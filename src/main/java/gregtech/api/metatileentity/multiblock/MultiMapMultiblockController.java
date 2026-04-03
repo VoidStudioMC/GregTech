@@ -29,6 +29,7 @@ import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.value.sync.IntSyncValue;
 import com.cleanroommc.modularui.widgets.CycleButtonWidget;
 import org.apache.commons.lang3.ArrayUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -145,16 +146,16 @@ public abstract class MultiMapMultiblockController extends RecipeMapMultiblockCo
                     IntSyncValue activeMapIndex = new IntSyncValue(this::getRecipeMapIndex, this::setRecipeMapIndex);
 
                     return new CycleButtonWidget()
+                            .stateCount(recipeMaps.length)
+                            .value(activeMapIndex)
                             .overlay(GTGuiTextures.BUTTON_MULTI_MAP)
                             .background(GTGuiTextures.BUTTON)
                             // TODO find out why this needs to be called
                             .disableHoverBackground()
-                            .value(activeMapIndex)
-                            .length(recipeMaps.length)
                             .tooltipBuilder(t -> {
                                 RecipeMap<?> map = recipeMaps[activeMapIndex.getIntValue()];
                                 t.addLine(IKey.lang("gregtech.multiblock.multiple_recipemaps.value",
-                                        map.getTranslationKey()));
+                                        IKey.lang(map.getTranslationKey())));
                             });
                 });
     }
@@ -172,7 +173,8 @@ public abstract class MultiMapMultiblockController extends RecipeMapMultiblockCo
     }
 
     @Override
-    public void addInformation(ItemStack stack, @Nullable World player, List<String> tooltip, boolean advanced) {
+    public void addInformation(ItemStack stack, @Nullable World player, @NotNull List<String> tooltip,
+                               boolean advanced) {
         super.addInformation(stack, player, tooltip, advanced);
         if (recipeMaps.length == 1) return;
         tooltip.add(I18n.format("gregtech.multiblock.multiple_recipemaps_recipes.tooltip", this.recipeMapsToString()));

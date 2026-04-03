@@ -253,7 +253,7 @@ public class GTTextFieldWidget extends BaseTextFieldWidget<GTTextFieldWidget> {
 
     public GTTextFieldWidget value(IStringValue<?> stringValue) {
         this.stringValue = stringValue;
-        setSyncOrValue(stringValue);
+        setSyncOrValue(ISyncOrValue.orEmpty(stringValue));
         return this;
     }
 
