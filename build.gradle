@@ -566,6 +566,9 @@ dependencies {
         transitive = false
     }
 
+    // Prevent MacOS from crash
+    runtimeOnlyNonPublishable 'com.cleanroommc:osxnarratorblocker:1.0'
+
     if ((usesMixins.toBoolean() || forceEnableMixins.toBoolean()) && stripForgeRequirements.toBoolean()) {
         runtimeOnlyNonPublishable 'com.cleanroommc:strip-latest-forge-requirements:1.0'
     }
