@@ -478,7 +478,6 @@ metaitem.electric.pump.opv.name=OpV Electric Pump
 
 metaitem.electric.pump.tooltip=Transfers §fFluids§7 at specific rates as §fCover§7.
 
-metaitem.fluid.regulator.ulv.name=ULV Fluid Regulator
 metaitem.fluid.regulator.lv.name=LV Fluid Regulator
 metaitem.fluid.regulator.mv.name=MV Fluid Regulator
 metaitem.fluid.regulator.hv.name=HV Fluid Regulator
@@ -539,7 +538,6 @@ metaitem.robot.arm.opv.name=OpV Robot Arm
 
 metaitem.robot.arm.tooltip=Limits §fItems§7 to specific quantities as §fCover§7.
 
-metaitem.field.generator.ulv.name=ULV Field Generator
 metaitem.field.generator.lv.name=LV Field Generator
 metaitem.field.generator.mv.name=MV Field Generator
 metaitem.field.generator.hv.name=HV Field Generator
@@ -554,7 +552,6 @@ metaitem.field.generator.uiv.name=UIV Field Generator
 metaitem.field.generator.uxv.name=UXV Field Generator
 metaitem.field.generator.opv.name=OpV Field Generator
 
-metaitem.emitter.ulv.name=ULV Emitter
 metaitem.emitter.lv.name=LV Emitter
 metaitem.emitter.mv.name=MV Emitter
 metaitem.emitter.hv.name=HV Emitter
@@ -569,7 +566,6 @@ metaitem.emitter.uiv.name=UIV Emitter
 metaitem.emitter.uxv.name=UXV Emitter
 metaitem.emitter.opv.name=OpV Emitter
 
-metaitem.sensor.ulv.name=ULV Sensor
 metaitem.sensor.lv.name=LV Sensor
 metaitem.sensor.mv.name=MV Sensor
 metaitem.sensor.hv.name=HV Sensor
@@ -771,8 +767,6 @@ metaitem.plate.system_on_chip.tooltip=System on Chip
 metaitem.plate.simple_system_on_chip.name=Simple SoC
 metaitem.plate.simple_system_on_chip.tooltip=Simple System on Chip
 
-# T0: Simple
-metaitem.circuit.simple.name=Simple Circuit
 
 # T1: Electronic
 metaitem.circuit.electronic.name=Electronic Circuit

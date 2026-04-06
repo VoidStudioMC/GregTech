@@ -1210,9 +1210,5 @@ public class MetaItem1 extends StandardMetaItem {
             lines.add(I18n.format("metaitem.electric.pump.tooltip"));
             lines.add(I18n.format("gregtech.universal.tooltip.fluid_transfer_rate", 320 / 20));
         }));
-
-        // FIELD_GENERATOR_ULV = addItem(1016, "field.generator.ulv");
-        // EMITTER_ULV = addItem(1017, "emitter.ulv");
-        // SENSOR_ULV = addItem(1018, "sensor.ulv");
     }
 }

@@ -190,7 +190,6 @@ public final class MetaItems {
     public static MetaItem<?>.MetaValueItem ELECTRIC_PUMP_UXV;
     public static MetaItem<?>.MetaValueItem ELECTRIC_PUMP_OpV;
 
-    public static MetaItem<?>.MetaValueItem FLUID_REGULATOR_ULV;
     public static MetaItem<?>.MetaValueItem FLUID_REGULATOR_LV;
     public static MetaItem<?>.MetaValueItem FLUID_REGULATOR_MV;
     public static MetaItem<?>.MetaValueItem FLUID_REGULATOR_HV;
@@ -249,7 +248,6 @@ public final class MetaItems {
     public static MetaItem<?>.MetaValueItem ROBOT_ARM_UXV;
     public static MetaItem<?>.MetaValueItem ROBOT_ARM_OpV;
 
-    // public static MetaItem<?>.MetaValueItem FIELD_GENERATOR_ULV;
     public static MetaItem<?>.MetaValueItem FIELD_GENERATOR_LV;
     public static MetaItem<?>.MetaValueItem FIELD_GENERATOR_MV;
     public static MetaItem<?>.MetaValueItem FIELD_GENERATOR_HV;
@@ -264,7 +262,6 @@ public final class MetaItems {
     public static MetaItem<?>.MetaValueItem FIELD_GENERATOR_UXV;
     public static MetaItem<?>.MetaValueItem FIELD_GENERATOR_OpV;
 
-    // public static MetaItem<?>.MetaValueItem EMITTER_ULV;
     public static MetaItem<?>.MetaValueItem EMITTER_LV;
     public static MetaItem<?>.MetaValueItem EMITTER_MV;
     public static MetaItem<?>.MetaValueItem EMITTER_HV;
@@ -279,7 +276,6 @@ public final class MetaItems {
     public static MetaItem<?>.MetaValueItem EMITTER_UXV;
     public static MetaItem<?>.MetaValueItem EMITTER_OpV;
 
-    // public static MetaItem<?>.MetaValueItem SENSOR_ULV;
     public static MetaItem<?>.MetaValueItem SENSOR_LV;
     public static MetaItem<?>.MetaValueItem SENSOR_MV;
     public static MetaItem<?>.MetaValueItem SENSOR_HV;
