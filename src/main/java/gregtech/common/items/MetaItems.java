@@ -249,7 +249,7 @@ public final class MetaItems {
     public static MetaItem<?>.MetaValueItem ROBOT_ARM_UXV;
     public static MetaItem<?>.MetaValueItem ROBOT_ARM_OpV;
 
-    public static MetaItem<?>.MetaValueItem FIELD_GENERATOR_ULV;
+    // public static MetaItem<?>.MetaValueItem FIELD_GENERATOR_ULV;
     public static MetaItem<?>.MetaValueItem FIELD_GENERATOR_LV;
     public static MetaItem<?>.MetaValueItem FIELD_GENERATOR_MV;
     public static MetaItem<?>.MetaValueItem FIELD_GENERATOR_HV;
@@ -264,7 +264,7 @@ public final class MetaItems {
     public static MetaItem<?>.MetaValueItem FIELD_GENERATOR_UXV;
     public static MetaItem<?>.MetaValueItem FIELD_GENERATOR_OpV;
 
-    public static MetaItem<?>.MetaValueItem EMITTER_ULV;
+    // public static MetaItem<?>.MetaValueItem EMITTER_ULV;
     public static MetaItem<?>.MetaValueItem EMITTER_LV;
     public static MetaItem<?>.MetaValueItem EMITTER_MV;
     public static MetaItem<?>.MetaValueItem EMITTER_HV;
@@ -279,7 +279,7 @@ public final class MetaItems {
     public static MetaItem<?>.MetaValueItem EMITTER_UXV;
     public static MetaItem<?>.MetaValueItem EMITTER_OpV;
 
-    public static MetaItem<?>.MetaValueItem SENSOR_ULV;
+    // public static MetaItem<?>.MetaValueItem SENSOR_ULV;
     public static MetaItem<?>.MetaValueItem SENSOR_LV;
     public static MetaItem<?>.MetaValueItem SENSOR_MV;
     public static MetaItem<?>.MetaValueItem SENSOR_HV;
@@ -384,9 +384,6 @@ public final class MetaItems {
     public static MetaItem<?>.MetaValueItem ADVANCED_SMD_RESISTOR;
     public static MetaItem<?>.MetaValueItem ADVANCED_SMD_TRANSISTOR;
     public static MetaItem<?>.MetaValueItem ADVANCED_SMD_INDUCTOR;
-
-    // T0: Simple
-    public static MetaItem<?>.MetaValueItem SIMPLE_CIRCUIT_ULV;
 
     // T1: Electronic
     public static MetaItem<?>.MetaValueItem ELECTRONIC_CIRCUIT_LV;
