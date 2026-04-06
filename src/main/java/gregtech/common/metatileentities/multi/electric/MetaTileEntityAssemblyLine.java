@@ -3,6 +3,7 @@ package gregtech.common.metatileentities.multi.electric;
 import gregtech.api.GTValues;
 import gregtech.api.capability.GregtechDataCodes;
 import gregtech.api.capability.IDataAccessHatch;
+import gregtech.api.capability.impl.GhostCircuitItemStackHandler;
 import gregtech.api.metatileentity.MetaTileEntity;
 import gregtech.api.metatileentity.interfaces.IGregTechTileEntity;
 import gregtech.api.metatileentity.multiblock.IMultiblockPart;
@@ -53,6 +54,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static gregtech.api.util.RelativeDirection.*;
 
@@ -333,7 +335,9 @@ public class MetaTileEntityAssemblyLine extends RecipeMapMultiblockController {
         // check ordered items
         if (ConfigHolder.machines.orderedAssembly) {
             List<GTRecipeInput> inputs = recipe.getInputs();
-            List<IItemHandlerModifiable> itemInputInventory = getAbilities(MultiblockAbility.IMPORT_ITEMS);
+            List<IItemHandlerModifiable> itemInputInventory = getAbilities(MultiblockAbility.IMPORT_ITEMS).stream()
+                    .filter(handler -> !(handler instanceof GhostCircuitItemStackHandler)).collect(
+                            Collectors.toList());
 
             // slot count is not enough, so don't try to match it
             if (itemInputInventory.size() < inputs.size()) return false;
