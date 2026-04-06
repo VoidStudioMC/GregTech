@@ -160,6 +160,7 @@ public final class MetaItems {
     public static MetaItem<?>.MetaValueItem ZERO_POINT_MODULE;
     public static MetaItem<?>.MetaValueItem ULTIMATE_BATTERY;
 
+    public static MetaItem<?>.MetaValueItem ELECTRIC_MOTOR_ULV;
     public static MetaItem<?>.MetaValueItem ELECTRIC_MOTOR_LV;
     public static MetaItem<?>.MetaValueItem ELECTRIC_MOTOR_MV;
     public static MetaItem<?>.MetaValueItem ELECTRIC_MOTOR_HV;
@@ -174,6 +175,7 @@ public final class MetaItems {
     public static MetaItem<?>.MetaValueItem ELECTRIC_MOTOR_UXV;
     public static MetaItem<?>.MetaValueItem ELECTRIC_MOTOR_OpV;
 
+    public static MetaItem<?>.MetaValueItem ELECTRIC_PUMP_ULV;
     public static MetaItem<?>.MetaValueItem ELECTRIC_PUMP_LV;
     public static MetaItem<?>.MetaValueItem ELECTRIC_PUMP_MV;
     public static MetaItem<?>.MetaValueItem ELECTRIC_PUMP_HV;
@@ -188,6 +190,7 @@ public final class MetaItems {
     public static MetaItem<?>.MetaValueItem ELECTRIC_PUMP_UXV;
     public static MetaItem<?>.MetaValueItem ELECTRIC_PUMP_OpV;
 
+    public static MetaItem<?>.MetaValueItem FLUID_REGULATOR_ULV;
     public static MetaItem<?>.MetaValueItem FLUID_REGULATOR_LV;
     public static MetaItem<?>.MetaValueItem FLUID_REGULATOR_MV;
     public static MetaItem<?>.MetaValueItem FLUID_REGULATOR_HV;
@@ -201,6 +204,7 @@ public final class MetaItems {
 
     public static MetaItem<?>.MetaValueItem DYNAMITE;
 
+    public static MetaItem<?>.MetaValueItem CONVEYOR_MODULE_ULV;
     public static MetaItem<?>.MetaValueItem CONVEYOR_MODULE_LV;
     public static MetaItem<?>.MetaValueItem CONVEYOR_MODULE_MV;
     public static MetaItem<?>.MetaValueItem CONVEYOR_MODULE_HV;
@@ -215,6 +219,7 @@ public final class MetaItems {
     public static MetaItem<?>.MetaValueItem CONVEYOR_MODULE_UXV;
     public static MetaItem<?>.MetaValueItem CONVEYOR_MODULE_OpV;
 
+    public static MetaItem<?>.MetaValueItem ELECTRIC_PISTON_ULV;
     public static MetaItem<?>.MetaValueItem ELECTRIC_PISTON_LV;
     public static MetaItem<?>.MetaValueItem ELECTRIC_PISTON_MV;
     public static MetaItem<?>.MetaValueItem ELECTRIC_PISTON_HV;
@@ -229,6 +234,7 @@ public final class MetaItems {
     public static MetaItem<?>.MetaValueItem ELECTRIC_PISTON_UXV;
     public static MetaItem<?>.MetaValueItem ELECTRIC_PISTON_OpV;
 
+    public static MetaItem<?>.MetaValueItem ROBOT_ARM_ULV;
     public static MetaItem<?>.MetaValueItem ROBOT_ARM_LV;
     public static MetaItem<?>.MetaValueItem ROBOT_ARM_MV;
     public static MetaItem<?>.MetaValueItem ROBOT_ARM_HV;
@@ -243,6 +249,7 @@ public final class MetaItems {
     public static MetaItem<?>.MetaValueItem ROBOT_ARM_UXV;
     public static MetaItem<?>.MetaValueItem ROBOT_ARM_OpV;
 
+    public static MetaItem<?>.MetaValueItem FIELD_GENERATOR_ULV;
     public static MetaItem<?>.MetaValueItem FIELD_GENERATOR_LV;
     public static MetaItem<?>.MetaValueItem FIELD_GENERATOR_MV;
     public static MetaItem<?>.MetaValueItem FIELD_GENERATOR_HV;
@@ -257,6 +264,7 @@ public final class MetaItems {
     public static MetaItem<?>.MetaValueItem FIELD_GENERATOR_UXV;
     public static MetaItem<?>.MetaValueItem FIELD_GENERATOR_OpV;
 
+    public static MetaItem<?>.MetaValueItem EMITTER_ULV;
     public static MetaItem<?>.MetaValueItem EMITTER_LV;
     public static MetaItem<?>.MetaValueItem EMITTER_MV;
     public static MetaItem<?>.MetaValueItem EMITTER_HV;
@@ -271,6 +279,7 @@ public final class MetaItems {
     public static MetaItem<?>.MetaValueItem EMITTER_UXV;
     public static MetaItem<?>.MetaValueItem EMITTER_OpV;
 
+    public static MetaItem<?>.MetaValueItem SENSOR_ULV;
     public static MetaItem<?>.MetaValueItem SENSOR_LV;
     public static MetaItem<?>.MetaValueItem SENSOR_MV;
     public static MetaItem<?>.MetaValueItem SENSOR_HV;
@@ -375,6 +384,9 @@ public final class MetaItems {
     public static MetaItem<?>.MetaValueItem ADVANCED_SMD_RESISTOR;
     public static MetaItem<?>.MetaValueItem ADVANCED_SMD_TRANSISTOR;
     public static MetaItem<?>.MetaValueItem ADVANCED_SMD_INDUCTOR;
+
+    // T0: Simple
+    public static MetaItem<?>.MetaValueItem SIMPLE_CIRCUIT_ULV;
 
     // T1: Electronic
     public static MetaItem<?>.MetaValueItem ELECTRONIC_CIRCUIT_LV;

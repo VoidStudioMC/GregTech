@@ -950,9 +950,12 @@ public class MetaItem1 extends StandardMetaItem {
         HIGH_POWER_INTEGRATED_CIRCUIT = addItem(605, "plate.high_power_integrated_circuit");
         ULTRA_HIGH_POWER_INTEGRATED_CIRCUIT = addItem(606, "plate.ultra_high_power_integrated_circuit");
 
-        // ???: ID 616-620
+        // ???: ID 616-619
 
-        // Circuits: ID 621-700
+        // Circuits: ID 620-700
+
+        // T0: Simple
+        SIMPLE_CIRCUIT_ULV = addItem(1011, "circuit.simple").setUnificationData(OrePrefix.circuit, Tier.ULV);
 
         // T1: Electronic
         ELECTRONIC_CIRCUIT_LV = addItem(621, "circuit.electronic").setUnificationData(OrePrefix.circuit, Tier.LV);
@@ -1197,5 +1200,21 @@ public class MetaItem1 extends StandardMetaItem {
                 .setRecyclingData(new RecyclingData(new MaterialStack(Materials.Steel, M * 4)));
         SHAPE_MOLDS[22] = SHAPE_MOLD_PIPE_HUGE = addItem(1010, "shape.mold.pipe.huge")
                 .setRecyclingData(new RecyclingData(new MaterialStack(Materials.Steel, M * 4)));
+
+        // ULV Components
+        ELECTRIC_MOTOR_ULV = addItem(1012, "electric.motor.ulv");
+        ELECTRIC_PISTON_ULV = addItem(1013, "electric.piston.ulv");
+        ROBOT_ARM_ULV = addItem(1014, "robot.arm.ulv").addComponents(new TooltipBehavior(lines -> {
+            lines.add(I18n.format("metaitem.robot.arm.tooltip"));
+            lines.add(I18n.format("gregtech.universal.tooltip.item_transfer_rate_stacks", 2));
+        }));
+        CONVEYOR_MODULE_ULV = addItem(1015, "conveyor.module.ulv");
+        FIELD_GENERATOR_ULV = addItem(1016, "field.generator.ulv");
+        EMITTER_ULV = addItem(1017, "emitter.ulv");
+        ELECTRIC_PUMP_ULV = addItem(1018, "electric.pump.ulv").addComponents(new TooltipBehavior(lines -> {
+            lines.add(I18n.format("metaitem.electric.pump.tooltip"));
+            lines.add(I18n.format("gregtech.universal.tooltip.fluid_transfer_rate", 320 / 20));
+        }));
+        SENSOR_ULV = addItem(1020, "sensor.ulv");
     }
 }

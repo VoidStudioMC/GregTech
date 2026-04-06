@@ -28,6 +28,8 @@ public final class CoverBehaviors {
 
     public static void init() {
         GTLog.logger.info("Registering cover behaviors...");
+        registerBehavior(gregtechId("conveyor.ulv"), MetaItems.CONVEYOR_MODULE_ULV,
+                (def, tile, side) -> new CoverConveyor(def, tile, side, GTValues.ULV, 2));
         registerBehavior(gregtechId("conveyor.lv"), MetaItems.CONVEYOR_MODULE_LV,
                 (def, tile, side) -> new CoverConveyor(def, tile, side, GTValues.LV, 8));
         registerBehavior(gregtechId("conveyor.mv"), MetaItems.CONVEYOR_MODULE_MV,
@@ -45,6 +47,8 @@ public final class CoverBehaviors {
         registerBehavior(gregtechId("conveyor.uv"), MetaItems.CONVEYOR_MODULE_UV,
                 (def, tile, side) -> new CoverConveyor(def, tile, side, GTValues.UV, 16 * 64));
 
+        registerBehavior(gregtechId("robotic_arm.lv"), MetaItems.ROBOT_ARM_ULV,
+                (def, tile, side) -> new CoverRoboticArm(def, tile, side, GTValues.ULV, 2));
         registerBehavior(gregtechId("robotic_arm.lv"), MetaItems.ROBOT_ARM_LV,
                 (def, tile, side) -> new CoverRoboticArm(def, tile, side, GTValues.LV, 8));
         registerBehavior(gregtechId("robotic_arm.mv"), MetaItems.ROBOT_ARM_MV,
@@ -126,6 +130,8 @@ public final class CoverBehaviors {
                         MetaItems.COVER_DIGITAL_INTERFACE_WIRELESS.getStackForm(),
                         CoverDigitalInterfaceWireless::new)));
 
+        registerBehavior(gregtechId("pump.ulv"), MetaItems.ELECTRIC_PUMP_ULV,
+                (def, tile, side) -> new CoverPump(def, tile, side, GTValues.ULV, 320));
         registerBehavior(gregtechId("pump.lv"), MetaItems.ELECTRIC_PUMP_LV,
                 (def, tile, side) -> new CoverPump(def, tile, side, GTValues.LV, 1280));
         registerBehavior(gregtechId("pump.mv"), MetaItems.ELECTRIC_PUMP_MV,
