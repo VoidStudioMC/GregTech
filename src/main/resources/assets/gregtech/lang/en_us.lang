@@ -446,6 +446,7 @@ metaitem.energy.cluster.tooltip=Reusable Battery
 metaitem.max.battery.name=Ultimate Battery
 metaitem.max.battery.tooltip=Fill this to win Minecraft
 
+metaitem.electric.motor.ulv.name=ULV Electric Motor
 metaitem.electric.motor.lv.name=LV Electric Motor
 metaitem.electric.motor.mv.name=MV Electric Motor
 metaitem.electric.motor.hv.name=HV Electric Motor
@@ -460,6 +461,7 @@ metaitem.electric.motor.uiv.name=UIV Electric Motor
 metaitem.electric.motor.uxv.name=UXV Electric Motor
 metaitem.electric.motor.opv.name=OpV Electric Motor
 
+metaitem.electric.pump.ulv.name=ULV Electric Pump
 metaitem.electric.pump.lv.name=LV Electric Pump
 metaitem.electric.pump.mv.name=MV Electric Pump
 metaitem.electric.pump.hv.name=HV Electric Pump
@@ -476,6 +478,7 @@ metaitem.electric.pump.opv.name=OpV Electric Pump
 
 metaitem.electric.pump.tooltip=Transfers §fFluids§7 at specific rates as §fCover§7.
 
+metaitem.fluid.regulator.ulv.name=ULV Fluid Regulator
 metaitem.fluid.regulator.lv.name=LV Fluid Regulator
 metaitem.fluid.regulator.mv.name=MV Fluid Regulator
 metaitem.fluid.regulator.hv.name=HV Fluid Regulator
@@ -487,6 +490,7 @@ metaitem.fluid.regulator.uv.name=UV Fluid Regulator
 
 metaitem.fluid.regulator.tooltip=Limits §fFluids§7 to specific quantities as §fCover§7.
 
+metaitem.conveyor.module.ulv.name=ULV Conveyor Module
 metaitem.conveyor.module.lv.name=LV Conveyor Module
 metaitem.conveyor.module.mv.name=MV Conveyor Module
 metaitem.conveyor.module.hv.name=HV Conveyor Module
@@ -503,6 +507,7 @@ metaitem.conveyor.module.opv.name=OpV Conveyor Module
 
 metaitem.conveyor.module.tooltip=Transfers §fItems§7 at specific rates as §fCover§7.
 
+metaitem.electric.piston.ulv.name=ULV Electric Piston
 metaitem.electric.piston.lv.name=LV Electric Piston
 metaitem.electric.piston.mv.name=MV Electric Piston
 metaitem.electric.piston.hv.name=HV Electric Piston
@@ -517,6 +522,7 @@ metaitem.electric.piston.uiv.name=UIV Electric Piston
 metaitem.electric.piston.uxv.name=UXV Electric Piston
 metaitem.electric.piston.opv.name=OpV Electric Piston
 
+metaitem.robot.arm.ulv.name=ULV Robot Arm
 metaitem.robot.arm.lv.name=LV Robot Arm
 metaitem.robot.arm.mv.name=MV Robot Arm
 metaitem.robot.arm.hv.name=HV Robot Arm
@@ -533,6 +539,7 @@ metaitem.robot.arm.opv.name=OpV Robot Arm
 
 metaitem.robot.arm.tooltip=Limits §fItems§7 to specific quantities as §fCover§7.
 
+metaitem.field.generator.ulv.name=ULV Field Generator
 metaitem.field.generator.lv.name=LV Field Generator
 metaitem.field.generator.mv.name=MV Field Generator
 metaitem.field.generator.hv.name=HV Field Generator
@@ -547,6 +554,7 @@ metaitem.field.generator.uiv.name=UIV Field Generator
 metaitem.field.generator.uxv.name=UXV Field Generator
 metaitem.field.generator.opv.name=OpV Field Generator
 
+metaitem.emitter.ulv.name=ULV Emitter
 metaitem.emitter.lv.name=LV Emitter
 metaitem.emitter.mv.name=MV Emitter
 metaitem.emitter.hv.name=HV Emitter
@@ -561,6 +569,7 @@ metaitem.emitter.uiv.name=UIV Emitter
 metaitem.emitter.uxv.name=UXV Emitter
 metaitem.emitter.opv.name=OpV Emitter
 
+metaitem.sensor.ulv.name=ULV Sensor
 metaitem.sensor.lv.name=LV Sensor
 metaitem.sensor.mv.name=MV Sensor
 metaitem.sensor.hv.name=HV Sensor
@@ -762,6 +771,8 @@ metaitem.plate.system_on_chip.tooltip=System on Chip
 metaitem.plate.simple_system_on_chip.name=Simple SoC
 metaitem.plate.simple_system_on_chip.tooltip=Simple System on Chip
 
+# T0: Simple
+metaitem.circuit.simple.name=Simple Circuit
 
 # T1: Electronic
 metaitem.circuit.electronic.name=Electronic Circuit
