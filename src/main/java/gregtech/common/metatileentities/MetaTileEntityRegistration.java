@@ -3,6 +3,7 @@ package gregtech.common.metatileentities;
 import gregtech.api.GTValues;
 import gregtech.api.GregTechAPI;
 import gregtech.api.capability.FeCompat;
+import gregtech.api.metatileentity.SimpleMachineMetaTileEntity;
 import gregtech.api.recipes.RecipeMaps;
 import gregtech.api.unification.material.Materials;
 import gregtech.api.util.GTUtility;
@@ -244,9 +245,15 @@ final class MetaTileEntityRegistration {
                         GTUtility.hvCappedTankSizeFunction));
 
         // Assembler, IDs 110-124
-        MetaTileEntities.registerSimpleMetaTileEntity(MetaTileEntities.ASSEMBLER, 110, "assembler",
-                RecipeMaps.ASSEMBLER_RECIPES,
-                Textures.ASSEMBLER_OVERLAY, true, GTUtility.hvCappedTankSizeFunction);
+        MetaTileEntities.registerMetaTileEntities(MetaTileEntities.ASSEMBLER, 110, "assembler",
+                // use decreased tier as registry in that method starting from LV
+                (tier, voltageName) -> new SimpleMachineMetaTileEntity(
+                        gregtechId(String.format("%s.%s", "assembler", GTValues.VN[tier - 1])),
+                        RecipeMaps.ASSEMBLER_RECIPES,
+                        Textures.ASSEMBLER_OVERLAY,
+                        tier - 1,
+                        true,
+                        GTUtility.hvCappedTankSizeFunction));
 
         // Autoclave, IDs 125-139
         MetaTileEntities.registerSimpleMetaTileEntity(MetaTileEntities.AUTOCLAVE, 125, "autoclave",
@@ -436,12 +443,15 @@ final class MetaTileEntityRegistration {
 
         // Steam Turbine, IDs 950-964
         MetaTileEntities.STEAM_TURBINE[0] = MetaTileEntities.registerMetaTileEntity(950,
+                new MetaTileEntitySingleTurbine(gregtechId("steam_turbine.ulv"), RecipeMaps.STEAM_TURBINE_FUELS,
+                        Textures.STEAM_TURBINE_OVERLAY, 0, GTUtility.steamGeneratorTankSizeFunction));
+        MetaTileEntities.STEAM_TURBINE[1] = MetaTileEntities.registerMetaTileEntity(951,
                 new MetaTileEntitySingleTurbine(gregtechId("steam_turbine.lv"), RecipeMaps.STEAM_TURBINE_FUELS,
                         Textures.STEAM_TURBINE_OVERLAY, 1, GTUtility.steamGeneratorTankSizeFunction));
-        MetaTileEntities.STEAM_TURBINE[1] = MetaTileEntities.registerMetaTileEntity(951,
+        MetaTileEntities.STEAM_TURBINE[2] = MetaTileEntities.registerMetaTileEntity(952,
                 new MetaTileEntitySingleTurbine(gregtechId("steam_turbine.mv"), RecipeMaps.STEAM_TURBINE_FUELS,
                         Textures.STEAM_TURBINE_OVERLAY, 2, GTUtility.steamGeneratorTankSizeFunction));
-        MetaTileEntities.STEAM_TURBINE[2] = MetaTileEntities.registerMetaTileEntity(952,
+        MetaTileEntities.STEAM_TURBINE[3] = MetaTileEntities.registerMetaTileEntity(953,
                 new MetaTileEntitySingleTurbine(gregtechId("steam_turbine.hv"), RecipeMaps.STEAM_TURBINE_FUELS,
                         Textures.STEAM_TURBINE_OVERLAY, 3, GTUtility.steamGeneratorTankSizeFunction));
 

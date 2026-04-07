@@ -677,7 +677,7 @@ public class GTUtility {
      * This function is meant for use with generators
      */
     public static final Function<Integer, Integer> steamGeneratorTankSizeFunction = tier -> Math
-            .min(16000 * (1 << (tier - 1)), 64000);
+            .min(8000 * (1 << tier), 64000);
 
     public static final Function<Integer, Integer> genericGeneratorTankSizeFunction = tier -> Math
             .min(4000 * (1 << (tier - 1)), 16000);

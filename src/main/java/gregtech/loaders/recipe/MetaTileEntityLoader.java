@@ -734,19 +734,19 @@ public class MetaTileEntityLoader {
                 new UnificationEntry(OrePrefix.circuit, MarkerMaterials.Tier.HV), 'W',
                 new UnificationEntry(OrePrefix.cableGtSingle, Materials.Gold));
 
-        ModHandler.addShapedRecipe(true, "steam_turbine_lv", MetaTileEntities.STEAM_TURBINE[0].getStackForm(), "PCP",
+        ModHandler.addShapedRecipe(true, "steam_turbine_lv", MetaTileEntities.STEAM_TURBINE[1].getStackForm(), "PCP",
                 "RMR", "EWE", 'M', MetaTileEntities.HULL[GTValues.LV].getStackForm(), 'E', MetaItems.ELECTRIC_MOTOR_LV,
                 'R', new UnificationEntry(OrePrefix.rotor, Materials.Tin), 'C',
                 new UnificationEntry(OrePrefix.circuit, MarkerMaterials.Tier.LV), 'W',
                 new UnificationEntry(OrePrefix.cableGtSingle, Materials.Tin), 'P',
                 new UnificationEntry(OrePrefix.pipeNormalFluid, Materials.Bronze));
-        ModHandler.addShapedRecipe(true, "steam_turbine_mv", MetaTileEntities.STEAM_TURBINE[1].getStackForm(), "PCP",
+        ModHandler.addShapedRecipe(true, "steam_turbine_mv", MetaTileEntities.STEAM_TURBINE[2].getStackForm(), "PCP",
                 "RMR", "EWE", 'M', MetaTileEntities.HULL[GTValues.MV].getStackForm(), 'E', MetaItems.ELECTRIC_MOTOR_MV,
                 'R', new UnificationEntry(OrePrefix.rotor, Materials.Bronze), 'C',
                 new UnificationEntry(OrePrefix.circuit, MarkerMaterials.Tier.MV), 'W',
                 new UnificationEntry(OrePrefix.cableGtSingle, Materials.Copper), 'P',
                 new UnificationEntry(OrePrefix.pipeNormalFluid, Materials.Steel));
-        ModHandler.addShapedRecipe(true, "steam_turbine_hv", MetaTileEntities.STEAM_TURBINE[2].getStackForm(), "PCP",
+        ModHandler.addShapedRecipe(true, "steam_turbine_hv", MetaTileEntities.STEAM_TURBINE[3].getStackForm(), "PCP",
                 "RMR", "EWE", 'M', MetaTileEntities.HULL[GTValues.HV].getStackForm(), 'E', MetaItems.ELECTRIC_MOTOR_HV,
                 'R', new UnificationEntry(OrePrefix.rotor, Materials.Steel), 'C',
                 new UnificationEntry(OrePrefix.circuit, MarkerMaterials.Tier.HV), 'W',
