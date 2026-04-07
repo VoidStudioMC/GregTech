@@ -429,14 +429,18 @@ final class MetaTileEntityRegistration {
 
         // Diesel Generator, IDs 935-949
         MetaTileEntities.COMBUSTION_GENERATOR[0] = MetaTileEntities.registerMetaTileEntity(935,
+                new MetaTileEntitySingleCombustion(gregtechId("combustion_generator.ulv"),
+                        RecipeMaps.COMBUSTION_GENERATOR_FUELS, Textures.COMBUSTION_GENERATOR_OVERLAY, 0,
+                        GTUtility.genericGeneratorTankSizeFunction));
+        MetaTileEntities.COMBUSTION_GENERATOR[1] = MetaTileEntities.registerMetaTileEntity(936,
                 new MetaTileEntitySingleCombustion(gregtechId("combustion_generator.lv"),
                         RecipeMaps.COMBUSTION_GENERATOR_FUELS, Textures.COMBUSTION_GENERATOR_OVERLAY, 1,
                         GTUtility.genericGeneratorTankSizeFunction));
-        MetaTileEntities.COMBUSTION_GENERATOR[1] = MetaTileEntities.registerMetaTileEntity(936,
+        MetaTileEntities.COMBUSTION_GENERATOR[2] = MetaTileEntities.registerMetaTileEntity(937,
                 new MetaTileEntitySingleCombustion(gregtechId("combustion_generator.mv"),
                         RecipeMaps.COMBUSTION_GENERATOR_FUELS, Textures.COMBUSTION_GENERATOR_OVERLAY, 2,
                         GTUtility.genericGeneratorTankSizeFunction));
-        MetaTileEntities.COMBUSTION_GENERATOR[2] = MetaTileEntities.registerMetaTileEntity(937,
+        MetaTileEntities.COMBUSTION_GENERATOR[3] = MetaTileEntities.registerMetaTileEntity(938,
                 new MetaTileEntitySingleCombustion(gregtechId("combustion_generator.hv"),
                         RecipeMaps.COMBUSTION_GENERATOR_FUELS, Textures.COMBUSTION_GENERATOR_OVERLAY, 3,
                         GTUtility.genericGeneratorTankSizeFunction));

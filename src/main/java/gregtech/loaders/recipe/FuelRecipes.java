@@ -11,92 +11,92 @@ public class FuelRecipes {
         // diesel generator fuels
         RecipeMaps.COMBUSTION_GENERATOR_FUELS.recipeBuilder()
                 .fluidInputs(Naphtha.getFluid(1))
-                .duration(10)
-                .EUt(V[LV])
+                .duration(40)
+                .EUt(V[ULV])
                 .buildAndRegister();
 
         RecipeMaps.COMBUSTION_GENERATOR_FUELS.recipeBuilder()
                 .fluidInputs(SulfuricLightFuel.getFluid(4))
-                .duration(5)
-                .EUt(V[LV])
+                .duration(20)
+                .EUt(V[ULV])
                 .buildAndRegister();
 
         RecipeMaps.COMBUSTION_GENERATOR_FUELS.recipeBuilder()
-                .fluidInputs(Methanol.getFluid(4))
+                .fluidInputs(Methanol.getFluid(1))
                 .duration(8)
-                .EUt(V[LV])
+                .EUt(V[ULV])
                 .buildAndRegister();
 
         RecipeMaps.COMBUSTION_GENERATOR_FUELS.recipeBuilder()
                 .fluidInputs(Ethanol.getFluid(1))
-                .duration(6)
-                .EUt(V[LV])
+                .duration(24)
+                .EUt(V[ULV])
                 .buildAndRegister();
 
         RecipeMaps.COMBUSTION_GENERATOR_FUELS.recipeBuilder()
-                .fluidInputs(Octane.getFluid(2))
-                .duration(5)
-                .EUt(V[LV])
+                .fluidInputs(Octane.getFluid(1))
+                .duration(10)
+                .EUt(V[ULV])
                 .buildAndRegister();
 
         RecipeMaps.COMBUSTION_GENERATOR_FUELS.recipeBuilder()
                 .fluidInputs(BioDiesel.getFluid(1))
-                .duration(8)
-                .EUt(V[LV])
+                .duration(32)
+                .EUt(V[ULV])
                 .buildAndRegister();
 
         RecipeMaps.COMBUSTION_GENERATOR_FUELS.recipeBuilder()
                 .fluidInputs(LightFuel.getFluid(1))
-                .duration(10)
-                .EUt(V[LV])
+                .duration(40)
+                .EUt(V[ULV])
                 .buildAndRegister();
 
         RecipeMaps.COMBUSTION_GENERATOR_FUELS.recipeBuilder()
                 .fluidInputs(Diesel.getFluid(1))
-                .duration(15)
-                .EUt(V[LV])
+                .duration(60)
+                .EUt(V[ULV])
                 .buildAndRegister();
 
         RecipeMaps.COMBUSTION_GENERATOR_FUELS.recipeBuilder()
-                .fluidInputs(CetaneBoostedDiesel.getFluid(2))
-                .duration(45)
-                .EUt(V[LV])
+                .fluidInputs(CetaneBoostedDiesel.getFluid(1))
+                .duration(90)
+                .EUt(V[ULV])
                 .buildAndRegister();
 
         RecipeMaps.COMBUSTION_GENERATOR_FUELS.recipeBuilder()
-                .fluidInputs(RocketFuel.getFluid(16))
+                .fluidInputs(RocketFuel.getFluid(4))
                 .duration(125)
-                .EUt(V[LV])
+                .EUt(V[ULV])
                 .buildAndRegister();
 
         RecipeMaps.COMBUSTION_GENERATOR_FUELS.recipeBuilder()
                 .fluidInputs(Gasoline.getFluid(1))
-                .duration(50)
-                .EUt(V[LV])
+                .duration(200)
+                .EUt(V[ULV])
                 .buildAndRegister();
 
         RecipeMaps.COMBUSTION_GENERATOR_FUELS.recipeBuilder()
                 .fluidInputs(HighOctaneGasoline.getFluid(1))
-                .duration(100)
-                .EUt(V[LV])
+                .duration(400)
+                .EUt(V[ULV])
                 .buildAndRegister();
 
         RecipeMaps.COMBUSTION_GENERATOR_FUELS.recipeBuilder()
                 .fluidInputs(Toluene.getFluid(1))
-                .duration(10)
-                .EUt(V[LV])
+                .duration(40)
+                .EUt(V[ULV])
                 .buildAndRegister();
 
         RecipeMaps.COMBUSTION_GENERATOR_FUELS.recipeBuilder()
-                .fluidInputs(OilLight.getFluid(32))
+                .fluidInputs(OilLight.getFluid(8))
                 .duration(5)
-                .EUt(V[LV])
+                .EUt(V[ULV])
                 .buildAndRegister();
 
         RecipeMaps.COMBUSTION_GENERATOR_FUELS.recipeBuilder()
-                .fluidInputs(RawOil.getFluid(64))
+                .fluidInputs(RawOil.getFluid(16))
                 .duration(15)
-                .EUt(V[LV])
+                .EUt(V[ULV])
                 .buildAndRegister();
 
         // steam generator fuels

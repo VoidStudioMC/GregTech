@@ -680,7 +680,7 @@ public class GTUtility {
             .min(8000 * (1 << tier), 64000);
 
     public static final Function<Integer, Integer> genericGeneratorTankSizeFunction = tier -> Math
-            .min(4000 * (1 << (tier - 1)), 16000);
+            .min(2000 * (1 << tier), 16000);
 
     public static ItemStack toItem(IBlockState state) {
         return toItem(state, 1);
