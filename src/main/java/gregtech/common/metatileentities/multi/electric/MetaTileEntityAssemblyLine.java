@@ -185,7 +185,8 @@ public class MetaTileEntityAssemblyLine extends RecipeMapMultiblockController {
         super.update();
         if (ConfigHolder.client.shader.assemblyLineParticles) {
             if (getRecipeMapWorkable().isWorking()) {
-                int maxBeams = getAbilities(MultiblockAbility.IMPORT_ITEMS).size() + 1;
+                int maxBeams = (int) getAbilities(MultiblockAbility.IMPORT_ITEMS)
+                        .stream().filter(handler -> !(handler instanceof GhostCircuitItemStackHandler)).count() + 1;
                 int maxProgress = getRecipeMapWorkable().getMaxProgress();
 
                 // Each beam should be visible for an equal amount of time, which is derived from the maximum number of
