@@ -68,6 +68,7 @@ import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityDataA
 import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityEnergyHatch;
 import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityFluidHatch;
 import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityItemBus;
+import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityLargeSteamHatch;
 import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityLaserHatch;
 import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityMachineHatch;
 import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityMaintenanceHatch;
@@ -192,6 +193,8 @@ public final class MetaTileEntities {
     public static final MetaTileEntityItemBus[] ITEM_EXPORT_BUS = new MetaTileEntityItemBus[GTValues.V.length - 1];
     public static final MetaTileEntityFluidHatch[] FLUID_IMPORT_HATCH = new MetaTileEntityFluidHatch[GTValues.V.length - 1];
     public static final MetaTileEntityFluidHatch[] FLUID_EXPORT_HATCH = new MetaTileEntityFluidHatch[GTValues.V.length - 1];
+    public static final MetaTileEntityLargeSteamHatch[] STEAM_IMPORT_HATCH = new MetaTileEntityLargeSteamHatch[GTValues.V.length - 1];
+    public static final MetaTileEntityLargeSteamHatch[] STEAM_EXPORT_HATCH = new MetaTileEntityLargeSteamHatch[GTValues.V.length - 1];
     public static final MetaTileEntityMultiFluidHatch[] QUADRUPLE_IMPORT_HATCH = new MetaTileEntityMultiFluidHatch[GTValues.V.length - 1];
     public static final MetaTileEntityMultiFluidHatch[] NONUPLE_IMPORT_HATCH = new MetaTileEntityMultiFluidHatch[GTValues.V.length - 1];
     public static final MetaTileEntityMultiFluidHatch[] QUADRUPLE_EXPORT_HATCH = new MetaTileEntityMultiFluidHatch[GTValues.V.length - 1];

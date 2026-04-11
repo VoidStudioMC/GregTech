@@ -72,6 +72,7 @@ import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityDataA
 import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityEnergyHatch;
 import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityFluidHatch;
 import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityItemBus;
+import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityLargeSteamHatch;
 import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityLaserHatch;
 import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityMachineHatch;
 import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityMaintenanceHatch;
@@ -899,11 +900,19 @@ final class MetaTileEntityRegistration {
             MetaTileEntities.FLUID_EXPORT_HATCH[i] = new MetaTileEntityFluidHatch(
                     gregtechId("fluid_hatch.export." + voltageName), i,
                     true);
+            MetaTileEntities.STEAM_IMPORT_HATCH[i] = new MetaTileEntityLargeSteamHatch(
+                    gregtechId("steam_hatch.import." + voltageName), i,
+                    false);
+            MetaTileEntities.STEAM_EXPORT_HATCH[i] = new MetaTileEntityLargeSteamHatch(
+                    gregtechId("steam_hatch.export." + voltageName), i,
+                    true);
 
             MetaTileEntities.registerMetaTileEntity(11000 + i, MetaTileEntities.ITEM_IMPORT_BUS[i]);
             MetaTileEntities.registerMetaTileEntity(11015 + i, MetaTileEntities.ITEM_EXPORT_BUS[i]);
             MetaTileEntities.registerMetaTileEntity(11030 + i, MetaTileEntities.FLUID_IMPORT_HATCH[i]);
             MetaTileEntities.registerMetaTileEntity(11045 + i, MetaTileEntities.FLUID_EXPORT_HATCH[i]);
+            MetaTileEntities.registerMetaTileEntity(11545 + i, MetaTileEntities.STEAM_IMPORT_HATCH[i]);
+            MetaTileEntities.registerMetaTileEntity(11560 + i, MetaTileEntities.STEAM_EXPORT_HATCH[i]);
         }
 
         // quad and nonuple hatches, Ids 11060-11219
