@@ -489,6 +489,17 @@ metaitem.fluid.regulator.uv.name=UV Fluid Regulator
 
 metaitem.fluid.regulator.tooltip=Limits §fFluids§7 to specific quantities as §fCover§7.
 
+metaitem.steam.regulator.lv.name=LV Steam Regulator
+metaitem.steam.regulator.mv.name=MV Steam Regulator
+metaitem.steam.regulator.hv.name=HV Steam Regulator
+metaitem.steam.regulator.ev.name=EV Steam Regulator
+metaitem.steam.regulator.iv.name=IV Steam Regulator
+metaitem.steam.regulator.luv.name=LuV Steam Regulator
+metaitem.steam.regulator.zpm.name=ZPM Steam Regulator
+metaitem.steam.regulator.uv.name=UV Steam Regulator
+
+metaitem.steam.regulator.tooltip=Limits §fSteam§7 to specific quantities as §fCover§7.
+
 metaitem.conveyor.module.ulv.name=ULV Conveyor Module
 metaitem.conveyor.module.lv.name=LV Conveyor Module
 metaitem.conveyor.module.mv.name=MV Conveyor Module
