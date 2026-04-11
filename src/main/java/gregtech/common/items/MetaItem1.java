@@ -1210,5 +1210,39 @@ public class MetaItem1 extends StandardMetaItem {
             lines.add(I18n.format("metaitem.electric.pump.tooltip"));
             lines.add(I18n.format("gregtech.universal.tooltip.fluid_transfer_rate", 320 / 20));
         }));
+
+        // Steam Regulators
+        STEAM_REGULATOR_LV = addItem(1016, "steam.regulator.lv").addComponents(new TooltipBehavior(lines -> {
+            lines.add(I18n.format("metaitem.steam.regulator.tooltip"));
+            lines.add(I18n.format("gregtech.universal.tooltip.fluid_transfer_rate", 1280 * 16 / 20));
+        }));
+        STEAM_REGULATOR_MV = addItem(1017, "steam.regulator.mv").addComponents(new TooltipBehavior(lines -> {
+            lines.add(I18n.format("metaitem.steam.regulator.tooltip"));
+            lines.add(I18n.format("gregtech.universal.tooltip.fluid_transfer_rate", 1280 * 64 / 20));
+        }));
+        STEAM_REGULATOR_HV = addItem(1018, "steam.regulator.hv").addComponents(new TooltipBehavior(lines -> {
+            lines.add(I18n.format("metaitem.steam.regulator.tooltip"));
+            lines.add(I18n.format("gregtech.universal.tooltip.fluid_transfer_rate", 1280 * 64 * 4 / 20));
+        }));
+        STEAM_REGULATOR_EV = addItem(1019, "steam.regulator.ev").addComponents(new TooltipBehavior(lines -> {
+            lines.add(I18n.format("metaitem.steam.regulator.tooltip"));
+            lines.add(I18n.format("gregtech.universal.tooltip.fluid_transfer_rate", 1280 * 64 * 16 / 20));
+        }));
+        STEAM_REGULATOR_IV = addItem(1020, "steam.regulator.iv").addComponents(new TooltipBehavior(lines -> {
+            lines.add(I18n.format("metaitem.steam.regulator.tooltip"));
+            lines.add(I18n.format("gregtech.universal.tooltip.fluid_transfer_rate", 1280 * 64 * 64 / 20));
+        }));
+        STEAM_REGULATOR_LUV = addItem(1021, "steam.regulator.luv").addComponents(new TooltipBehavior(lines -> {
+            lines.add(I18n.format("metaitem.steam.regulator.tooltip"));
+            lines.add(I18n.format("gregtech.universal.tooltip.fluid_transfer_rate", 1280 * 64 * 64 * 4 / 20));
+        }));
+        STEAM_REGULATOR_ZPM = addItem(1022, "steam.regulator.zpm").addComponents(new TooltipBehavior(lines -> {
+            lines.add(I18n.format("metaitem.steam.regulator.tooltip"));
+            lines.add(I18n.format("gregtech.universal.tooltip.fluid_transfer_rate", 1280 * 64 * 64 * 64 / 20));
+        }));
+        STEAM_REGULATOR_UV = addItem(1023, "steam.regulator.uv").addComponents(new TooltipBehavior(lines -> {
+            lines.add(I18n.format("metaitem.steam.regulator.tooltip"));
+            lines.add(I18n.format("gregtech.universal.tooltip.fluid_transfer_rate", 1280 * 64 * 64 * 4 / 20));
+        }));
     }
 }

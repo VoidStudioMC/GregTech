@@ -166,6 +166,23 @@ public final class CoverBehaviors {
         registerBehavior(gregtechId("fluid.regulator.uv"), MetaItems.FLUID_REGULATOR_UV,
                 (def, tile, side) -> new CoverFluidRegulator(def, tile, side, GTValues.UV, 1280 * 64 * 64 * 4));
 
+        registerBehavior(gregtechId("steam.regulator.lv"), MetaItems.STEAM_REGULATOR_LV,
+                (def, tile, side) -> new CoverSteamRegulator(def, tile, side, GTValues.LV, 1280 * 16));
+        registerBehavior(gregtechId("steam.regulator.mv"), MetaItems.STEAM_REGULATOR_MV,
+                (def, tile, side) -> new CoverSteamRegulator(def, tile, side, GTValues.MV, 1280 * 64));
+        registerBehavior(gregtechId("steam.regulator.hv"), MetaItems.STEAM_REGULATOR_HV,
+                (def, tile, side) -> new CoverSteamRegulator(def, tile, side, GTValues.HV, 1280 * 64 * 4));
+        registerBehavior(gregtechId("steam.regulator.ev"), MetaItems.STEAM_REGULATOR_EV,
+                (def, tile, side) -> new CoverSteamRegulator(def, tile, side, GTValues.EV, 1280 * 64 * 16));
+        registerBehavior(gregtechId("steam.regulator.iv"), MetaItems.STEAM_REGULATOR_IV,
+                (def, tile, side) -> new CoverSteamRegulator(def, tile, side, GTValues.IV, 1280 * 64 * 64));
+        registerBehavior(gregtechId("steam.regulator.luv"), MetaItems.STEAM_REGULATOR_LUV,
+                (def, tile, side) -> new CoverSteamRegulator(def, tile, side, GTValues.LuV, 1280 * 64 * 64 * 4));
+        registerBehavior(gregtechId("steam.regulator.zpm"), MetaItems.STEAM_REGULATOR_ZPM,
+                (def, tile, side) -> new CoverSteamRegulator(def, tile, side, GTValues.ZPM, 1280 * 64 * 64 * 16));
+        registerBehavior(gregtechId("steam.regulator.uv"), MetaItems.STEAM_REGULATOR_UV,
+                (def, tile, side) -> new CoverSteamRegulator(def, tile, side, GTValues.UV, 1280 * 64 * 64 * 64));
+
         // UHV+
         registerBehavior(gregtechId("conveyor.uhv"), MetaItems.CONVEYOR_MODULE_UHV,
                 (def, tile, side) -> new CoverConveyor(def, tile, side, GTValues.UHV, 16 * 64));
