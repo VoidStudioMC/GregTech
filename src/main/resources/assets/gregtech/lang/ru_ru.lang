@@ -3980,11 +3980,11 @@ gregtech.machine.super_tank.mv.name=Супер резервуар II
 gregtech.machine.super_tank.hv.name=Супер резервуар III
 gregtech.machine.super_tank.ev.name=Супер резервуар IV
 gregtech.machine.super_tank.iv.name=Супер резервуар V
-gregtech.machine.quantum_tank.iv.name=Квантовый резервуар I
-gregtech.machine.quantum_tank.luv.name=Квантовый резервуар II
-gregtech.machine.quantum_tank.zpm.name=Квантовый резервуар III
-gregtech.machine.quantum_tank.uv.name=Квантовый резервуар IV
-gregtech.machine.quantum_tank.uhv.name=Квантовый резервуар V
+gregtech.machine.quantum_tank.luv.name=Квантовый резервуар I
+gregtech.machine.quantum_tank.zpm.name=Квантовый резервуар II
+gregtech.machine.quantum_tank.uv.name=Квантовый резервуар III
+gregtech.machine.quantum_tank.uhv.name=Квантовый резервуар IV
+gregtech.machine.quantum_tank.uev.name=Квантовый резервуар V
 
 #Buffers
 gregtech.machine.buffer.tooltip=Небольшой буфер для хранения предметов и жидкостей

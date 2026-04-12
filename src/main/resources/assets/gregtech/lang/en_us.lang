@@ -4436,11 +4436,11 @@ gregtech.machine.super_tank.mv.name=Super Tank II
 gregtech.machine.super_tank.hv.name=Super Tank III
 gregtech.machine.super_tank.ev.name=Super Tank IV
 gregtech.machine.super_tank.iv.name=Super Tank V
-gregtech.machine.quantum_tank.iv.name=Quantum Tank I
-gregtech.machine.quantum_tank.luv.name=Quantum Tank II
-gregtech.machine.quantum_tank.zpm.name=Quantum Tank III
-gregtech.machine.quantum_tank.uv.name=Quantum Tank IV
-gregtech.machine.quantum_tank.uhv.name=Quantum Tank V
+gregtech.machine.quantum_tank.luv.name=Quantum Tank I
+gregtech.machine.quantum_tank.zpm.name=Quantum Tank II
+gregtech.machine.quantum_tank.uv.name=Quantum Tank III
+gregtech.machine.quantum_tank.uhv.name=Quantum Tank IV
+gregtech.machine.quantum_tank.uev.name=Quantum Tank V
 
 #Quantum Storage Controller
 gregtech.machine.quantum_storage_controller.name=Quantum Storage Controller

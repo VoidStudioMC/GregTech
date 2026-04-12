@@ -125,6 +125,8 @@ import gregtech.common.metatileentities.storage.MetaTileEntityWorkbench;
 import gregtech.common.pipelike.fluidpipe.longdistance.MetaTileEntityLDFluidEndpoint;
 import gregtech.common.pipelike.itempipe.longdistance.MetaTileEntityLDItemEndpoint;
 
+import net.minecraft.util.ResourceLocation;
+
 import static gregtech.api.util.GTUtility.gregtechId;
 
 final class MetaTileEntityRegistration {
@@ -626,20 +628,14 @@ final class MetaTileEntityRegistration {
         }
 
         // Super / Quantum Tanks, IDs 5575-5589
-        for (int i = 0; i < GTValues.IV; i++) {
-            String voltageName = GTValues.VN[i + 1].toLowerCase();
-            MetaTileEntities.QUANTUM_TANK[i] = new MetaTileEntityQuantumTank(gregtechId("super_tank." + voltageName),
-                    i + 1,
-                    4000000 * (int) Math.pow(2, i));
-            MetaTileEntities.registerMetaTileEntity(5575 + i, MetaTileEntities.QUANTUM_TANK[i]);
-        }
-
-        for (int i = GTValues.IV; i < MetaTileEntities.QUANTUM_TANK.length; i++) {
+        for (int i = 0; i < MetaTileEntities.QUANTUM_TANK.length; i++) {
             String voltageName = GTValues.VN[i].toLowerCase();
-            int capacity = i == GTValues.UHV ? Integer.MAX_VALUE : 4000000 * (int) Math.pow(2, i);
-            MetaTileEntities.QUANTUM_TANK[i] = new MetaTileEntityQuantumTank(gregtechId("quantum_tank." + voltageName),
-                    i, capacity);
-            MetaTileEntities.registerMetaTileEntity(5580 + i, MetaTileEntities.QUANTUM_TANK[i]);
+            ResourceLocation id = gregtechId((i <= GTValues.IV ? "super_tank." : "quantum_tank.") + voltageName);
+            int capacity = i == GTValues.UEV ? Integer.MAX_VALUE : 2000000 * (int) Math.pow(2, i);
+            MetaTileEntities.QUANTUM_TANK[i] = new MetaTileEntityQuantumTank(id,
+                    i,
+                    capacity);
+            MetaTileEntities.registerMetaTileEntity(5575 + i, MetaTileEntities.QUANTUM_TANK[i]);
         }
 
         // Block Breakers, IDs 5590-5594
