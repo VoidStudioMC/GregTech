@@ -11,9 +11,8 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 
 import org.jetbrains.annotations.NotNull;
 
-public class CoverSteamRegulator extends CoverFluidRegulator {
+public class CoverSteamRegulator extends CoverPump {
 
-    protected TransferMode transferMode = TransferMode.TRANSFER_ANY;
     protected static final CommonFluidFilters steamFilter = CommonFluidFilters.STEAM;
 
     public CoverSteamRegulator(@NotNull CoverDefinition definition, @NotNull CoverableView coverableView,
@@ -24,27 +23,14 @@ public class CoverSteamRegulator extends CoverFluidRegulator {
     @Override
     protected int doTransferFluidsInternal(IFluidHandler myFluidHandler, IFluidHandler fluidHandler,
                                            int transferLimit) {
-        IFluidHandler sourceHandler;
-        IFluidHandler destHandler;
-
         if (pumpMode == PumpMode.IMPORT) {
-            sourceHandler = fluidHandler;
-            destHandler = myFluidHandler;
-        } else if (pumpMode == PumpMode.EXPORT) {
-            sourceHandler = myFluidHandler;
-            destHandler = fluidHandler;
-        } else {
-            return 0;
-        }
-        return switch (transferMode) {
-            case TRANSFER_ANY -> GTTransferUtils.transferFluids(sourceHandler, destHandler, transferLimit,
+            return GTTransferUtils.transferFluids(fluidHandler, myFluidHandler, transferLimit,
                     steamFilter::test);
-            case KEEP_EXACT -> doKeepExact(transferLimit, sourceHandler, destHandler,
-                    steamFilter::test,
-                    this.fluidFilterContainer.getTransferSize());
-            case TRANSFER_EXACT -> doTransferExact(transferLimit, sourceHandler, destHandler,
-                    steamFilter::test, this.fluidFilterContainer.getTransferSize());
-        };
+        } else if (pumpMode == PumpMode.EXPORT) {
+            return GTTransferUtils.transferFluids(myFluidHandler, fluidHandler, transferLimit,
+                    steamFilter::test);
+        }
+        return 0;
     }
 
     @Override
