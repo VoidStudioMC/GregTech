@@ -5148,6 +5148,24 @@ gregtech.machine.fluid_hatch.import.uxv.name=UXV Input Hatch
 gregtech.machine.fluid_hatch.import.opv.name=OpV Input Hatch
 gregtech.machine.fluid_hatch.import.max.name=MAX Input Hatch
 
+gregtech.machine.steam_hatch.import.tooltip=Steam Input for Multiblocks
+
+gregtech.machine.steam_hatch.import.ulv.name=ULV Steam Input Hatch
+gregtech.machine.steam_hatch.import.lv.name=LV Steam Input Hatch
+gregtech.machine.steam_hatch.import.mv.name=MV Steam Input Hatch
+gregtech.machine.steam_hatch.import.hv.name=HV Steam Input Hatch
+gregtech.machine.steam_hatch.import.ev.name=EV Steam Input Hatch
+gregtech.machine.steam_hatch.import.iv.name=IV Steam Input Hatch
+gregtech.machine.steam_hatch.import.luv.name=LuV Steam Input Hatch
+gregtech.machine.steam_hatch.import.zpm.name=ZPM Steam Input Hatch
+gregtech.machine.steam_hatch.import.uv.name=UV Steam Input Hatch
+gregtech.machine.steam_hatch.import.uhv.name=UHV Steam Input Hatch
+gregtech.machine.steam_hatch.import.uev.name=UEV Steam Input Hatch
+gregtech.machine.steam_hatch.import.uiv.name=UIV Steam Input Hatch
+gregtech.machine.steam_hatch.import.uxv.name=UXV Steam Input Hatch
+gregtech.machine.steam_hatch.import.opv.name=OpV Steam Input Hatch
+gregtech.machine.steam_hatch.import.max.name=MAX Steam Input Hatch
+
 gregtech.machine.fluid_hatch.export.tooltip=Fluid Output for Multiblocks
 
 gregtech.machine.fluid_hatch.import_4x.ulv.name=ULV Quadruple Input Hatch
@@ -5229,6 +5247,24 @@ gregtech.machine.fluid_hatch.export.uiv.name=UIV Output Hatch
 gregtech.machine.fluid_hatch.export.uxv.name=UXV Output Hatch
 gregtech.machine.fluid_hatch.export.opv.name=OpV Output Hatch
 gregtech.machine.fluid_hatch.export.max.name=MAX Output Hatch
+
+gregtech.machine.steam_hatch.export.tooltip=Steam Output for Multiblocks
+
+gregtech.machine.steam_hatch.export.ulv.name=ULV Steam Output Hatch
+gregtech.machine.steam_hatch.export.lv.name=LV Steam Output Hatch
+gregtech.machine.steam_hatch.export.mv.name=MV Steam Output Hatch
+gregtech.machine.steam_hatch.export.hv.name=HV Steam Output Hatch
+gregtech.machine.steam_hatch.export.ev.name=EV Steam Output Hatch
+gregtech.machine.steam_hatch.export.iv.name=IV Steam Output Hatch
+gregtech.machine.steam_hatch.export.luv.name=LuV Steam Output Hatch
+gregtech.machine.steam_hatch.export.zpm.name=ZPM Steam Output Hatch
+gregtech.machine.steam_hatch.export.uv.name=UV Steam Output Hatch
+gregtech.machine.steam_hatch.export.uhv.name=UHV Steam Output Hatch
+gregtech.machine.steam_hatch.export.uev.name=UEV Steam Output Hatch
+gregtech.machine.steam_hatch.export.uiv.name=UIV Steam Output Hatch
+gregtech.machine.steam_hatch.export.uxv.name=UXV Steam Output Hatch
+gregtech.machine.steam_hatch.export.opv.name=OpV Steam Output Hatch
+gregtech.machine.steam_hatch.export.max.name=MAX Steam Output Hatch
 
 gregtech.machine.energy_hatch.input.tooltip=Energy Input for Multiblocks
 
