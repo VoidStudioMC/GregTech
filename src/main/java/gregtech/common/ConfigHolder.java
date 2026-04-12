@@ -42,6 +42,11 @@ public class ConfigHolder {
     @Config.RequiresMcRestart
     public static WorldGenOptions worldgen = new WorldGenOptions();
 
+    @Config.Comment("VoidStudio fork custom configs")
+    @Config.Name("VoidStudio Config")
+    @Config.RequiresMcRestart
+    public static VoidStudioOptions voidStudio = new VoidStudioOptions();
+
     public static class MachineOptions {
 
         @Config.Comment({ "Whether insufficient energy supply should reset Machine recipe progress to zero.",
@@ -196,6 +201,14 @@ public class ConfigHolder {
         @Config.Comment({ "Should all Stone Types drop unique Ore Item Blocks?",
                 "Default: false (meaning only Stone, Netherrack, and Endstone" })
         public boolean allUniqueStoneTypes = false;
+    }
+
+    public static class VoidStudioOptions {
+
+        @Config.Comment({ "Initial size of steam hatch" })
+        @Config.RangeInt(min = 8000, max = 256000)
+        @Config.RequiresMcRestart
+        public int steamHatchInitialSize = 64000;
     }
 
     public static class RecipeOptions {

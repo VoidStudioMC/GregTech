@@ -17,6 +17,7 @@ import gregtech.api.mui.GTGuiTextures;
 import gregtech.api.mui.GTGuis;
 import gregtech.client.renderer.texture.Textures;
 import gregtech.client.renderer.texture.cube.SimpleOverlayRenderer;
+import gregtech.common.ConfigHolder;
 import gregtech.common.metatileentities.storage.MetaTileEntityQuantumTank;
 import gregtech.common.mui.widget.GTFluidSlot;
 
@@ -51,15 +52,14 @@ import com.cleanroommc.modularui.widgets.slot.ModularSlot;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-// Fluid Hatch code not extensible at all and I don't actually want to edit original source code in case of update
+// Fluid Hatch code is not extensible at all and I don't actually want to edit original source code in case of update
 public class MetaTileEntityLargeSteamHatch extends MetaTileEntityMultiblockNotifiablePart
                                            implements IMultiblockAbilityPart<IFluidTank>, IControllable {
 
-    public static final int INITIAL_INVENTORY_SIZE = 64000;
+    public static final int INITIAL_INVENTORY_SIZE = ConfigHolder.voidStudio.steamHatchInitialSize;
 
     protected final FluidTank fluidTank;
     protected boolean workingEnabled;
@@ -89,10 +89,6 @@ public class MetaTileEntityLargeSteamHatch extends MetaTileEntityMultiblockNotif
         super.readFromNBT(data);
         if (data.hasKey("workingEnabled")) {
             this.workingEnabled = data.getBoolean("workingEnabled");
-        }
-        if (data.hasKey("ContainerInventory")) {
-            MetaTileEntityQuantumTank.legacyTankItemHandlerNBTReading(this, data.getCompoundTag("ContainerInventory"),
-                    0, 1);
         }
     }
 
@@ -195,7 +191,7 @@ public class MetaTileEntityLargeSteamHatch extends MetaTileEntityMultiblockNotif
     public @NotNull List<MultiblockAbility<?>> getAbilities() {
         return isExportHatch ?
                 Collections.singletonList(MultiblockAbility.EXPORT_FLUIDS) :
-                Arrays.asList(MultiblockAbility.IMPORT_FLUIDS, MultiblockAbility.IMPORT_ITEMS);
+                Collections.singletonList(MultiblockAbility.IMPORT_FLUIDS);
     }
 
     @Override
