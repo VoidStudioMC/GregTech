@@ -55,6 +55,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+// Fluid Hatch code not extensible at all and I don't actually want to edit original source code in case of update
 public class MetaTileEntityLargeSteamHatch extends MetaTileEntityMultiblockNotifiablePart
                                            implements IMultiblockAbilityPart<IFluidTank>, IControllable {
 
@@ -216,50 +217,48 @@ public class MetaTileEntityLargeSteamHatch extends MetaTileEntityMultiblockNotif
                 .showAmountOnSlot(false)
                 .accessibility(true, !isExportHatch);
 
-        return GTGuis.createPanel(this, 176, 166)
-                .child(IKey.lang(getMetaFullName()).asWidget().pos(6, 6))
+        var panel = GTGuis.createPanel(this, 176, 166).bindPlayerInventory();
+        panel.child(IKey.lang(getMetaFullName()).asWidget().pos(6, 6));
 
-                // export specific
-                .childIf(isExportHatch, new ItemSlot()
-                        .pos(90, 44)
-                        .background(GTGuiTextures.SLOT, GTGuiTextures.OUT_SLOT_OVERLAY)
-                        .slot(new ModularSlot(exportItems, 0)
-                                .accessibility(false, true)))
+        if (isExportHatch) {
+            panel.child(new ItemSlot()
+                    .pos(90, 44)
+                    .background(GTGuiTextures.SLOT, GTGuiTextures.OUT_SLOT_OVERLAY)
+                    .slot(new ModularSlot(exportItems, 0)
+                            .accessibility(false, true)));
+        } else {
+            panel.child(GTGuiTextures.TANK_ICON.asWidget()
+                    .pos(91, 36)
+                    .size(14, 15))
+                    .child(new ItemSlot()
+                            .pos(90, 53)
+                            .background(GTGuiTextures.SLOT, GTGuiTextures.OUT_SLOT_OVERLAY)
+                            .slot(new ModularSlot(exportItems, 0)
+                                    .accessibility(false, true)));
+        }
 
-                // import specific
-                .childIf(!isExportHatch, GTGuiTextures.TANK_ICON.asWidget()
-                        .pos(91, 36)
-                        .size(14, 15))
-                .childIf(!isExportHatch, new ItemSlot()
-                        .pos(90, 53)
-                        .background(GTGuiTextures.SLOT, GTGuiTextures.OUT_SLOT_OVERLAY)
-                        .slot(new ModularSlot(exportItems, 0)
-                                .accessibility(false, true)))
+        panel.child(new RichTextWidget()
+                .size(81 - 6, (isExportHatch ? 46 : 55) - 8)
+                // .padding(3, 4)
+                .background(GTGuiTextures.DISPLAY.asIcon().size(81, isExportHatch ? 46 : 55))
+                .pos(7 + 3, 16 + 4)
+                .textColor(Color.WHITE.main)
+                .alignment(Alignment.TopLeft)
+                .autoUpdate(true)
+                .textBuilder(richText -> {
+                    richText.addLine(IKey.lang("gregtech.gui.fluid_amount"));
 
-                // common ui
-                // todo split up these lines into their own widgets and use a scrolling text widget for the name
-                .child(new RichTextWidget()
-                        .size(81 - 6, (isExportHatch ? 46 : 55) - 8)
-                        // .padding(3, 4)
-                        .background(GTGuiTextures.DISPLAY.asIcon().size(81, isExportHatch ? 46 : 55))
-                        .pos(7 + 3, 16 + 4)
-                        .textColor(Color.WHITE.main)
-                        .alignment(Alignment.TopLeft)
-                        .autoUpdate(true)
-                        .textBuilder(richText -> {
-                            richText.addLine(IKey.lang("gregtech.gui.fluid_amount"));
+                    IKey nameKey = fluidSyncHandler.getFluidNameKey();
+                    if (nameKey == IKey.EMPTY) return;
 
-                            IKey nameKey = fluidSyncHandler.getFluidNameKey();
-                            if (nameKey == IKey.EMPTY) return;
+                    String formatted = nameKey.getFormatted();
+                    if (formatted.length() > 25) {
+                        nameKey = IKey.str(formatted.substring(0, 25) + TextFormatting.WHITE + "...");
+                    }
 
-                            String formatted = nameKey.getFormatted();
-                            if (formatted.length() > 25) {
-                                nameKey = IKey.str(formatted.substring(0, 25) + TextFormatting.WHITE + "...");
-                            }
-
-                            richText.addLine(nameKey);
-                            richText.addLine(IKey.str(fluidSyncHandler.getFormattedFluidAmount()));
-                        }))
+                    richText.addLine(nameKey);
+                    richText.addLine(IKey.str(fluidSyncHandler.getFormattedFluidAmount()));
+                }))
                 .child(new GTFluidSlot()
                         .disableBackground()
                         .pos(69, isExportHatch ? 43 : 52)
@@ -276,8 +275,9 @@ public class MetaTileEntityLargeSteamHatch extends MetaTileEntityMultiblockNotif
                                     if (h == null) return false;
                                     return h.getTankProperties()[0].getContents() == null;
                                 })
-                                .accessibility(true, true)))
-                .bindPlayerInventory();
+                                .accessibility(true, true)));
+
+        return panel;
     }
 
     @Override
