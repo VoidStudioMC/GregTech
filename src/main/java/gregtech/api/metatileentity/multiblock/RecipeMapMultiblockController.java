@@ -39,7 +39,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class RecipeMapMultiblockController extends MultiblockWithDisplayBase implements IDataInfoProvider,
                                                     ICleanroomReceiver, IDistinctBusController,
@@ -127,7 +131,8 @@ public abstract class RecipeMapMultiblockController extends MultiblockWithDispla
     }
 
     protected void initializeAbilities() {
-        this.inputInventory = new ItemHandlerList(getAbilities(MultiblockAbility.IMPORT_ITEMS));
+        this.inputInventory = new ItemHandlerList(Stream.concat(getAbilities(MultiblockAbility.IMPORT_ITEMS).stream(),
+                getAbilities(MultiblockAbility.GHOST_CIRCUIT).stream()).collect(Collectors.toList()));
         this.inputFluidInventory = new FluidTankList(allowSameFluidFillForOutputs(),
                 getAbilities(MultiblockAbility.IMPORT_FLUIDS));
         this.extendedFluidInputs = extendedImportFluidList(this.inputFluidInventory);

@@ -23,6 +23,9 @@ public class MultiblockAbility<T> {
     public static final MultiblockAbility<IItemHandlerModifiable> IMPORT_ITEMS = ability(
             "import_items", IItemHandlerModifiable.class);
 
+    public static final MultiblockAbility<IItemHandlerModifiable> GHOST_CIRCUIT = ability(
+            "ghost_circuit", IItemHandlerModifiable.class);
+
     public static final MultiblockAbility<IFluidTank> EXPORT_FLUIDS = ability(
             "export_fluids", IFluidTank.class);
     public static final MultiblockAbility<IFluidTank> IMPORT_FLUIDS = ability(

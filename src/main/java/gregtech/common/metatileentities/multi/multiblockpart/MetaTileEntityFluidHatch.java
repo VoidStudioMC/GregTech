@@ -263,7 +263,7 @@ public class MetaTileEntityFluidHatch extends MetaTileEntityMultiblockNotifiable
     public @NotNull List<MultiblockAbility<?>> getAbilities() {
         return isExportHatch ?
                 Collections.singletonList(MultiblockAbility.EXPORT_FLUIDS) :
-                Arrays.asList(MultiblockAbility.IMPORT_FLUIDS, MultiblockAbility.IMPORT_ITEMS);
+                Arrays.asList(MultiblockAbility.IMPORT_FLUIDS, MultiblockAbility.GHOST_CIRCUIT);
     }
 
     @Override
@@ -271,7 +271,7 @@ public class MetaTileEntityFluidHatch extends MetaTileEntityMultiblockNotifiable
         if (abilityInstances.isKey(MultiblockAbility.EXPORT_FLUIDS) ||
                 abilityInstances.isKey(MultiblockAbility.IMPORT_FLUIDS)) {
             abilityInstances.add(this.fluidTank);
-        } else if (abilityInstances.isKey(MultiblockAbility.IMPORT_ITEMS)) {
+        } else if (abilityInstances.isKey(MultiblockAbility.GHOST_CIRCUIT)) {
             abilityInstances.add(this.circuitInventory);
         }
     }
