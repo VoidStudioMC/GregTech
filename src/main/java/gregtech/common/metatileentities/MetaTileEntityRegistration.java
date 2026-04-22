@@ -638,6 +638,16 @@ final class MetaTileEntityRegistration {
             MetaTileEntities.registerMetaTileEntity(5575 + i, MetaTileEntities.QUANTUM_TANK[i]);
         }
 
+        for (int i = 0; i < MetaTileEntities.PORTABLE_TANK.length; i++) {
+            String voltageName = GTValues.VN[i].toLowerCase();
+            ResourceLocation id = gregtechId("portable_tank." + voltageName);
+            int capacity = 32000 * (int) Math.pow(2, i);
+            MetaTileEntities.PORTABLE_TANK[i] = new MetaTileEntityQuantumTank(id,
+                    i,
+                    capacity);
+            MetaTileEntities.registerMetaTileEntity(11535 + i, MetaTileEntities.PORTABLE_TANK[i]);
+        }
+
         // Block Breakers, IDs 5590-5594
         for (int i = 0; i < MetaTileEntities.BLOCK_BREAKER.length; i++) {
             String voltageName = GTValues.VN[i + 1].toLowerCase();
