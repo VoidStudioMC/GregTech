@@ -3986,6 +3986,19 @@ gregtech.machine.quantum_tank.uv.name=Квантовый резервуар III
 gregtech.machine.quantum_tank.uhv.name=Квантовый резервуар IV
 gregtech.machine.quantum_tank.uev.name=Квантовый резервуар V
 
+#Portable tanks
+gregtech.machine.portable_tank.ulv.name=Портативный резервуар (§8ULV§r)
+gregtech.machine.portable_tank.lv.name=Портативный резервуар (§7LV§r)
+gregtech.machine.portable_tank.mv.name=Портативный резервуар (§bMV§r)
+gregtech.machine.portable_tank.hv.name=Портативный резервуар (§6HV§r)
+gregtech.machine.portable_tank.ev.name=Портативный резервуар (§5EV§r)
+gregtech.machine.portable_tank.iv.name=Портативный резервуар (§1IV§r)
+gregtech.machine.portable_tank.luv.name=Портативный резервуар (§dLuV§r)
+gregtech.machine.portable_tank.zpm.name=Портативный резервуар (§fZPM§r)
+gregtech.machine.portable_tank.uv.name=Портативный резервуар (§3UV§r)
+gregtech.machine.portable_tank.uhv.name=Портативный резервуар (§4UHV§r)
+gregtech.machine.portable_tank.uev.name=Портативный резервуар (§aUEV§r)
+
 #Buffers
 gregtech.machine.buffer.tooltip=Небольшой буфер для хранения предметов и жидкостей
 gregtech.machine.buffer.lv.name=Обычный буфер

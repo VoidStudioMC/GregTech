@@ -4442,6 +4442,19 @@ gregtech.machine.quantum_tank.uv.name=Quantum Tank III
 gregtech.machine.quantum_tank.uhv.name=Quantum Tank IV
 gregtech.machine.quantum_tank.uev.name=Quantum Tank V
 
+#Portable tanks
+gregtech.machine.portable_tank.ulv.name=ULV Portable Tank
+gregtech.machine.portable_tank.lv.name=LV Portable Tank
+gregtech.machine.portable_tank.mv.name=MV Portable Tank
+gregtech.machine.portable_tank.hv.name=HV Portable Tank
+gregtech.machine.portable_tank.ev.name=EV Portable Tank
+gregtech.machine.portable_tank.iv.name=IV Portable Tank
+gregtech.machine.portable_tank.luv.name=LuV Portable Tank
+gregtech.machine.portable_tank.zpm.name=ZPM Portable Tank
+gregtech.machine.portable_tank.uv.name=UV Portable Tank
+gregtech.machine.portable_tank.uhv.name=UHV Portable Tank
+gregtech.machine.portable_tank.uev.name=UEV Portable Tank
+
 #Quantum Storage Controller
 gregtech.machine.quantum_storage_controller.name=Quantum Storage Controller
 gregtech.machine.quantum_storage_controller.tooltip=Heart of the Quantum Storage Network/nConnect Energy Hatches to power the Quantum Storage Network
