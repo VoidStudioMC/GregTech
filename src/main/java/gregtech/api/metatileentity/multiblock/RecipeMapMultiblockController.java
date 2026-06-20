@@ -39,6 +39,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -129,8 +130,9 @@ public abstract class RecipeMapMultiblockController extends MultiblockWithDispla
     }
 
     protected void initializeAbilities() {
-        this.inputInventory = new ItemHandlerList(Stream.concat(getAbilities(MultiblockAbility.IMPORT_ITEMS).stream(),
-                getAbilities(MultiblockAbility.GHOST_CIRCUIT).stream()).collect(Collectors.toList()));
+        this.inputInventory = new ItemHandlerList(Stream.of(getAbilities(MultiblockAbility.IMPORT_ITEMS),
+                getAbilities(MultiblockAbility.GHOST_CIRCUIT)).flatMap(Collection::stream)
+                .collect(Collectors.toList()));
         this.inputFluidInventory = new FluidTankList(allowSameFluidFillForOutputs(),
                 getAbilities(MultiblockAbility.IMPORT_FLUIDS));
         this.extendedFluidInputs = extendedImportFluidList(this.inputFluidInventory);

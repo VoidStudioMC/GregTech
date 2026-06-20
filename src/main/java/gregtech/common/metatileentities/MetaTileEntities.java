@@ -435,6 +435,7 @@ public final class MetaTileEntities {
         if (mte instanceof IMultiblockAbilityPart<?>abilityPart) {
             for (var ability : abilityPart.getAbilities())
                 MultiblockAbility.registerMultiblockAbility(ability, mte);
+        }
 
         if (Mods.JustEnoughItems.isModLoaded() && mte instanceof MultiblockControllerBase controller &&
                 controller.shouldShowInJei()) {
