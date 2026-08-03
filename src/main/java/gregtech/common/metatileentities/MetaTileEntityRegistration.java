@@ -646,7 +646,7 @@ final class MetaTileEntityRegistration {
             MetaTileEntities.PORTABLE_TANK[i] = new MetaTileEntityQuantumTank(id,
                     i,
                     capacity);
-            MetaTileEntities.registerMetaTileEntity(11535 + i, MetaTileEntities.PORTABLE_TANK[i]);
+            MetaTileEntities.registerMetaTileEntity(11580 + i, MetaTileEntities.PORTABLE_TANK[i]);
         }
 
         // Block Breakers, IDs 5590-5594
