@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 @SuppressWarnings("deprecation")
 public class LocalizationUtils {
 
-    private static final Pattern NEW_LINE_PATTERN = Pattern.compile("/n");
+    private static final Pattern NEW_LINE_PATTERN = Pattern.compile("/n|\\\\n");
 
     /**
      * This function calls {@link net.minecraft.client.resources.I18n#format(String, Object...)} when called on client
