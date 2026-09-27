@@ -303,7 +303,11 @@ public class BlockMachine extends BlockCustomParticle implements ITileEntityProv
             if (stackTag != null && !stackTag.isEmpty())
                 metaTileEntity.initFromItemStackData(stackTag);
 
-            EnumFacing placeFacing = EnumFacing.getDirectionFromEntityLiving(pos, placer);
+            EnumFacing placeFacing = metaTileEntity.isValidFrontFacing(EnumFacing.UP) ||
+                    metaTileEntity.isValidFrontFacing(EnumFacing.DOWN) ?
+                            EnumFacing.getDirectionFromEntityLiving(pos, placer) :
+                            placer.getHorizontalFacing().getOpposite();
+
             if (metaTileEntity.isValidFrontFacing(placeFacing)) {
                 metaTileEntity.setFrontFacing(placeFacing);
             } else {
