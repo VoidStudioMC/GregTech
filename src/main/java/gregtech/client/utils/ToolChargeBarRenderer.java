@@ -170,7 +170,7 @@ public final class ToolChargeBarRenderer {
     }
 
     private static boolean renderDurabilityBar(double level, int xPosition, int yPosition) {
-        render(level, xPosition, yPosition, 0, true, colorBarLeftDurability, colorBarRightDurability, true);
+        render(1 - level, xPosition, yPosition, 0, true, colorBarLeftDurability, colorBarRightDurability, true);
         return true;
     }
 
