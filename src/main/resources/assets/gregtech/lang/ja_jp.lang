@@ -181,7 +181,7 @@ gregtech.tooltip.fluid_pipe_hold_shift=SHIFTで耐流体性能を表示
 gregtech.tooltip.tool_fluid_hold_shift=SHIFTで耐流体性能とツール情報を表示
 
 metaitem.generic.fluid_container.tooltip=%3$s %1$,d/%2$,dL
-metaitem.generic.electric_item.tooltip=%,d/%,d EU - Tier %s
+metaitem.generic.electric_item.tooltip=%s/%s EU - Tier %s
 metaitem.electric.discharge_mode.enabled=§e放電:有効
 metaitem.electric.discharge_mode.disabled=§e放電:無効
 metaitem.electric.discharge_mode.tooltip=スニーク中に使うことで放電を切り替えできます。

@@ -177,7 +177,7 @@ gregtech.tooltip.fluid_pipe_hold_shift=按住SHIFT以查看流体容器详情
 gregtech.tooltip.tool_fluid_hold_shift=按住SHIFT以查看流体容器及工具详情
 
 metaitem.generic.fluid_container.tooltip=%,d/%,dL %s
-metaitem.generic.electric_item.tooltip=%,d/%,d EU - %s级
+metaitem.generic.electric_item.tooltip=%s/%s EU - %s级
 metaitem.electric.discharge_mode.enabled=§e释能模式已启用
 metaitem.electric.discharge_mode.disabled=§e释能模式已禁用
 metaitem.electric.discharge_mode.tooltip=潜行右击以开关释能模式
