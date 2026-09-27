@@ -20,6 +20,7 @@ import gregtech.api.unification.stack.RecyclingData;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.LocalizationUtils;
 import gregtech.api.util.Mods;
+import gregtech.api.util.TextFormattingUtil;
 import gregtech.client.utils.ToolChargeBarRenderer;
 import gregtech.common.ConfigHolder;
 import gregtech.common.covers.filter.IFilter;
@@ -610,8 +611,8 @@ public abstract class MetaItem<T extends MetaItem<?>.MetaValueItem> extends Item
                         electricItem.getTier());
             } else {
                 lines.add(I18n.format("metaitem.generic.electric_item.tooltip",
-                        electricItem.getCharge(),
-                        electricItem.getMaxCharge(),
+                        TextFormattingUtil.formatNumbers(electricItem.getCharge()),
+                        TextFormattingUtil.formatNumbers(electricItem.getMaxCharge()),
                         GTValues.VNF[electricItem.getTier()]));
             }
         }
@@ -644,7 +645,9 @@ public abstract class MetaItem<T extends MetaItem<?>.MetaValueItem> extends Item
 
     private static void addDischargeItemTooltip(List<String> tooltip, long maxCharge, long currentCharge, int tier) {
         if (currentCharge == 0) { // do not display when empty
-            tooltip.add(I18n.format("metaitem.generic.electric_item.tooltip", currentCharge, maxCharge,
+            tooltip.add(I18n.format("metaitem.generic.electric_item.tooltip",
+                    TextFormattingUtil.formatNumbers(currentCharge),
+                    TextFormattingUtil.formatNumbers(maxCharge),
                     GTValues.VNF[tier]));
             return;
         }
