@@ -743,8 +743,8 @@ public interface IGTTool extends ItemUIFactory, IAEWrench, IToolWrench, IToolHam
         // electric info
         if (this.isElectric()) {
             tooltip.add(I18n.format("metaitem.generic.electric_item.tooltip",
-                    getCharge(stack),
-                    getMaxCharge(stack),
+                    TextFormattingUtil.formatNumbers(getCharge(stack)),
+                    TextFormattingUtil.formatNumbers(getMaxCharge(stack)),
                     GTValues.VNF[getElectricTier()]));
         }
 

@@ -177,7 +177,7 @@ gregtech.tooltip.fluid_pipe_hold_shift=Hold SHIFT to show Fluid Containment Info
 gregtech.tooltip.tool_fluid_hold_shift=Hold SHIFT to show Fluid Containment and Tool Info
 
 metaitem.generic.fluid_container.tooltip=%,d/%,dL %s
-metaitem.generic.electric_item.tooltip=%,d/%,d EU - Tier %s
+metaitem.generic.electric_item.tooltip=%s/%s EU - Tier %s
 metaitem.electric.discharge_mode.enabled=§eDischarge Mode Enabled
 metaitem.electric.discharge_mode.disabled=§eDischarge Mode Disabled
 metaitem.electric.discharge_mode.tooltip=Use while sneaking to toggle discharge mode
