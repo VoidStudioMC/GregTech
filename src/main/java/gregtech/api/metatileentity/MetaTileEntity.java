@@ -1452,6 +1452,10 @@ public abstract class MetaTileEntity implements ISyncedTileEntity, CoverHolder, 
         return frontFacing;
     }
 
+    public @NotNull EnumFacing getDefaultPlaceFacing() {
+        return frontFacing;
+    }
+
     public int getPaintingColor() {
         return paintingColor;
     }

@@ -303,10 +303,11 @@ public class BlockMachine extends BlockCustomParticle implements ITileEntityProv
             if (stackTag != null && !stackTag.isEmpty())
                 metaTileEntity.initFromItemStackData(stackTag);
 
-            if (metaTileEntity.isValidFrontFacing(EnumFacing.UP)) {
-                metaTileEntity.setFrontFacing(EnumFacing.getDirectionFromEntityLiving(pos, placer));
+            EnumFacing placeFacing = EnumFacing.getDirectionFromEntityLiving(pos, placer);
+            if (metaTileEntity.isValidFrontFacing(placeFacing)) {
+                metaTileEntity.setFrontFacing(placeFacing);
             } else {
-                metaTileEntity.setFrontFacing(placer.getHorizontalFacing().getOpposite());
+                metaTileEntity.setFrontFacing(metaTileEntity.getDefaultPlaceFacing());
             }
             if (metaTileEntity instanceof MultiblockControllerBase multi) {
                 if (multi.allowsExtendedFacing()) {
