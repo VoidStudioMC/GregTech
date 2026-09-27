@@ -69,6 +69,7 @@ import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityAutoM
 import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityCleaningMaintenanceHatch;
 import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityComputationHatch;
 import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityDataAccessHatch;
+import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityDualHatch;
 import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityEnergyHatch;
 import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityFluidHatch;
 import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityItemBus;
@@ -1097,6 +1098,22 @@ final class MetaTileEntityRegistration {
                     new MetaTileEntityMEOutputBus(gregtechId("me_export_item_bus")));
             MetaTileEntities.FLUID_EXPORT_HATCH_ME = MetaTileEntities.registerMetaTileEntity(11533,
                     new MetaTileEntityMEOutputHatch(gregtechId("me_export_fluid_hatch")));
+        }
+
+        // Dual Input Hatches
+        for (int tier = GTValues.ULV; tier <= (GregTechAPI.isHighTier() ? GTValues.OpV : GTValues.UHV); tier++) {
+            String voltageName = GTValues.VN[tier].toLowerCase();
+            MetaTileEntities.DUAL_INPUT_HATCH[tier] = MetaTileEntities.registerMetaTileEntity(11591 + tier,
+                    new MetaTileEntityDualHatch(
+                            gregtechId(String.format("%s.%s", "dual_input_hatch", voltageName)), tier, false));
+        }
+
+        // Dual Output Hatches
+        for (int tier = GTValues.ULV; tier <= (GregTechAPI.isHighTier() ? GTValues.OpV : GTValues.UHV); tier++) {
+            String voltageName = GTValues.VN[tier].toLowerCase();
+            MetaTileEntities.DUAL_INPUT_HATCH[tier] = MetaTileEntities.registerMetaTileEntity(11605 + tier,
+                    new MetaTileEntityDualHatch(
+                            gregtechId(String.format("%s.%s", "dual_output_hatch", voltageName)), tier, true));
         }
     }
 }
