@@ -348,6 +348,10 @@ public class Textures {
             "overlay/machine/overlay_item_hatch_input");
     public static final SimpleOverlayRenderer WATER_OVERLAY = new SimpleOverlayRenderer(
             "overlay/machine/overlay_water");
+    public static final SimpleOverlayRenderer DUAL_HATCH_OUTPUT_OVERLAY = new SimpleOverlayRenderer(
+            "overlay/machine/overlay_dual_hatch_output");
+    public static final SimpleOverlayRenderer DUAL_HATCH_INPUT_OVERLAY = new SimpleOverlayRenderer(
+            "overlay/machine/overlay_dual_hatch_input");
 
     public static final ICubeRenderer BRONZE_FIREBOX = new SidedCubeRenderer("casings/firebox/overlay/bronze");
     public static final ICubeRenderer BRONZE_FIREBOX_ACTIVE = new FireboxActiveRenderer(

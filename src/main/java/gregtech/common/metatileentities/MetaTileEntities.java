@@ -65,6 +65,7 @@ import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityAutoM
 import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityCleaningMaintenanceHatch;
 import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityComputationHatch;
 import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityDataAccessHatch;
+import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityDualHatch;
 import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityEnergyHatch;
 import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityFluidHatch;
 import gregtech.common.metatileentities.multi.multiblockpart.MetaTileEntityItemBus;
@@ -246,6 +247,8 @@ public final class MetaTileEntities {
     public static MetaTileEntityHPCACooler HPCA_HEAT_SINK_COMPONENT;
     public static MetaTileEntityHPCACooler HPCA_ACTIVE_COOLER_COMPONENT;
     public static MetaTileEntityHPCABridge HPCA_BRIDGE_COMPONENT;
+    public static MetaTileEntityDualHatch[] DUAL_INPUT_HATCH = new MetaTileEntityDualHatch[GTValues.V.length - 1];
+    public static MetaTileEntityDualHatch[] DUAL_OUTPUT_HATCH = new MetaTileEntityDualHatch[GTValues.V.length - 1];
 
     // Used for addons if they wish to disable certain tiers of machines
     private static final Map<String, Boolean> MID_TIER = new HashMap<>();
