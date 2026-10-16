@@ -7,7 +7,6 @@ import gregtech.api.items.metaitem.stats.IItemNameProvider;
 import gregtech.api.recipes.Recipe;
 import gregtech.api.recipes.RecipeMaps;
 import gregtech.api.recipes.machines.IResearchRecipeMap;
-import gregtech.api.util.AssemblyLineManager;
 import gregtech.api.util.ItemStackHashStrategy;
 import gregtech.api.util.LocalizationUtils;
 
@@ -39,14 +38,7 @@ public class DataItemBehavior implements IItemBehaviour, IDataItem, IItemNamePro
 
     @Override
     public void addInformation(@NotNull ItemStack itemStack, List<String> lines) {
-        if (DataStickRegistry.getHandler(itemStack) != null ||
-                itemStack.hasTagCompound() && itemStack.getTagCompound().hasKey(DataStickRegistry.ROOT_TAG)) {
-            DataStickRegistry.addInformation(itemStack, lines);
-            return;
-        }
-        String researchId = AssemblyLineManager.readResearchId(itemStack);
-        if (researchId == null) return;
-        collectResearchItems(researchId, lines);
+        DataStickRegistry.addInformation(itemStack, lines);
     }
 
     @Override

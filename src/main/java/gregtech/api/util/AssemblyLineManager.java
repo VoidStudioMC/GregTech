@@ -14,10 +14,10 @@ import gregtech.api.recipes.machines.RecipeMapScanner;
 import gregtech.api.recipes.properties.impl.ScanProperty;
 import gregtech.common.ConfigHolder;
 import gregtech.common.items.MetaItems;
+import gregtech.common.items.behaviors.DataStickHandlers;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fluids.FluidStack;
 
 import org.jetbrains.annotations.ApiStatus;
@@ -57,9 +57,7 @@ public final class AssemblyLineManager {
      * @param researchId    the research id
      */
     public static void writeResearchToNBT(@NotNull NBTTagCompound stackCompound, @NotNull String researchId) {
-        NBTTagCompound compound = new NBTTagCompound();
-        compound.setString(RESEARCH_ID_NBT_TAG, researchId);
-        stackCompound.setTag(RESEARCH_NBT_TAG, compound);
+        DataStickHandlers.ASSEMBLY_LINE.write(stackCompound, researchId);
     }
 
     /**
@@ -68,12 +66,7 @@ public final class AssemblyLineManager {
      */
     @Nullable
     public static String readResearchId(@NotNull ItemStack stack) {
-        NBTTagCompound compound = stack.getTagCompound();
-        if (!hasResearchTag(compound)) return null;
-
-        NBTTagCompound researchCompound = compound.getCompoundTag(RESEARCH_NBT_TAG);
-        String researchId = researchCompound.getString(RESEARCH_ID_NBT_TAG);
-        return researchId.isEmpty() ? null : researchId;
+        return DataStickHandlers.ASSEMBLY_LINE.read(stack);
     }
 
     /**
@@ -96,19 +89,10 @@ public final class AssemblyLineManager {
 
     /**
      * @param stack the stack to check
-     * @return if the stack has the research NBTTagCompound
+     * @return if the stack contains readable research data, including the legacy NBT format
      */
     public static boolean hasResearchTag(@NotNull ItemStack stack) {
-        return hasResearchTag(stack.getTagCompound());
-    }
-
-    /**
-     * @param compound the compound to check
-     * @return if the tag has the research NBTTagCompound
-     */
-    private static boolean hasResearchTag(@Nullable NBTTagCompound compound) {
-        if (compound == null || compound.isEmpty()) return false;
-        return compound.hasKey(RESEARCH_NBT_TAG, Constants.NBT.TAG_COMPOUND);
+        return readResearchId(stack) != null;
     }
 
     /**

@@ -12,6 +12,7 @@ import gregtech.api.unification.ore.OrePrefix;
 import gregtech.api.util.GTLog;
 import gregtech.client.renderer.handler.FacadeRenderer;
 import gregtech.common.items.armor.MetaArmor;
+import gregtech.common.items.behaviors.DataStickHandlers;
 
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -632,6 +633,7 @@ public final class MetaItems {
     }
 
     public static void init() {
+        DataStickHandlers.init();
         MetaItem1 first = new MetaItem1();
         first.setRegistryName("meta_item_1");
         MetaArmor armor = new MetaArmor();
