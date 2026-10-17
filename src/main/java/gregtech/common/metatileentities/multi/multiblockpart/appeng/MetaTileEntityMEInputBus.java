@@ -22,6 +22,7 @@ import gregtech.api.metatileentity.multiblock.MultiblockControllerBase;
 import gregtech.api.util.GTUtility;
 import gregtech.client.renderer.texture.Textures;
 import gregtech.common.gui.widget.appeng.AEItemConfigWidget;
+import gregtech.common.items.behaviors.DataStickHandlers;
 import gregtech.common.metatileentities.multi.multiblockpart.appeng.slot.ExportOnlyAEItemList;
 import gregtech.common.metatileentities.multi.multiblockpart.appeng.slot.ExportOnlyAEItemSlot;
 import gregtech.common.metatileentities.multi.multiblockpart.appeng.stack.WrappedItemStack;
@@ -353,10 +354,7 @@ public class MetaTileEntityMEInputBus extends MetaTileEntityAEHostablePart<IAEIt
 
     @Override
     public final void onDataStickLeftClick(EntityPlayer player, ItemStack dataStick) {
-        NBTTagCompound tag = new NBTTagCompound();
-        tag.setTag("MEInputBus", writeConfigToTag());
-        dataStick.setTagCompound(tag);
-        dataStick.setTranslatableName("gregtech.machine.me.item_import.data_stick.name");
+        DataStickHandlers.ME_INPUT_BUS.write(dataStick, writeConfigToTag());
         player.sendStatusMessage(new TextComponentTranslation("gregtech.machine.me.import_copy_settings"), true);
     }
 
@@ -380,11 +378,11 @@ public class MetaTileEntityMEInputBus extends MetaTileEntityAEHostablePart<IAEIt
 
     @Override
     public final boolean onDataStickRightClick(EntityPlayer player, ItemStack dataStick) {
-        NBTTagCompound tag = dataStick.getTagCompound();
-        if (tag == null || !tag.hasKey("MEInputBus")) {
+        NBTTagCompound tag = DataStickHandlers.ME_INPUT_BUS.read(dataStick);
+        if (tag == null) {
             return false;
         }
-        readConfigFromTag(tag.getCompoundTag("MEInputBus"));
+        readConfigFromTag(tag);
         syncME();
         player.sendStatusMessage(new TextComponentTranslation("gregtech.machine.me.import_paste_settings"), true);
         return true;

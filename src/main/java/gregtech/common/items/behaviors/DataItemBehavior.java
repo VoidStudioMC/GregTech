@@ -1,12 +1,14 @@
 package gregtech.common.items.behaviors;
 
+import gregtech.api.items.datastick.DataStickRegistry;
 import gregtech.api.items.metaitem.stats.IDataItem;
 import gregtech.api.items.metaitem.stats.IItemBehaviour;
+import gregtech.api.items.metaitem.stats.IItemNameProvider;
 import gregtech.api.recipes.Recipe;
 import gregtech.api.recipes.RecipeMaps;
 import gregtech.api.recipes.machines.IResearchRecipeMap;
-import gregtech.api.util.AssemblyLineManager;
 import gregtech.api.util.ItemStackHashStrategy;
+import gregtech.api.util.LocalizationUtils;
 
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
@@ -17,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.List;
 
-public class DataItemBehavior implements IItemBehaviour, IDataItem {
+public class DataItemBehavior implements IItemBehaviour, IDataItem, IItemNameProvider {
 
     private final boolean requireDataBank;
 
@@ -36,9 +38,13 @@ public class DataItemBehavior implements IItemBehaviour, IDataItem {
 
     @Override
     public void addInformation(@NotNull ItemStack itemStack, List<String> lines) {
-        String researchId = AssemblyLineManager.readResearchId(itemStack);
-        if (researchId == null) return;
-        collectResearchItems(researchId, lines);
+        DataStickRegistry.addInformation(itemStack, lines);
+    }
+
+    @Override
+    public String getItemStackDisplayName(ItemStack itemStack, String unlocalizedName) {
+        String name = DataStickRegistry.getDisplayName(itemStack);
+        return name == null ? LocalizationUtils.format(unlocalizedName) : name;
     }
 
     public static void collectResearchItems(String id, List<String> lines) {
