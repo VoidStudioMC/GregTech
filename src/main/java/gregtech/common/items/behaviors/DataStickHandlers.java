@@ -25,6 +25,11 @@ public final class DataStickHandlers {
             new DataStickHandler<>() {
 
                 @Override
+                public @NotNull String getStorageKey() {
+                    return AssemblyLineManager.RESEARCH_NBT_TAG;
+                }
+
+                @Override
                 public @NotNull NBTTagCompound serializeNBT(@NotNull String data) {
                     NBTTagCompound tag = new NBTTagCompound();
                     tag.setString(AssemblyLineManager.RESEARCH_ID_NBT_TAG, data);
