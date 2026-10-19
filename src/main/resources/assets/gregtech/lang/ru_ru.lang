@@ -2797,6 +2797,10 @@ gregtech.machine.arc_furnace.opv.name=Совершенная дуговая пе
 gregtech.machine.arc_furnace.opv.tooltip=Нагреватель короткого замыкания
 
 # Assembler
+gregtech.machine.assembler.ulv.name=Простая сборочная машина
+gregtech.machine.assembler.ulv.tooltip=Мстители, общий сбор!
+gregtech.machine.assembler.lv.name=Обычная сборочная машина
+gregtech.machine.assembler.lv.tooltip=Мстители, общий сбор!
 gregtech.machine.assembler.lv.name=Обычная сборочная машина
 gregtech.machine.assembler.lv.tooltip=Мстители, общий сбор!
 gregtech.machine.assembler.mv.name=Улучшенная сборочная машина

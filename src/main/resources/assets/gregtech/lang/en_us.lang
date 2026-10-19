@@ -3216,6 +3216,8 @@ gregtech.machine.arc_furnace.opv.name=Legendary Arc Furnace
 gregtech.machine.arc_furnace.opv.tooltip=Short Circuit Heater
 
 # Assembler
+gregtech.machine.assembler.ulv.name=Simple Assembling Machine
+gregtech.machine.assembler.ulv.tooltip=Avengers, Assemble!
 gregtech.machine.assembler.lv.name=Basic Assembling Machine
 gregtech.machine.assembler.lv.tooltip=Avengers, Assemble!
 gregtech.machine.assembler.mv.name=Advanced Assembling Machine
