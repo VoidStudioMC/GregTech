@@ -61,12 +61,20 @@ public final class AssemblyLineManager {
     }
 
     /**
+     * Read research data for use, making the research handler active on success.
+     *
      * @param stack the ItemStack to read from
      * @return the research id
      */
     @Nullable
     public static String readResearchId(@NotNull ItemStack stack) {
         return DataStickHandlers.ASSEMBLY_LINE.read(stack);
+    }
+
+    /** Inspect research data without changing the active handler or the item's NBT. */
+    @Nullable
+    public static String peekResearchId(@NotNull ItemStack stack) {
+        return DataStickHandlers.ASSEMBLY_LINE.peek(stack);
     }
 
     /**
@@ -92,7 +100,7 @@ public final class AssemblyLineManager {
      * @return if the stack contains readable research data
      */
     public static boolean hasResearchTag(@NotNull ItemStack stack) {
-        return readResearchId(stack) != null;
+        return peekResearchId(stack) != null;
     }
 
     /**

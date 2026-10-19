@@ -55,9 +55,19 @@ public abstract class DataStickHandler<T> {
         DataStickRegistry.write(root, this, data);
     }
 
-    /** Return null when this storage area belongs to another handler, has no data, or cannot be decoded. */
+    /**
+     * Read data for use and make this handler active for the name on success. Returns null without changing the item
+     * when this area belongs to another handler, has no data, or cannot be decoded. Use {@link #peek(ItemStack)} for
+     * inspection, validation and presentation.
+     */
     @Nullable
     public final T read(@NotNull ItemStack stack) {
         return DataStickRegistry.read(stack, this);
+    }
+
+    /** Read an isolated copy of this area's data without changing the item or its active handler. */
+    @Nullable
+    public final T peek(@NotNull ItemStack stack) {
+        return DataStickRegistry.peek(stack, this);
     }
 }

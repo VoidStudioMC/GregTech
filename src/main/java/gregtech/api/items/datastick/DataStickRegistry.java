@@ -52,7 +52,7 @@ public final class DataStickRegistry {
         return null;
     }
 
-    /** The last written handler, or null when the active area is missing or invalid. */
+    /** The last successfully used handler (read or write), or null when the active area is missing or invalid. */
     @Nullable
     public static DataStickHandler<?> getHandler(@NotNull ItemStack stack) {
         NBTTagCompound root = stack.getTagCompound();
@@ -110,17 +110,32 @@ public final class DataStickRegistry {
         NBTTagCompound handlers = metadata.getCompoundTag(HANDLERS_TAG);
         handlers.setString(storageKey, id);
         metadata.setTag(HANDLERS_TAG, handlers);
-        metadata.setString(ACTIVE_TAG, storageKey);
+        root.setTag(storageKey, payload);
+        root.setTag(ROOT_TAG, metadata);
+        setActive(root, storageKey);
+    }
+
+    private static void setActive(NBTTagCompound root, String storageKey) {
+        root.getCompoundTag(ROOT_TAG).setString(ACTIVE_TAG, storageKey);
         NBTTagCompound display = root.getCompoundTag("display");
         display.removeTag("Name");
         display.removeTag("LocName");
         if (display.isEmpty()) root.removeTag("display");
-        root.setTag(storageKey, payload);
-        root.setTag(ROOT_TAG, metadata);
     }
 
     @Nullable
     static <T> T read(ItemStack stack, DataStickHandler<T> handler) {
+        T data = peek(stack, handler);
+        if (data != null) {
+            NBTTagCompound root = stack.getTagCompound().copy();
+            setActive(root, handler.getStorageKey());
+            stack.setTagCompound(root);
+        }
+        return data;
+    }
+
+    @Nullable
+    static <T> T peek(ItemStack stack, DataStickHandler<T> handler) {
         NBTTagCompound root = stack.getTagCompound();
         String storageKey = handler.getStorageKey();
         if (getHandler(root, storageKey) != handler) return null;
@@ -135,7 +150,7 @@ public final class DataStickRegistry {
 
     @Nullable
     private static <T> String getDisplayName(ItemStack stack, DataStickHandler<T> handler) {
-        T data = handler.read(stack);
+        T data = handler.peek(stack);
         return data == null ? null : handler.getDisplayName(data);
     }
 
@@ -146,7 +161,7 @@ public final class DataStickRegistry {
     }
 
     private static <T> void addInformation(ItemStack stack, DataStickHandler<T> handler, List<String> lines) {
-        T data = handler.read(stack);
+        T data = handler.peek(stack);
         if (data != null) handler.addInformation(data, lines);
     }
 }

@@ -74,9 +74,9 @@ class DataStickHandlersTest {
         ME_INPUT_BUS.write(stack, itemConfig());
         stack.setTranslatableName("gregtech.machine.me.item_import.data_stick.name");
         AssemblyLineManager.writeResearchToNBT(stack.getTagCompound(), "test:research");
-        assertEquals("test:research", AssemblyLineManager.readResearchId(stack));
+        assertEquals("test:research", AssemblyLineManager.peekResearchId(stack));
         assertTrue(AssemblyLineManager.hasResearchTag(stack));
-        assertEquals(itemConfig(), ME_INPUT_BUS.read(stack));
+        assertEquals(itemConfig(), ME_INPUT_BUS.peek(stack));
         assertFalse(stack.getTagCompound().hasKey("display"));
         assertEquals("test:research", stack.getTagCompound().getCompoundTag(AssemblyLineManager.RESEARCH_NBT_TAG)
                 .getString(AssemblyLineManager.RESEARCH_ID_NBT_TAG));
@@ -84,21 +84,45 @@ class DataStickHandlersTest {
 
         ME_INPUT_HATCH.write(stack, fluidConfig());
         assertTrue(AssemblyLineManager.hasResearchTag(stack));
-        assertEquals("test:research", AssemblyLineManager.readResearchId(stack));
-        assertNull(ME_INPUT_BUS.read(stack));
-        assertEquals(fluidConfig(), ME_INPUT_HATCH.read(stack));
+        assertEquals("test:research", AssemblyLineManager.peekResearchId(stack));
+        assertNull(ME_INPUT_BUS.peek(stack));
+        assertEquals(fluidConfig(), ME_INPUT_HATCH.peek(stack));
         assertEquals(LocalizationUtils.format("gregtech.machine.me.fluid_import.data_stick.name"),
                 stack.getDisplayName());
 
         ME_INPUT_BUS.write(stack, itemConfig());
-        assertNull(ME_INPUT_HATCH.read(stack));
-        assertEquals(itemConfig(), ME_INPUT_BUS.read(stack));
+        assertNull(ME_INPUT_HATCH.peek(stack));
+        assertEquals(itemConfig(), ME_INPUT_BUS.peek(stack));
         assertEquals(LocalizationUtils.format("gregtech.machine.me.item_import.data_stick.name"),
                 stack.getDisplayName());
         ASSEMBLY_LINE.write(stack, "test:replacement_research");
-        assertEquals(itemConfig(), ME_INPUT_BUS.read(stack));
-        assertEquals("test:replacement_research", AssemblyLineManager.readResearchId(stack));
+        assertEquals(itemConfig(), ME_INPUT_BUS.peek(stack));
+        assertEquals("test:replacement_research", AssemblyLineManager.peekResearchId(stack));
         assertEquals(LocalizationUtils.format("metaitem.tool.datastick.name"), stack.getDisplayName());
+    }
+
+    @Test
+    void applyingMEDataSelectsItsNameWhileResearchInspectionLeavesItSelected() {
+        ItemStack stack = stick.getStackForm();
+        ME_INPUT_BUS.write(stack, itemConfig());
+        ASSEMBLY_LINE.write(stack, "test:research");
+        assertEquals(LocalizationUtils.format("metaitem.tool.datastick.name"), stack.getDisplayName());
+
+        assertEquals(itemConfig(), ME_INPUT_BUS.read(stack));
+        assertSame(ME_INPUT_BUS, DataStickRegistry.getHandler(stack));
+        assertEquals(LocalizationUtils.format("gregtech.machine.me.item_import.data_stick.name"),
+                stack.getDisplayName());
+        NBTTagCompound afterUse = stack.getTagCompound().copy();
+        assertTrue(AssemblyLineManager.hasResearchTag(stack));
+        assertEquals("test:research", AssemblyLineManager.peekResearchId(stack));
+        tooltip(stack, false);
+        tooltip(stack, true);
+        assertEquals(afterUse, stack.getTagCompound());
+
+        assertEquals("test:research", AssemblyLineManager.readResearchId(stack));
+        assertSame(ASSEMBLY_LINE, DataStickRegistry.getHandler(stack));
+        assertEquals(LocalizationUtils.format("metaitem.tool.datastick.name"), stack.getDisplayName());
+        assertEquals(itemConfig(), ME_INPUT_BUS.peek(stack));
     }
 
     @Test
@@ -125,10 +149,10 @@ class DataStickHandlersTest {
         config.setByte("GhostCircuit", (byte) -1);
         ItemStack stack = stick.getStackForm();
         ME_INPUT_BUS.write(stack, config);
-        assertEquals(config, ME_INPUT_BUS.read(stack));
+        assertEquals(config, ME_INPUT_BUS.peek(stack));
         assertEquals(Arrays.asList("Auto-Pull Enabled", "No programmed circuit"), tooltip(stack));
         ME_INPUT_HATCH.write(stack, config);
-        assertEquals(config, ME_INPUT_HATCH.read(stack));
+        assertEquals(config, ME_INPUT_HATCH.peek(stack));
         assertEquals(Collections.singletonList("Auto-Pull Enabled"), tooltip(stack));
 
         config.removeTag("AutoPull");
@@ -205,6 +229,16 @@ class DataStickHandlersTest {
             allLines.addAll(tooltipWith(ME_INPUT_BUS, itemConfig()));
             assertEquals(allLines, tooltip(stack));
             assertEquals(LocalizationUtils.format("metaitem.tool.datastick.name"), stack.getDisplayName());
+
+            assertEquals(itemConfig(), ME_INPUT_BUS.read(stack));
+            before = stack.getTagCompound().copy();
+            allLines = new ArrayList<>(tooltipWith(ME_INPUT_BUS, itemConfig()));
+            allLines.addAll(expected);
+            assertEquals(collapsed, tooltip(stack, false));
+            assertEquals(allLines, tooltip(stack, true));
+            assertEquals(LocalizationUtils.format("gregtech.machine.me.item_import.data_stick.name"),
+                    stack.getDisplayName());
+            assertEquals(before, stack.getTagCompound());
         } finally {
             map.removeDataStickEntry(id, recipe);
         }

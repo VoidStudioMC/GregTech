@@ -68,12 +68,12 @@ class DataStickRegistryTest {
     void roundTripAndOverwriteUseOnlyTheActiveHandler() {
         ItemStack stack = new ItemStack(Items.STICK);
         FIRST.write(stack, "first payload");
-        assertEquals("first payload", FIRST.read(stack));
+        assertEquals("first payload", FIRST.peek(stack));
         assertSame(FIRST, DataStickRegistry.getHandler(stack));
 
         SECOND.write(stack, "second payload");
-        assertNull(FIRST.read(stack));
-        assertEquals("second payload", SECOND.read(stack));
+        assertNull(FIRST.peek(stack));
+        assertEquals("second payload", SECOND.peek(stack));
         assertSame(SECOND, DataStickRegistry.getHandler(stack));
         assertEquals("second payload", new DataItemBehavior().getItemStackDisplayName(stack, "unused"));
         List<String> lines = new ArrayList<>();
@@ -82,13 +82,13 @@ class DataStickRegistryTest {
     }
 
     @Test
-    void independentAreasKeepTheirDataAndTooltipsWhileOnlyTheLastWriterNamesTheItem() {
+    void independentAreasKeepTheirDataAndTooltipsWhileOnlyTheLastUsedHandlerNamesTheItem() {
         ItemStack stack = new ItemStack(Items.STICK);
         FIRST.write(stack, "first");
         OTHER.write(stack, "other");
         NBTTagCompound otherPayload = stack.getTagCompound().getCompoundTag(OTHER.getStorageKey()).copy();
-        assertEquals("first", FIRST.read(stack));
-        assertEquals("other", OTHER.read(stack));
+        assertEquals("first", FIRST.peek(stack));
+        assertEquals("other", OTHER.peek(stack));
         assertSame(OTHER, DataStickRegistry.getHandler(stack));
         assertSame(FIRST, DataStickRegistry.getHandler(stack, DataStickHandler.DEFAULT_STORAGE_KEY));
         assertEquals("other", DataStickRegistry.getDisplayName(stack));
@@ -97,8 +97,8 @@ class DataStickRegistryTest {
         assertEquals(Arrays.asList("Saved: other", "Saved: first"), lines);
 
         SECOND.write(stack, "second");
-        assertNull(FIRST.read(stack));
-        assertEquals("other", OTHER.read(stack));
+        assertNull(FIRST.peek(stack));
+        assertEquals("other", OTHER.peek(stack));
         assertEquals(otherPayload, stack.getTagCompound().getCompoundTag(OTHER.getStorageKey()));
         assertSame(SECOND, DataStickRegistry.getHandler(stack));
         assertEquals("second", DataStickRegistry.getDisplayName(stack));
@@ -108,11 +108,14 @@ class DataStickRegistryTest {
     }
 
     @Test
-    void lastWriterWithoutANameUsesTheItemDefaultInsteadOfAnotherHandlerName() {
+    void lastUsedHandlerWithoutANameUsesTheItemDefaultInsteadOfAnotherHandlerName() {
         ItemStack stack = new ItemStack(Items.STICK);
         FIRST.write(stack, "custom name");
         UNNAMED.write(stack, "unnamed payload");
+        assertEquals("custom name", FIRST.peek(stack));
         assertEquals("custom name", FIRST.read(stack));
+        assertEquals("custom name", DataStickRegistry.getDisplayName(stack));
+        assertEquals("unnamed payload", UNNAMED.read(stack));
         assertSame(UNNAMED, DataStickRegistry.getHandler(stack));
         assertNull(DataStickRegistry.getDisplayName(stack));
         assertEquals(LocalizationUtils.format("metaitem.tool.datastick.name"),
@@ -123,17 +126,73 @@ class DataStickRegistryTest {
     }
 
     @Test
+    void successfulReadsSelectTheHandlerWithoutOverwritingStoredData() {
+        ItemStack stack = new ItemStack(Items.STICK);
+        FIRST.write(stack, "first");
+        OTHER.write(stack, "other");
+        stack.setStackDisplayName("previous name");
+        stack.setTranslatableName("previous.translation");
+        stack.getOrCreateSubCompound("display").setInteger("color", 42);
+        NBTTagCompound expected = stack.getTagCompound().copy();
+        expected.getCompoundTag("display").removeTag("Name");
+        expected.getCompoundTag("display").removeTag("LocName");
+        expected.getCompoundTag(DataStickRegistry.ROOT_TAG)
+                .setString(DataStickRegistry.ACTIVE_TAG, FIRST.getStorageKey());
+
+        assertEquals("first", FIRST.read(stack));
+        assertSame(FIRST, DataStickRegistry.getHandler(stack));
+        assertEquals(expected, stack.getTagCompound());
+        assertEquals("first", new DataItemBehavior().getItemStackDisplayName(stack, "unused"));
+        assertEquals("other", OTHER.peek(stack));
+        assertSame(OTHER, DataStickRegistry.getHandler(stack, OTHER.getStorageKey()));
+        assertEquals(Arrays.asList(FIRST, OTHER), DataStickRegistry.getHandlers(stack));
+        List<String> lines = new ArrayList<>();
+        DataStickRegistry.addInformation(stack, lines);
+        assertEquals(Arrays.asList("Saved: first", "Saved: other"), lines);
+        assertEquals(expected, stack.getTagCompound());
+
+        assertEquals("other", OTHER.read(stack));
+        assertSame(OTHER, DataStickRegistry.getHandler(stack));
+        assertEquals("other", DataStickRegistry.getDisplayName(stack));
+        expected.getCompoundTag(DataStickRegistry.ROOT_TAG)
+                .setString(DataStickRegistry.ACTIVE_TAG, OTHER.getStorageKey());
+        assertEquals(expected, stack.getTagCompound());
+    }
+
+    @Test
+    void failedReadsKeepTheActiveHandlerAndItemUnchanged() {
+        ItemStack stack = new ItemStack(Items.STICK);
+        FIRST.write(stack, "first");
+        OTHER.write(stack, "other");
+        stack.setStackDisplayName("keep this name");
+        NBTTagCompound before = stack.getTagCompound().copy();
+        assertNull(SECOND.read(stack));
+        assertEquals(before, stack.getTagCompound());
+
+        stack.getTagCompound().setString(FIRST.getStorageKey(), "invalid compound");
+        before = stack.getTagCompound().copy();
+        assertNull(FIRST.read(stack));
+        assertEquals(before, stack.getTagCompound());
+        stack.getTagCompound().setTag(FIRST.getStorageKey(), new NBTTagCompound());
+        before = stack.getTagCompound().copy();
+        assertNull(FIRST.read(stack));
+        assertEquals(before, stack.getTagCompound());
+        assertSame(OTHER, DataStickRegistry.getHandler(stack));
+        assertEquals("other", DataStickRegistry.getDisplayName(stack));
+    }
+
+    @Test
     void payloadsAreIsolatedFromCallersAndCopies() {
         ItemStack stack = new ItemStack(Items.STICK);
         NBTTagCompound payload = new NBTTagCompound();
         payload.setString("value", "original");
         RAW.write(stack, payload);
         payload.setString("value", "changed input");
-        RAW.read(stack).setString("value", "changed output");
+        RAW.peek(stack).setString("value", "changed output");
         ItemStack copy = stack.copy();
         RAW.write(copy, payload);
-        assertEquals("original", RAW.read(stack).getString("value"));
-        assertEquals("changed input", RAW.read(copy).getString("value"));
+        assertEquals("original", RAW.peek(stack).getString("value"));
+        assertEquals("changed input", RAW.peek(copy).getString("value"));
         assertNull(DataStickRegistry.getDisplayName(stack));
     }
 
@@ -164,7 +223,7 @@ class DataStickRegistryTest {
         NBTTagCompound handlers = metadata.getCompoundTag(DataStickRegistry.HANDLERS_TAG);
         handlers.setString(DataStickHandler.DEFAULT_STORAGE_KEY, "missing:handler");
 
-        assertNull(FIRST.read(stack));
+        assertNull(FIRST.peek(stack));
         assertNull(DataStickRegistry.getHandler(stack));
         assertNull(DataStickRegistry.getDisplayName(stack));
         List<String> lines = new ArrayList<>();
@@ -174,17 +233,17 @@ class DataStickRegistryTest {
                 new DataItemBehavior().getItemStackDisplayName(stack, "metaitem.tool.datastick.name"));
 
         root.setString(DataStickRegistry.ROOT_TAG, "invalid compound");
-        assertNull(FIRST.read(stack));
+        assertNull(FIRST.peek(stack));
         handlers.setString(DataStickHandler.DEFAULT_STORAGE_KEY, "test:first");
         root.setTag(DataStickRegistry.ROOT_TAG, metadata);
         root.setString(DataStickHandler.DEFAULT_STORAGE_KEY, "invalid payload");
-        assertNull(FIRST.read(stack));
+        assertNull(FIRST.peek(stack));
         root.setTag(DataStickHandler.DEFAULT_STORAGE_KEY, new NBTTagCompound());
-        assertNull(FIRST.read(stack));
+        assertNull(FIRST.peek(stack));
         assertNull(DataStickRegistry.getDisplayName(stack));
         root.setTag(DataStickHandler.DEFAULT_STORAGE_KEY, FIRST.serializeNBT("payload"));
         metadata.removeTag(DataStickRegistry.HANDLERS_TAG);
-        assertNull(FIRST.read(stack));
+        assertNull(FIRST.peek(stack));
         assertTrue(DataStickRegistry.getHandlers(stack).isEmpty());
     }
 
@@ -196,8 +255,8 @@ class DataStickRegistryTest {
         stack.getTagCompound().getCompoundTag(DataStickRegistry.ROOT_TAG).removeTag(DataStickRegistry.ACTIVE_TAG);
         assertNull(DataStickRegistry.getHandler(stack));
         assertNull(DataStickRegistry.getDisplayName(stack));
-        assertEquals("first", FIRST.read(stack));
-        assertEquals("other", OTHER.read(stack));
+        assertEquals("first", FIRST.peek(stack));
+        assertEquals("other", OTHER.peek(stack));
     }
 
     @Test
@@ -212,10 +271,10 @@ class DataStickRegistryTest {
             metadata.getCompoundTag(DataStickRegistry.HANDLERS_TAG)
                     .setString(DataStickHandler.DEFAULT_STORAGE_KEY, invalidId);
             NBTTagCompound before = root.copy();
-            assertNull(FIRST.read(stack));
+            assertNull(FIRST.peek(stack));
             assertNull(DataStickRegistry.getHandler(stack));
             assertNull(DataStickRegistry.getDisplayName(stack));
-            assertEquals("other", OTHER.read(stack));
+            assertEquals("other", OTHER.peek(stack));
             List<String> lines = new ArrayList<>();
             DataStickRegistry.addInformation(stack, lines);
             assertEquals(Collections.singletonList("Saved: other"), lines);
@@ -231,7 +290,7 @@ class DataStickRegistryTest {
         ItemStack stack = new ItemStack(Items.STICK);
         FIRST.write(stack, "keep me");
         assertThrows(IllegalArgumentException.class, () -> new TextHandler().write(stack, "invalid"));
-        assertEquals("keep me", FIRST.read(stack));
+        assertEquals("keep me", FIRST.peek(stack));
     }
 
     @Test
@@ -272,7 +331,8 @@ class DataStickRegistryTest {
     @Test
     void emptyItemsHaveNoHandler() {
         assertNull(DataStickRegistry.getHandler(ItemStack.EMPTY));
-        assertNull(FIRST.read(new ItemStack(Items.STICK)));
+        assertNull(FIRST.read(ItemStack.EMPTY));
+        assertNull(FIRST.peek(new ItemStack(Items.STICK)));
     }
 
     private static class TextHandler extends DataStickHandler<String> {
