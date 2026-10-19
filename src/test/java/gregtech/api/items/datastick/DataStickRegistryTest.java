@@ -62,7 +62,6 @@ class DataStickRegistryTest {
     @BeforeAll
     static void bootstrap() {
         Bootstrap.perform();
-        DataStickRegistry.registerLegacyTag("TestLegacyData", FIRST);
     }
 
     @Test
@@ -78,7 +77,7 @@ class DataStickRegistryTest {
         assertSame(SECOND, DataStickRegistry.getHandler(stack));
         assertEquals("second payload", new DataItemBehavior().getItemStackDisplayName(stack, "unused"));
         List<String> lines = new ArrayList<>();
-        new DataItemBehavior().addInformation(stack, lines);
+        DataStickRegistry.addInformation(stack, lines);
         assertEquals(Collections.singletonList("Saved: second payload"), lines);
     }
 
@@ -91,10 +90,10 @@ class DataStickRegistryTest {
         assertEquals("first", FIRST.read(stack));
         assertEquals("other", OTHER.read(stack));
         assertSame(OTHER, DataStickRegistry.getHandler(stack));
-        assertSame(FIRST, DataStickRegistry.getHandler(stack, DataStickRegistry.DEFAULT_STORAGE_KEY));
+        assertSame(FIRST, DataStickRegistry.getHandler(stack, DataStickHandler.DEFAULT_STORAGE_KEY));
         assertEquals("other", DataStickRegistry.getDisplayName(stack));
         List<String> lines = new ArrayList<>();
-        new DataItemBehavior().addInformation(stack, lines);
+        DataStickRegistry.addInformation(stack, lines);
         assertEquals(Arrays.asList("Saved: other", "Saved: first"), lines);
 
         SECOND.write(stack, "second");
@@ -104,7 +103,7 @@ class DataStickRegistryTest {
         assertSame(SECOND, DataStickRegistry.getHandler(stack));
         assertEquals("second", DataStickRegistry.getDisplayName(stack));
         lines.clear();
-        new DataItemBehavior().addInformation(stack, lines);
+        DataStickRegistry.addInformation(stack, lines);
         assertEquals(Arrays.asList("Saved: second", "Saved: other"), lines);
     }
 
@@ -119,33 +118,8 @@ class DataStickRegistryTest {
         assertEquals(LocalizationUtils.format("metaitem.tool.datastick.name"),
                 new DataItemBehavior().getItemStackDisplayName(stack, "metaitem.tool.datastick.name"));
         List<String> lines = new ArrayList<>();
-        new DataItemBehavior().addInformation(stack, lines);
+        DataStickRegistry.addInformation(stack, lines);
         assertEquals(Arrays.asList("Saved: unnamed payload", "Saved: custom name"), lines);
-    }
-
-    @Test
-    void oldSinglePayloadEnvelopeSurvivesWritesToAnotherArea() {
-        ItemStack stack = new ItemStack(Items.STICK);
-        NBTTagCompound root = new NBTTagCompound();
-        NBTTagCompound entry = new NBTTagCompound();
-        entry.setString(DataStickRegistry.HANDLER_TAG, "test:first");
-        entry.setTag(DataStickRegistry.DATA_TAG, FIRST.serializeNBT("old envelope"));
-        root.setTag(DataStickRegistry.ROOT_TAG, entry);
-        stack.setTagCompound(root);
-        NBTTagCompound before = root.copy();
-        assertEquals("old envelope", FIRST.read(stack));
-        assertEquals(before, stack.getTagCompound());
-
-        OTHER.write(stack, "separate");
-        assertEquals("old envelope", FIRST.read(stack));
-        assertEquals("separate", OTHER.read(stack));
-        assertEquals("separate", DataStickRegistry.getDisplayName(stack));
-        SECOND.write(stack, "new envelope");
-        assertNull(FIRST.read(stack));
-        assertEquals("separate", OTHER.read(stack));
-        assertEquals("new envelope", SECOND.read(stack));
-        assertFalse(stack.getTagCompound().getCompoundTag(DataStickRegistry.ROOT_TAG)
-                .hasKey(DataStickRegistry.HANDLER_TAG));
     }
 
     @Test
@@ -164,10 +138,9 @@ class DataStickRegistryTest {
     }
 
     @Test
-    void legacyDataIsReadableWithoutMutatingTheItemAndIsRemovedOnWrite() {
+    void writesClearPreviousNamesAndPreserveUnrelatedMetadata() {
         ItemStack stack = new ItemStack(Items.STICK);
         NBTTagCompound root = new NBTTagCompound();
-        root.setTag("TestLegacyData", FIRST.serializeNBT("legacy"));
         root.setString("unrelated", "keep me");
         NBTTagCompound display = new NBTTagCompound();
         display.setString("Name", "old name");
@@ -175,12 +148,7 @@ class DataStickRegistryTest {
         display.setInteger("color", 42);
         root.setTag("display", display);
         stack.setTagCompound(root);
-        NBTTagCompound before = root.copy();
-
-        assertEquals("legacy", FIRST.read(stack));
-        assertEquals(before, stack.getTagCompound());
         SECOND.write(stack, "new");
-        assertFalse(stack.getTagCompound().hasKey("TestLegacyData"));
         assertFalse(stack.getTagCompound().getCompoundTag("display").hasKey("Name"));
         assertFalse(stack.getTagCompound().getCompoundTag("display").hasKey("LocName"));
         assertEquals(42, stack.getTagCompound().getCompoundTag("display").getInteger("color"));
@@ -188,34 +156,48 @@ class DataStickRegistryTest {
     }
 
     @Test
-    void unknownOrMalformedHandlerNeverFallsBackToLegacyData() {
+    void unknownOrMalformedHandlerDataIsNotRead() {
         ItemStack stack = new ItemStack(Items.STICK);
-        NBTTagCompound root = new NBTTagCompound();
-        root.setTag("TestLegacyData", FIRST.serializeNBT("legacy"));
-        NBTTagCompound entry = new NBTTagCompound();
-        entry.setString(DataStickRegistry.HANDLER_TAG, "missing:handler");
-        entry.setTag(DataStickRegistry.DATA_TAG, FIRST.serializeNBT("unknown"));
-        root.setTag(DataStickRegistry.ROOT_TAG, entry);
-        stack.setTagCompound(root);
+        FIRST.write(stack, "payload");
+        NBTTagCompound root = stack.getTagCompound();
+        NBTTagCompound metadata = root.getCompoundTag(DataStickRegistry.ROOT_TAG);
+        NBTTagCompound handlers = metadata.getCompoundTag(DataStickRegistry.HANDLERS_TAG);
+        handlers.setString(DataStickHandler.DEFAULT_STORAGE_KEY, "missing:handler");
 
         assertNull(FIRST.read(stack));
         assertNull(DataStickRegistry.getHandler(stack));
         assertNull(DataStickRegistry.getDisplayName(stack));
         List<String> lines = new ArrayList<>();
-        new DataItemBehavior().addInformation(stack, lines);
+        DataStickRegistry.addInformation(stack, lines);
         assertTrue(lines.isEmpty());
         assertEquals(LocalizationUtils.format("metaitem.tool.datastick.name"),
                 new DataItemBehavior().getItemStackDisplayName(stack, "metaitem.tool.datastick.name"));
 
         root.setString(DataStickRegistry.ROOT_TAG, "invalid compound");
         assertNull(FIRST.read(stack));
-        entry.setString(DataStickRegistry.HANDLER_TAG, "test:first");
-        entry.setString(DataStickRegistry.DATA_TAG, "invalid payload");
-        root.setTag(DataStickRegistry.ROOT_TAG, entry);
+        handlers.setString(DataStickHandler.DEFAULT_STORAGE_KEY, "test:first");
+        root.setTag(DataStickRegistry.ROOT_TAG, metadata);
+        root.setString(DataStickHandler.DEFAULT_STORAGE_KEY, "invalid payload");
         assertNull(FIRST.read(stack));
-        entry.setTag(DataStickRegistry.DATA_TAG, new NBTTagCompound());
+        root.setTag(DataStickHandler.DEFAULT_STORAGE_KEY, new NBTTagCompound());
         assertNull(FIRST.read(stack));
         assertNull(DataStickRegistry.getDisplayName(stack));
+        root.setTag(DataStickHandler.DEFAULT_STORAGE_KEY, FIRST.serializeNBT("payload"));
+        metadata.removeTag(DataStickRegistry.HANDLERS_TAG);
+        assertNull(FIRST.read(stack));
+        assertTrue(DataStickRegistry.getHandlers(stack).isEmpty());
+    }
+
+    @Test
+    void missingActiveAreaDoesNotSelectAnotherHandlerForTheName() {
+        ItemStack stack = new ItemStack(Items.STICK);
+        FIRST.write(stack, "first");
+        OTHER.write(stack, "other");
+        stack.getTagCompound().getCompoundTag(DataStickRegistry.ROOT_TAG).removeTag(DataStickRegistry.ACTIVE_TAG);
+        assertNull(DataStickRegistry.getHandler(stack));
+        assertNull(DataStickRegistry.getDisplayName(stack));
+        assertEquals("first", FIRST.read(stack));
+        assertEquals("other", OTHER.read(stack));
     }
 
     @Test
@@ -224,19 +206,18 @@ class DataStickRegistryTest {
         FIRST.write(stack, "first");
         OTHER.write(stack, "other");
         NBTTagCompound root = stack.getTagCompound();
-        root.setTag("TestLegacyData", FIRST.serializeNBT("stale"));
         NBTTagCompound metadata = root.getCompoundTag(DataStickRegistry.ROOT_TAG);
-        metadata.setString(DataStickRegistry.ACTIVE_TAG, DataStickRegistry.DEFAULT_STORAGE_KEY);
+        metadata.setString(DataStickRegistry.ACTIVE_TAG, DataStickHandler.DEFAULT_STORAGE_KEY);
         for (String invalidId : Arrays.asList("missing:handler", "test:other")) {
             metadata.getCompoundTag(DataStickRegistry.HANDLERS_TAG)
-                    .setString(DataStickRegistry.DEFAULT_STORAGE_KEY, invalidId);
+                    .setString(DataStickHandler.DEFAULT_STORAGE_KEY, invalidId);
             NBTTagCompound before = root.copy();
             assertNull(FIRST.read(stack));
             assertNull(DataStickRegistry.getHandler(stack));
             assertNull(DataStickRegistry.getDisplayName(stack));
             assertEquals("other", OTHER.read(stack));
             List<String> lines = new ArrayList<>();
-            new DataItemBehavior().addInformation(stack, lines);
+            DataStickRegistry.addInformation(stack, lines);
             assertEquals(Collections.singletonList("Saved: other"), lines);
             assertEquals(before, stack.getTagCompound());
         }
@@ -254,8 +235,8 @@ class DataStickRegistryTest {
     }
 
     @Test
-    void storageAreasCannotTakeOverMetadataOrAnotherAreasLegacyTag() {
-        for (String key : Arrays.asList("", DataStickRegistry.ROOT_TAG, "display", "TestLegacyData")) {
+    void storageAreasCannotTakeOverMetadata() {
+        for (String key : Arrays.asList("", DataStickRegistry.ROOT_TAG, "display")) {
             DataStickHandler<String> handler = new TextHandler() {
 
                 @Override
@@ -266,8 +247,6 @@ class DataStickRegistryTest {
             assertThrows(IllegalArgumentException.class,
                     () -> DataStickRegistry.register("test:invalid_area", handler));
         }
-        assertThrows(IllegalArgumentException.class,
-                () -> DataStickRegistry.registerLegacyTag(OTHER.getStorageKey(), FIRST));
     }
 
     @Test

@@ -16,13 +16,15 @@ import java.util.List;
  */
 public abstract class DataStickHandler<T> {
 
+    public static final String DEFAULT_STORAGE_KEY = "handler";
+
     /**
      * Top-level item tag containing this handler's payload. Handlers sharing a key overwrite each other; other
-     * storage areas are preserved. The registry captures this value during registration.
+     * storage areas are preserved. This key must remain stable for the lifetime of the handler.
      */
     @NotNull
     public String getStorageKey() {
-        return DataStickRegistry.DEFAULT_STORAGE_KEY;
+        return DEFAULT_STORAGE_KEY;
     }
 
     @NotNull
@@ -38,7 +40,7 @@ public abstract class DataStickHandler<T> {
         return null;
     }
 
-    /** Append tooltip lines for the decoded payload. Called on the client. */
+    /** Append tooltip lines for the decoded payload. Data items display these on the client while Shift is held. */
     public void addInformation(@NotNull T data, @NotNull List<String> lines) {}
 
     /** Replace this storage area's payload and make this handler active for the name. Other areas are preserved. */

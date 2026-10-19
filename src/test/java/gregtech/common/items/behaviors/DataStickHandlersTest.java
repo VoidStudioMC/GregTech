@@ -70,13 +70,13 @@ class DataStickHandlersTest {
 
     @Test
     void researchAndMEDataCoexistWhileMEBusAndHatchReplaceEachOther() {
-        ItemStack stack = legacy("MEInputBus", itemConfig());
+        ItemStack stack = stick.getStackForm();
+        ME_INPUT_BUS.write(stack, itemConfig());
         stack.setTranslatableName("gregtech.machine.me.item_import.data_stick.name");
         AssemblyLineManager.writeResearchToNBT(stack.getTagCompound(), "test:research");
         assertEquals("test:research", AssemblyLineManager.readResearchId(stack));
         assertTrue(AssemblyLineManager.hasResearchTag(stack));
         assertEquals(itemConfig(), ME_INPUT_BUS.read(stack));
-        assertTrue(stack.getTagCompound().hasKey("MEInputBus"));
         assertFalse(stack.getTagCompound().hasKey("display"));
         assertEquals("test:research", stack.getTagCompound().getCompoundTag(AssemblyLineManager.RESEARCH_NBT_TAG)
                 .getString(AssemblyLineManager.RESEARCH_ID_NBT_TAG));
@@ -86,7 +86,6 @@ class DataStickHandlersTest {
         assertTrue(AssemblyLineManager.hasResearchTag(stack));
         assertEquals("test:research", AssemblyLineManager.readResearchId(stack));
         assertNull(ME_INPUT_BUS.read(stack));
-        assertFalse(stack.getTagCompound().hasKey("MEInputBus"));
         assertEquals(fluidConfig(), ME_INPUT_HATCH.read(stack));
         assertEquals(LocalizationUtils.format("gregtech.machine.me.fluid_import.data_stick.name"),
                 stack.getDisplayName());
@@ -100,38 +99,6 @@ class DataStickHandlersTest {
         assertEquals(itemConfig(), ME_INPUT_BUS.read(stack));
         assertEquals("test:replacement_research", AssemblyLineManager.readResearchId(stack));
         assertEquals(LocalizationUtils.format("metaitem.tool.datastick.name"), stack.getDisplayName());
-    }
-
-    @Test
-    void oldResearchEnvelopeSurvivesConfigurationWritesUntilResearchIsReplaced() {
-        NBTTagCompound entry = new NBTTagCompound();
-        entry.setString(DataStickRegistry.HANDLER_TAG, "gregtech:assembly_line");
-        entry.setTag(DataStickRegistry.DATA_TAG, ASSEMBLY_LINE.serializeNBT("test:old_envelope"));
-        ItemStack stack = legacy(DataStickRegistry.ROOT_TAG, entry);
-        ME_INPUT_BUS.write(stack, itemConfig());
-        assertEquals("test:old_envelope", AssemblyLineManager.readResearchId(stack));
-        assertEquals(itemConfig(), ME_INPUT_BUS.read(stack));
-        ASSEMBLY_LINE.write(stack, "test:new_research");
-        assertEquals("test:new_research", AssemblyLineManager.readResearchId(stack));
-        assertEquals(itemConfig(), ME_INPUT_BUS.read(stack));
-        assertFalse(stack.getTagCompound().getCompoundTag(DataStickRegistry.ROOT_TAG)
-                .hasKey(DataStickRegistry.HANDLER_TAG));
-    }
-
-    @Test
-    void legacyResearchAndMEConfigurationsRemainReadable() {
-        ItemStack research = legacy(AssemblyLineManager.RESEARCH_NBT_TAG, ASSEMBLY_LINE.serializeNBT("old research"));
-        assertEquals("old research", AssemblyLineManager.readResearchId(research));
-        assertTrue(AssemblyLineManager.hasResearchTag(research));
-        ItemStack bus = legacy("MEInputBus", itemConfig());
-        ItemStack hatch = legacy("MEInputHatch", fluidConfig());
-        assertEquals(itemConfig(), ME_INPUT_BUS.read(bus));
-        assertEquals(fluidConfig(), ME_INPUT_HATCH.read(hatch));
-        assertNull(ME_INPUT_HATCH.read(bus));
-        assertNull(ME_INPUT_BUS.read(hatch));
-        assertFalse(bus.getTagCompound().hasKey(DataStickRegistry.ROOT_TAG));
-        assertEquals(tooltip(bus), tooltipWith(ME_INPUT_BUS, itemConfig()));
-        assertEquals(tooltip(hatch), tooltipWith(ME_INPUT_HATCH, fluidConfig()));
     }
 
     @Test
@@ -170,7 +137,7 @@ class DataStickHandlersTest {
     }
 
     @Test
-    void scannerCopiesNewAndLegacyPayloadsWithoutChangingSourceOrDataBankRestrictions() {
+    void scannerCopiesPayloadsWithoutChangingSourceOrDataBankRestrictions() {
         ItemStack items = stick.getStackForm();
         ME_INPUT_BUS.write(items, itemConfig());
         ItemStack fluids = stick.getStackForm();
@@ -183,9 +150,7 @@ class DataStickHandlersTest {
                 .setString(AssemblyLineManager.RESEARCH_NBT_TAG, "missing:addon");
         ItemStack combined = research.copy();
         ME_INPUT_BUS.write(combined, itemConfig());
-        List<ItemStack> sources = Arrays.asList(items, fluids, research, unknown, combined,
-                legacy("MEInputBus", itemConfig()),
-                legacy(AssemblyLineManager.RESEARCH_NBT_TAG, ASSEMBLY_LINE.serializeNBT("test:legacy_copy")));
+        List<ItemStack> sources = Arrays.asList(items, fluids, research, unknown, combined);
 
         for (ItemStack source : sources) {
             NBTTagCompound before = source.getTagCompound().copy();
@@ -206,7 +171,7 @@ class DataStickHandlersTest {
     }
 
     @Test
-    void bothResearchFormatsDisplayRegisteredAssemblyLineOutputs() {
+    void shiftRevealsEveryHandlerWhileNameAndDataStayUnchanged() {
         String id = "test:tooltip_research";
         Recipe recipe = RecipeMaps.SCANNER_RECIPES.recipeBuilder()
                 .inputs(new ItemStack(Items.IRON_INGOT)).outputs(new ItemStack(Items.DIAMOND))
@@ -219,8 +184,6 @@ class DataStickHandlersTest {
             List<String> expected = Arrays.asList("§nAssembly Line Construction Data:",
                     "- §a" + new ItemStack(Items.DIAMOND).getDisplayName());
             assertEquals(expected, tooltip(stack));
-            assertEquals(expected,
-                    tooltip(legacy(AssemblyLineManager.RESEARCH_NBT_TAG, ASSEMBLY_LINE.serializeNBT(id))));
 
             ME_INPUT_BUS.write(stack, itemConfig());
             List<String> allLines = new ArrayList<>(tooltipWith(ME_INPUT_BUS, itemConfig()));
@@ -228,21 +191,36 @@ class DataStickHandlersTest {
             assertEquals(allLines, tooltip(stack));
             assertEquals(LocalizationUtils.format("gregtech.machine.me.item_import.data_stick.name"),
                     stack.getDisplayName());
+            NBTTagCompound before = stack.getTagCompound().copy();
+            String name = stack.getDisplayName();
+            List<String> collapsed = Collections.singletonList("Hold SHIFT for more info");
+            assertEquals(collapsed, tooltip(stack, false));
+            assertEquals(allLines, tooltip(stack, true));
+            assertEquals(collapsed, tooltip(stack, false));
+            assertEquals(name, stack.getDisplayName());
+            assertEquals(before, stack.getTagCompound());
 
             ASSEMBLY_LINE.write(stack, id);
             allLines = new ArrayList<>(expected);
             allLines.addAll(tooltipWith(ME_INPUT_BUS, itemConfig()));
             assertEquals(allLines, tooltip(stack));
             assertEquals(LocalizationUtils.format("metaitem.tool.datastick.name"), stack.getDisplayName());
-
-            ItemStack oldStack = legacy(AssemblyLineManager.RESEARCH_NBT_TAG, ASSEMBLY_LINE.serializeNBT(id));
-            ME_INPUT_HATCH.write(oldStack, fluidConfig());
-            allLines = new ArrayList<>(tooltipWith(ME_INPUT_HATCH, fluidConfig()));
-            allLines.addAll(expected);
-            assertEquals(allLines, tooltip(oldStack));
         } finally {
             map.removeDataStickEntry(id, recipe);
         }
+    }
+
+    @Test
+    void emptyAndUnknownDataDoNotShowAShiftHint() {
+        ItemStack stack = stick.getStackForm();
+        assertTrue(tooltip(stack, false).isEmpty());
+        assertTrue(tooltip(stack, true).isEmpty());
+        ME_INPUT_BUS.write(stack, itemConfig());
+        stack.getTagCompound().getCompoundTag(DataStickRegistry.ROOT_TAG)
+                .getCompoundTag(DataStickRegistry.HANDLERS_TAG)
+                .setString(DataStickHandler.DEFAULT_STORAGE_KEY, "missing:handler");
+        assertTrue(tooltip(stack, false).isEmpty());
+        assertTrue(tooltip(stack, true).isEmpty());
     }
 
     private static List<String> tooltipWith(DataStickHandler<NBTTagCompound> handler,
@@ -253,17 +231,19 @@ class DataStickHandlersTest {
     }
 
     private static List<String> tooltip(ItemStack stack) {
-        List<String> lines = new ArrayList<>();
-        new DataItemBehavior().addInformation(stack, lines);
-        return lines;
+        return tooltip(stack, true);
     }
 
-    private static ItemStack legacy(String key, NBTTagCompound payload) {
-        ItemStack stack = stick.getStackForm();
-        NBTTagCompound root = new NBTTagCompound();
-        root.setTag(key, payload);
-        stack.setTagCompound(root);
-        return stack;
+    private static List<String> tooltip(ItemStack stack, boolean shiftDown) {
+        List<String> lines = new ArrayList<>();
+        new DataItemBehavior() {
+
+            @Override
+            protected boolean isShiftDown() {
+                return shiftDown;
+            }
+        }.addInformation(stack, lines);
+        return lines;
     }
 
     private static NBTTagCompound itemConfig() {

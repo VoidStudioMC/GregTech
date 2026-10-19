@@ -54,12 +54,6 @@ public final class DataStickHandlers {
     public static final DataStickHandler<NBTTagCompound> ME_INPUT_HATCH = DataStickRegistry
             .register("gregtech:me_input_hatch", new MEConfigurationHandler(true));
 
-    static {
-        DataStickRegistry.registerLegacyTag("MEInputBus", ME_INPUT_BUS);
-        DataStickRegistry.registerLegacyTag("MEInputHatch", ME_INPUT_HATCH);
-        DataStickRegistry.registerLegacyTag(AssemblyLineManager.RESEARCH_NBT_TAG, ASSEMBLY_LINE);
-    }
-
     private DataStickHandlers() {}
 
     /** Force registration during item initialization, before any existing stacks are inspected. */

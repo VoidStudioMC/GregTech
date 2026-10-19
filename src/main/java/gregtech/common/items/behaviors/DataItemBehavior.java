@@ -9,6 +9,7 @@ import gregtech.api.recipes.RecipeMaps;
 import gregtech.api.recipes.machines.IResearchRecipeMap;
 import gregtech.api.util.ItemStackHashStrategy;
 import gregtech.api.util.LocalizationUtils;
+import gregtech.client.utils.TooltipHelper;
 
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
@@ -38,7 +39,16 @@ public class DataItemBehavior implements IItemBehaviour, IDataItem, IItemNamePro
 
     @Override
     public void addInformation(@NotNull ItemStack itemStack, List<String> lines) {
-        DataStickRegistry.addInformation(itemStack, lines);
+        if (DataStickRegistry.getHandlers(itemStack).isEmpty()) return;
+        if (isShiftDown()) {
+            DataStickRegistry.addInformation(itemStack, lines);
+        } else {
+            lines.add(I18n.format("gregtech.tooltip.hold_shift"));
+        }
+    }
+
+    protected boolean isShiftDown() {
+        return TooltipHelper.isShiftDown();
     }
 
     @Override

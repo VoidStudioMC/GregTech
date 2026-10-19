@@ -89,7 +89,7 @@ public final class AssemblyLineManager {
 
     /**
      * @param stack the stack to check
-     * @return if the stack contains readable research data, including the legacy NBT format
+     * @return if the stack contains readable research data
      */
     public static boolean hasResearchTag(@NotNull ItemStack stack) {
         return readResearchId(stack) != null;
