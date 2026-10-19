@@ -19,13 +19,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 public class DataItemBehavior implements IItemBehaviour, IDataItem, IItemNameProvider {
 
     private final boolean requireDataBank;
 
     public DataItemBehavior() {
-        this.requireDataBank = false;
+        this(false);
     }
 
     public DataItemBehavior(boolean requireDataBank) {
@@ -39,7 +40,10 @@ public class DataItemBehavior implements IItemBehaviour, IDataItem, IItemNamePro
 
     @Override
     public void addInformation(@NotNull ItemStack itemStack, List<String> lines) {
-        if (DataStickRegistry.getHandlers(itemStack).isEmpty()) return;
+        if (DataStickRegistry.getHandlers(itemStack).isEmpty()) {
+            return;
+        }
+
         if (isShiftDown()) {
             DataStickRegistry.addInformation(itemStack, lines);
         } else {
@@ -60,14 +64,16 @@ public class DataItemBehavior implements IItemBehaviour, IDataItem, IItemNamePro
     public static void collectResearchItems(String id, List<String> lines) {
         Collection<Recipe> recipes = ((IResearchRecipeMap) RecipeMaps.ASSEMBLY_LINE_RECIPES)
                 .getDataStickEntry(id);
-        if (recipes != null && !recipes.isEmpty()) {
-            lines.add(I18n.format("behavior.data_item.assemblyline.title"));
-            Collection<ItemStack> added = new ObjectOpenCustomHashSet<>(ItemStackHashStrategy.comparingAllButCount());
-            for (Recipe recipe : recipes) {
-                ItemStack output = recipe.getOutputs().get(0);
-                if (added.add(output)) {
-                    lines.add(I18n.format("behavior.data_item.assemblyline.data", output.getDisplayName()));
-                }
+        if (recipes == null || recipes.isEmpty()) {
+            return;
+        }
+
+        lines.add(I18n.format("behavior.data_item.assemblyline.title"));
+        Set<ItemStack> displayedOutputs = new ObjectOpenCustomHashSet<>(ItemStackHashStrategy.comparingAllButCount());
+        for (Recipe recipe : recipes) {
+            ItemStack output = recipe.getOutputs().get(0);
+            if (displayedOutputs.add(output)) {
+                lines.add(I18n.format("behavior.data_item.assemblyline.data", output.getDisplayName()));
             }
         }
     }
