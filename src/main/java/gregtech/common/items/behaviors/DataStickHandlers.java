@@ -9,7 +9,7 @@ import gregtech.common.items.behaviors.datastick.MEInputHatchDataHandler;
 
 import net.minecraft.nbt.NBTTagCompound;
 
-/** Built-in data formats. Register during item initialization before any stacks are inspected. */
+/** Built-in data formats. Registered by the common proxy during pre-initialization. */
 public final class DataStickHandlers {
 
     public static final DataStickHandler<String> ASSEMBLY_LINE = new AssemblyLineDataHandler();
@@ -18,7 +18,7 @@ public final class DataStickHandlers {
 
     private DataStickHandlers() {}
 
-    /** Register built-in handlers during item initialization, before any stacks are inspected. Call once. */
+    /** Register built-in handlers during proxy pre-initialization, before any stacks are inspected. Call once. */
     public static void init() {
         GregTechAPI.DATA_STICK_REGISTRY.register(GTUtility.gregtechId("assembly_line"), ASSEMBLY_LINE);
         GregTechAPI.DATA_STICK_REGISTRY.register(GTUtility.gregtechId("me_input_bus"), ME_INPUT_BUS);
