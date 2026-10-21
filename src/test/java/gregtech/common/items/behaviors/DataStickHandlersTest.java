@@ -2,7 +2,7 @@ package gregtech.common.items.behaviors;
 
 import gregtech.Bootstrap;
 import gregtech.api.items.datastick.DataStickHandler;
-import gregtech.api.items.datastick.DataStickRegistry;
+import gregtech.api.items.datastick.DataStickStorage;
 import gregtech.api.items.metaitem.MetaItem;
 import gregtech.api.items.metaitem.StandardMetaItem;
 import gregtech.api.recipes.Recipe;
@@ -109,7 +109,7 @@ class DataStickHandlersTest {
         assertEquals(LocalizationUtils.format("metaitem.tool.datastick.name"), stack.getDisplayName());
 
         assertEquals(itemConfig(), ME_INPUT_BUS.read(stack));
-        assertSame(ME_INPUT_BUS, DataStickRegistry.getHandler(stack));
+        assertSame(ME_INPUT_BUS, DataStickStorage.getActiveHandler(stack));
         assertEquals(LocalizationUtils.format("gregtech.machine.me.item_import.data_stick.name"),
                 stack.getDisplayName());
         NBTTagCompound afterUse = stack.getTagCompound().copy();
@@ -120,7 +120,7 @@ class DataStickHandlersTest {
         assertEquals(afterUse, stack.getTagCompound());
 
         assertEquals("test:research", AssemblyLineManager.readResearchId(stack));
-        assertSame(ASSEMBLY_LINE, DataStickRegistry.getHandler(stack));
+        assertSame(ASSEMBLY_LINE, DataStickStorage.getActiveHandler(stack));
         assertEquals(LocalizationUtils.format("metaitem.tool.datastick.name"), stack.getDisplayName());
         assertEquals(itemConfig(), ME_INPUT_BUS.peek(stack));
     }
@@ -169,8 +169,8 @@ class DataStickHandlersTest {
         ItemStack research = stick.getStackForm();
         ASSEMBLY_LINE.write(research, "test:copied");
         ItemStack unknown = research.copy();
-        unknown.getTagCompound().getCompoundTag(DataStickRegistry.ROOT_TAG)
-                .getCompoundTag(DataStickRegistry.HANDLERS_TAG)
+        unknown.getTagCompound().getCompoundTag(DataStickStorage.ROOT_TAG)
+                .getCompoundTag(DataStickStorage.HANDLERS_TAG)
                 .setString(AssemblyLineManager.RESEARCH_NBT_TAG, "missing:addon");
         ItemStack combined = research.copy();
         ME_INPUT_BUS.write(combined, itemConfig());
@@ -250,8 +250,8 @@ class DataStickHandlersTest {
         assertTrue(tooltip(stack, false).isEmpty());
         assertTrue(tooltip(stack, true).isEmpty());
         ME_INPUT_BUS.write(stack, itemConfig());
-        stack.getTagCompound().getCompoundTag(DataStickRegistry.ROOT_TAG)
-                .getCompoundTag(DataStickRegistry.HANDLERS_TAG)
+        stack.getTagCompound().getCompoundTag(DataStickStorage.ROOT_TAG)
+                .getCompoundTag(DataStickStorage.HANDLERS_TAG)
                 .setString(DataStickHandler.DEFAULT_STORAGE_KEY, "missing:handler");
         assertTrue(tooltip(stack, false).isEmpty());
         assertTrue(tooltip(stack, true).isEmpty());

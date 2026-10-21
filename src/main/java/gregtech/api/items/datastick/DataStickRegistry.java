@@ -1,203 +1,43 @@
 package gregtech.api.items.datastick;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.common.util.Constants;
+import gregtech.api.util.GTControlledRegistry;
+
+import net.minecraft.util.ResourceLocation;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+/**
+ * Registry of the data formats supported by data sticks, data orbs and data modules. Item NBT and active-area
+ * selection are handled by {@link DataStickStorage}.
+ */
+public final class DataStickRegistry extends GTControlledRegistry<ResourceLocation, DataStickHandler<?>> {
 
-/** Registry and NBT storage shared by data sticks, data orbs and data modules. */
-public final class DataStickRegistry {
+    public DataStickRegistry() {
+        super(Short.MAX_VALUE);
+    }
 
-    public static final String ROOT_TAG = "GT.DataStick";
-    public static final String HANDLERS_TAG = "Handlers";
-    public static final String ACTIVE_TAG = "Active";
-
-    private static final Map<String, DataStickHandler<?>> HANDLERS = new LinkedHashMap<>();
-
-    private DataStickRegistry() {}
-
-    /** Register during mod initialization on both sides. IDs must be stable; prefer "modid:name". */
-    @NotNull
-    public static <T> DataStickHandler<T> register(@NotNull String id, @NotNull DataStickHandler<T> handler) {
-        Objects.requireNonNull(id, "id");
-        Objects.requireNonNull(handler, "handler");
-
-        if (id.trim().isEmpty() || HANDLERS.containsKey(id) || getHandlerId(handler) != null) {
-            throw new IllegalArgumentException("Duplicate or empty data stick handler registration: " + id);
+    /**
+     * Register during mod initialization on both sides. Numeric IDs and handler instances must be unique across
+     * all mods; IDs range from 0 to {@code Short.MAX_VALUE - 1}. Names are unique within their mod namespace.
+     * Keys are saved in NBT as {@code modid:name} and must remain stable.
+     * Numeric IDs determine iteration order. Handlers may share a storage key to replace each other's payload.
+     */
+    @Override
+    public void register(int id, @NotNull ResourceLocation key, @NotNull DataStickHandler<?> handler) {
+        if (key.getPath().trim().isEmpty() || containsKey(key) || getNameForObject(handler) != null) {
+            throw new IllegalArgumentException("Duplicate or empty data stick handler registration: " + key);
+        }
+        // Check before the base registry changes its name-to-object mapping.
+        if (getObjectById(id) != null) {
+            throw new IllegalArgumentException("Duplicate data stick handler id: " + id);
         }
 
-        String storageKey = Objects.requireNonNull(handler.getStorageKey(), "storageKey");
-        if (storageKey.trim().isEmpty() || ROOT_TAG.equals(storageKey) || "display".equals(storageKey)) {
+        String storageKey = handler.getStorageKey();
+        if (storageKey.trim().isEmpty() || DataStickStorage.ROOT_TAG.equals(storageKey) ||
+                "display".equals(storageKey)) {
             throw new IllegalArgumentException("Invalid data stick storage key: " + storageKey);
         }
 
-        HANDLERS.put(id, handler);
-        return handler;
-    }
-
-    /** The last successfully used handler (read or write), or null when the active area is missing or invalid. */
-    @Nullable
-    public static DataStickHandler<?> getHandler(@NotNull ItemStack stack) {
-        NBTTagCompound root = stack.getTagCompound();
-        if (root == null) {
-            return null;
-        }
-
-        String activeStorageKey = root.getCompoundTag(ROOT_TAG).getString(ACTIVE_TAG);
-        return getHandler(root, activeStorageKey);
-    }
-
-    /** Look up an area's handler independently of which handler supplies the item's name. */
-    @Nullable
-    public static DataStickHandler<?> getHandler(@NotNull ItemStack stack, @NotNull String storageKey) {
-        return getHandler(stack.getTagCompound(), storageKey);
-    }
-
-    /** Present handlers, active area first, followed by the default area and remaining areas in registration order. */
-    @NotNull
-    public static List<DataStickHandler<?>> getHandlers(@NotNull ItemStack stack) {
-        NBTTagCompound root = stack.getTagCompound();
-        if (root == null) {
-            return Collections.emptyList();
-        }
-
-        List<DataStickHandler<?>> handlers = new ArrayList<>();
-        for (String storageKey : getStorageKeys(root)) {
-            DataStickHandler<?> handler = getHandler(root, storageKey);
-            if (handler != null) {
-                handlers.add(handler);
-            }
-        }
-        return Collections.unmodifiableList(handlers);
-    }
-
-    @Nullable
-    public static String getDisplayName(@NotNull ItemStack stack) {
-        DataStickHandler<?> handler = getHandler(stack);
-        return handler == null ? null : getDisplayName(stack, handler);
-    }
-
-    public static void addInformation(@NotNull ItemStack stack, @NotNull List<String> lines) {
-        for (DataStickHandler<?> handler : getHandlers(stack)) {
-            addInformation(stack, handler, lines);
-        }
-    }
-
-    static <T> void write(NBTTagCompound root, DataStickHandler<T> handler, T data) {
-        String id = getHandlerId(handler);
-        if (id == null) {
-            throw new IllegalArgumentException("Data stick handler is not registered");
-        }
-
-        String storageKey = handler.getStorageKey();
-        // Serialize before changing the item, so a failed write keeps its original data.
-        Objects.requireNonNull(data);
-        NBTTagCompound payload = Objects.requireNonNull(handler.serializeNBT(data), "payload").copy();
-
-        NBTTagCompound metadata = root.getCompoundTag(ROOT_TAG).copy();
-        NBTTagCompound handlerIds = metadata.getCompoundTag(HANDLERS_TAG);
-        handlerIds.setString(storageKey, id);
-        metadata.setTag(HANDLERS_TAG, handlerIds);
-
-        root.setTag(storageKey, payload);
-        root.setTag(ROOT_TAG, metadata);
-        setActive(root, storageKey);
-    }
-
-    @Nullable
-    static <T> T read(ItemStack stack, DataStickHandler<T> handler) {
-        T data = peek(stack, handler);
-        if (data == null) {
-            return null;
-        }
-
-        NBTTagCompound root = stack.getTagCompound().copy();
-        setActive(root, handler.getStorageKey());
-        stack.setTagCompound(root);
-        return data;
-    }
-
-    @Nullable
-    static <T> T peek(ItemStack stack, DataStickHandler<T> handler) {
-        NBTTagCompound root = stack.getTagCompound();
-        String storageKey = handler.getStorageKey();
-        if (getHandler(root, storageKey) != handler) {
-            return null;
-        }
-
-        return handler.deserializeNBT(root.getCompoundTag(storageKey).copy());
-    }
-
-    @Nullable
-    private static String getHandlerId(DataStickHandler<?> handler) {
-        for (Map.Entry<String, DataStickHandler<?>> entry : HANDLERS.entrySet()) {
-            if (entry.getValue() == handler) {
-                return entry.getKey();
-            }
-        }
-        return null;
-    }
-
-    @Nullable
-    private static DataStickHandler<?> getHandler(@Nullable NBTTagCompound root, String storageKey) {
-        if (root == null || !root.hasKey(storageKey, Constants.NBT.TAG_COMPOUND)) {
-            return null;
-        }
-
-        NBTTagCompound handlerIds = root.getCompoundTag(ROOT_TAG).getCompoundTag(HANDLERS_TAG);
-        DataStickHandler<?> handler = HANDLERS.get(handlerIds.getString(storageKey));
-        if (handler == null || !storageKey.equals(handler.getStorageKey())) {
-            return null;
-        }
-        return handler;
-    }
-
-    private static Set<String> getStorageKeys(NBTTagCompound root) {
-        Set<String> keys = new LinkedHashSet<>();
-        NBTTagCompound metadata = root.getCompoundTag(ROOT_TAG);
-        if (metadata.hasKey(ACTIVE_TAG, Constants.NBT.TAG_STRING)) {
-            keys.add(metadata.getString(ACTIVE_TAG));
-        }
-
-        keys.add(DataStickHandler.DEFAULT_STORAGE_KEY);
-        for (DataStickHandler<?> handler : HANDLERS.values()) {
-            keys.add(handler.getStorageKey());
-        }
-        return keys;
-    }
-
-    private static void setActive(NBTTagCompound root, String storageKey) {
-        root.getCompoundTag(ROOT_TAG).setString(ACTIVE_TAG, storageKey);
-
-        NBTTagCompound display = root.getCompoundTag("display");
-        display.removeTag("Name");
-        display.removeTag("LocName");
-        if (display.isEmpty()) {
-            root.removeTag("display");
-        }
-    }
-
-    @Nullable
-    private static <T> String getDisplayName(ItemStack stack, DataStickHandler<T> handler) {
-        T data = handler.peek(stack);
-        return data == null ? null : handler.getDisplayName(data);
-    }
-
-    private static <T> void addInformation(ItemStack stack, DataStickHandler<T> handler, List<String> lines) {
-        T data = handler.peek(stack);
-        if (data != null) {
-            handler.addInformation(data, lines);
-        }
+        super.register(id, key, handler);
     }
 }

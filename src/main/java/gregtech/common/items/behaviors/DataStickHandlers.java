@@ -1,8 +1,9 @@
 package gregtech.common.items.behaviors;
 
+import gregtech.api.GregTechAPI;
 import gregtech.api.items.datastick.DataStickHandler;
-import gregtech.api.items.datastick.DataStickRegistry;
 import gregtech.api.util.AssemblyLineManager;
+import gregtech.api.util.GTUtility;
 import gregtech.api.util.LocalizationUtils;
 import gregtech.api.util.TextFormattingUtil;
 
@@ -22,45 +23,46 @@ import java.util.TreeSet;
 /** Built-in data formats. ME payloads use vanilla NBT decoding so these handlers do not require AE2 to be installed. */
 public final class DataStickHandlers {
 
-    public static final DataStickHandler<String> ASSEMBLY_LINE = DataStickRegistry.register("gregtech:assembly_line",
-            new DataStickHandler<>() {
+    public static final DataStickHandler<String> ASSEMBLY_LINE = new DataStickHandler<>() {
 
-                @Override
-                @NotNull
-                public String getStorageKey() {
-                    return AssemblyLineManager.RESEARCH_NBT_TAG;
-                }
+        @Override
+        @NotNull
+        public String getStorageKey() {
+            return AssemblyLineManager.RESEARCH_NBT_TAG;
+        }
 
-                @Override
-                @NotNull
-                public NBTTagCompound serializeNBT(@NotNull String data) {
-                    NBTTagCompound tag = new NBTTagCompound();
-                    tag.setString(AssemblyLineManager.RESEARCH_ID_NBT_TAG, data);
-                    return tag;
-                }
+        @Override
+        @NotNull
+        public NBTTagCompound serializeNBT(@NotNull String data) {
+            NBTTagCompound tag = new NBTTagCompound();
+            tag.setString(AssemblyLineManager.RESEARCH_ID_NBT_TAG, data);
+            return tag;
+        }
 
-                @Override
-                @Nullable
-                public String deserializeNBT(@NotNull NBTTagCompound tag) {
-                    String id = tag.getString(AssemblyLineManager.RESEARCH_ID_NBT_TAG);
-                    return id.isEmpty() ? null : id;
-                }
+        @Override
+        @Nullable
+        public String deserializeNBT(@NotNull NBTTagCompound tag) {
+            String id = tag.getString(AssemblyLineManager.RESEARCH_ID_NBT_TAG);
+            return id.isEmpty() ? null : id;
+        }
 
-                @Override
-                public void addInformation(@NotNull String data, @NotNull List<String> lines) {
-                    DataItemBehavior.collectResearchItems(data, lines);
-                }
-            });
+        @Override
+        public void addInformation(@NotNull String data, @NotNull List<String> lines) {
+            DataItemBehavior.collectResearchItems(data, lines);
+        }
+    };
 
-    public static final DataStickHandler<NBTTagCompound> ME_INPUT_BUS = DataStickRegistry
-            .register("gregtech:me_input_bus", new MEConfigurationHandler(false));
-    public static final DataStickHandler<NBTTagCompound> ME_INPUT_HATCH = DataStickRegistry
-            .register("gregtech:me_input_hatch", new MEConfigurationHandler(true));
+    public static final DataStickHandler<NBTTagCompound> ME_INPUT_BUS = new MEConfigurationHandler(false);
+    public static final DataStickHandler<NBTTagCompound> ME_INPUT_HATCH = new MEConfigurationHandler(true);
 
     private DataStickHandlers() {}
 
-    /** Force registration during item initialization, before any existing stacks are inspected. */
-    public static void init() {}
+    /** Register built-in handlers during item initialization, before any stacks are inspected. Call once. */
+    public static void init() {
+        GregTechAPI.DATA_STICK_REGISTRY.register(0, GTUtility.gregtechId("assembly_line"), ASSEMBLY_LINE);
+        GregTechAPI.DATA_STICK_REGISTRY.register(1, GTUtility.gregtechId("me_input_bus"), ME_INPUT_BUS);
+        GregTechAPI.DATA_STICK_REGISTRY.register(2, GTUtility.gregtechId("me_input_hatch"), ME_INPUT_HATCH);
+    }
 
     private static final class MEConfigurationHandler extends DataStickHandler<NBTTagCompound> {
 

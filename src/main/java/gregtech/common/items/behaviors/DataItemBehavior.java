@@ -1,6 +1,7 @@
 package gregtech.common.items.behaviors;
 
-import gregtech.api.items.datastick.DataStickRegistry;
+import gregtech.api.items.datastick.DataStickHandler;
+import gregtech.api.items.datastick.DataStickStorage;
 import gregtech.api.items.metaitem.stats.IDataItem;
 import gregtech.api.items.metaitem.stats.IItemBehaviour;
 import gregtech.api.items.metaitem.stats.IItemNameProvider;
@@ -16,6 +17,7 @@ import net.minecraft.item.ItemStack;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenCustomHashSet;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
@@ -40,12 +42,15 @@ public class DataItemBehavior implements IItemBehaviour, IDataItem, IItemNamePro
 
     @Override
     public void addInformation(@NotNull ItemStack itemStack, List<String> lines) {
-        if (DataStickRegistry.getHandlers(itemStack).isEmpty()) {
+        List<DataStickHandler<?>> handlers = DataStickStorage.getHandlers(itemStack);
+        if (handlers.isEmpty()) {
             return;
         }
 
         if (isShiftDown()) {
-            DataStickRegistry.addInformation(itemStack, lines);
+            for (DataStickHandler<?> handler : handlers) {
+                addInformation(itemStack, handler, lines);
+            }
         } else {
             lines.add(I18n.format("gregtech.tooltip.hold_shift"));
         }
@@ -57,8 +62,22 @@ public class DataItemBehavior implements IItemBehaviour, IDataItem, IItemNamePro
 
     @Override
     public String getItemStackDisplayName(ItemStack itemStack, String unlocalizedName) {
-        String name = DataStickRegistry.getDisplayName(itemStack);
+        DataStickHandler<?> handler = DataStickStorage.getActiveHandler(itemStack);
+        String name = handler == null ? null : getDisplayName(itemStack, handler);
         return name == null ? LocalizationUtils.format(unlocalizedName) : name;
+    }
+
+    @Nullable
+    private static <T> String getDisplayName(ItemStack stack, DataStickHandler<T> handler) {
+        T data = handler.peek(stack);
+        return data == null ? null : handler.getDisplayName(data);
+    }
+
+    private static <T> void addInformation(ItemStack stack, DataStickHandler<T> handler, List<String> lines) {
+        T data = handler.peek(stack);
+        if (data != null) {
+            handler.addInformation(data, lines);
+        }
     }
 
     public static void collectResearchItems(String id, List<String> lines) {

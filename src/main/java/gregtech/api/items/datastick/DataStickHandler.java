@@ -1,7 +1,10 @@
 package gregtech.api.items.datastick;
 
+import gregtech.api.GregTechAPI;
+
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ResourceLocation;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -10,7 +13,9 @@ import java.util.List;
 
 /**
  * Codec and presentation for one kind of data stored on a data item. Register the same instance on both sides with
- * {@link DataStickRegistry#register(String, DataStickHandler)} before using it.
+ * {@link GregTechAPI#DATA_STICK_REGISTRY} using
+ * {@link DataStickRegistry#register(int, ResourceLocation, DataStickHandler)} during
+ * mod initialization, before using it. Registration keys and storage keys must remain stable across saves.
  *
  * @param <T> the decoded data type
  */
@@ -45,14 +50,12 @@ public abstract class DataStickHandler<T> {
 
     /** Replace this storage area's payload and make this handler active for the name. Other areas are preserved. */
     public final void write(@NotNull ItemStack stack, @NotNull T data) {
-        NBTTagCompound root = stack.hasTagCompound() ? stack.getTagCompound().copy() : new NBTTagCompound();
-        write(root, data);
-        stack.setTagCompound(root);
+        DataStickStorage.write(stack, this, data);
     }
 
     /** Write to an existing item tag, for callers that do not have an ItemStack. */
     public final void write(@NotNull NBTTagCompound root, @NotNull T data) {
-        DataStickRegistry.write(root, this, data);
+        DataStickStorage.write(root, this, data);
     }
 
     /**
@@ -62,12 +65,12 @@ public abstract class DataStickHandler<T> {
      */
     @Nullable
     public final T read(@NotNull ItemStack stack) {
-        return DataStickRegistry.read(stack, this);
+        return DataStickStorage.read(stack, this);
     }
 
     /** Read an isolated copy of this area's data without changing the item or its active handler. */
     @Nullable
     public final T peek(@NotNull ItemStack stack) {
-        return DataStickRegistry.peek(stack, this);
+        return DataStickStorage.peek(stack, this);
     }
 }

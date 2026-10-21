@@ -8,6 +8,7 @@ import gregtech.api.command.ICommandManager;
 import gregtech.api.cover.CoverDefinition;
 import gregtech.api.event.HighTierEvent;
 import gregtech.api.gui.UIFactory;
+import gregtech.api.items.datastick.DataStickRegistry;
 import gregtech.api.metatileentity.multiblock.IBatteryData;
 import gregtech.api.metatileentity.registry.MTEManager;
 import gregtech.api.modules.IModuleManager;
@@ -62,6 +63,7 @@ public class GregTechAPI {
     /** GT's data migrations API */
     public static final MigrationAPI MIGRATIONS = new MigrationAPI();
     public static final RecipePropertyRegistry RECIPE_PROPERTIES = new RecipePropertyRegistry();
+    public static final DataStickRegistry DATA_STICK_REGISTRY = new DataStickRegistry();
     /**
      * Manager for Item Recycling Data
      */
