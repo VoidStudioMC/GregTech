@@ -5,23 +5,17 @@ import gregtech.api.items.datastick.DataStickStorage;
 import gregtech.api.items.metaitem.stats.IDataItem;
 import gregtech.api.items.metaitem.stats.IItemBehaviour;
 import gregtech.api.items.metaitem.stats.IItemNameProvider;
-import gregtech.api.recipes.Recipe;
-import gregtech.api.recipes.RecipeMaps;
-import gregtech.api.recipes.machines.IResearchRecipeMap;
-import gregtech.api.util.ItemStackHashStrategy;
 import gregtech.api.util.LocalizationUtils;
 import gregtech.client.utils.TooltipHelper;
 
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 
-import it.unimi.dsi.fastutil.objects.ObjectOpenCustomHashSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class DataItemBehavior implements IItemBehaviour, IDataItem, IItemNameProvider {
 
@@ -42,15 +36,16 @@ public class DataItemBehavior implements IItemBehaviour, IDataItem, IItemNamePro
 
     @Override
     public void addInformation(@NotNull ItemStack itemStack, List<String> lines) {
-        List<DataStickHandler<?>> handlers = DataStickStorage.getHandlers(itemStack);
-        if (handlers.isEmpty()) {
+        List<String> information = new ArrayList<>();
+        for (DataStickHandler<?> handler : DataStickStorage.getHandlers(itemStack)) {
+            addInformation(itemStack, handler, information);
+        }
+        if (information.isEmpty()) {
             return;
         }
 
         if (isShiftDown()) {
-            for (DataStickHandler<?> handler : handlers) {
-                addInformation(itemStack, handler, lines);
-            }
+            lines.addAll(information);
         } else {
             lines.add(I18n.format("gregtech.tooltip.hold_shift"));
         }
@@ -81,19 +76,6 @@ public class DataItemBehavior implements IItemBehaviour, IDataItem, IItemNamePro
     }
 
     public static void collectResearchItems(String id, List<String> lines) {
-        Collection<Recipe> recipes = ((IResearchRecipeMap) RecipeMaps.ASSEMBLY_LINE_RECIPES)
-                .getDataStickEntry(id);
-        if (recipes == null || recipes.isEmpty()) {
-            return;
-        }
-
-        lines.add(I18n.format("behavior.data_item.assemblyline.title"));
-        Set<ItemStack> displayedOutputs = new ObjectOpenCustomHashSet<>(ItemStackHashStrategy.comparingAllButCount());
-        for (Recipe recipe : recipes) {
-            ItemStack output = recipe.getOutputs().get(0);
-            if (displayedOutputs.add(output)) {
-                lines.add(I18n.format("behavior.data_item.assemblyline.data", output.getDisplayName()));
-            }
-        }
+        DataStickHandlers.ASSEMBLY_LINE.addInformation(id, lines);
     }
 }

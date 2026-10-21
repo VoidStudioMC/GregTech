@@ -269,6 +269,7 @@ public class MetaTileEntityResearchStation extends RecipeMapMultiblockController
         if (id == null) return;
         List<String> stacks = new ArrayList<>();
         DataItemBehavior.collectResearchItems(id, stacks);
+        if (stacks.isEmpty()) return;
         stacks.remove(0);
         manager.add(KeyUtil.lang(TextFormatting.GREEN, "gregtech.machine.research_station.researching"));
         for (String line : stacks) {

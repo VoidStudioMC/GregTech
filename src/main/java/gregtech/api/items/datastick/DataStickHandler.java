@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Codec and presentation for one kind of data stored on a data item. Register the same instance on both sides with
  * {@link GregTechAPI#DATA_STICK_REGISTRY} using
- * {@link DataStickRegistry#register(int, ResourceLocation, DataStickHandler)} during
+ * {@link DataStickRegistry#register(ResourceLocation, DataStickHandler)} during
  * mod initialization, before using it. Registration keys and storage keys must remain stable across saves.
  *
  * @param <T> the decoded data type

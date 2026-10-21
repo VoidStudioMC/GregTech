@@ -77,13 +77,13 @@ class DataStickStorageTest {
     @BeforeAll
     static void bootstrap() {
         Bootstrap.perform();
-        GregTechAPI.DATA_STICK_REGISTRY.register(100, new ResourceLocation("test", "first"), FIRST);
-        GregTechAPI.DATA_STICK_REGISTRY.register(101, new ResourceLocation("test", "second"), SECOND);
-        GregTechAPI.DATA_STICK_REGISTRY.register(102, new ResourceLocation("test", "other"), OTHER);
-        GregTechAPI.DATA_STICK_REGISTRY.register(103, new ResourceLocation("test", "unnamed"), UNNAMED);
-        GregTechAPI.DATA_STICK_REGISTRY.register(104, new ResourceLocation("test", "raw"), RAW);
+        GregTechAPI.DATA_STICK_REGISTRY.register(new ResourceLocation("test", "first"), FIRST);
+        GregTechAPI.DATA_STICK_REGISTRY.register(new ResourceLocation("test", "second"), SECOND);
+        GregTechAPI.DATA_STICK_REGISTRY.register(new ResourceLocation("test", "other"), OTHER);
+        GregTechAPI.DATA_STICK_REGISTRY.register(new ResourceLocation("test", "unnamed"), UNNAMED);
+        GregTechAPI.DATA_STICK_REGISTRY.register(new ResourceLocation("test", "raw"), RAW);
         // Use a one-character namespace to exercise Minecraft 1.12's ResourceLocation parsing edge case.
-        GregTechAPI.DATA_STICK_REGISTRY.register(106, new ResourceLocation("a", "first"), ADDON_FIRST);
+        GregTechAPI.DATA_STICK_REGISTRY.register(new ResourceLocation("a", "first"), ADDON_FIRST);
     }
 
     @Test
@@ -343,7 +343,7 @@ class DataStickStorageTest {
                 throw new IllegalArgumentException("Cannot encode data");
             }
         };
-        GregTechAPI.DATA_STICK_REGISTRY.register(105, new ResourceLocation("test", "failing"), failing);
+        GregTechAPI.DATA_STICK_REGISTRY.register(new ResourceLocation("test", "failing"), failing);
         ItemStack stack = new ItemStack(Items.STICK);
         FIRST.write(stack, "first");
         OTHER.write(stack, "other");

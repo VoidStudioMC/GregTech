@@ -38,7 +38,7 @@ public final class DataStickStorage {
         return root == null ? null : getHandler(root, root.getCompoundTag(ROOT_TAG).getString(ACTIVE_TAG));
     }
 
-    /** Present handlers, active area first, then the default area and remaining areas in registry ID order. */
+    /** Present handlers, active area first, then the default area and remaining areas in registration order. */
     @NotNull
     public static List<DataStickHandler<?>> getHandlers(@NotNull ItemStack stack) {
         NBTTagCompound root = stack.getTagCompound();

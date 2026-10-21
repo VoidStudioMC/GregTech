@@ -257,6 +257,51 @@ class DataStickHandlersTest {
         assertTrue(tooltip(stack, true).isEmpty());
     }
 
+    @Test
+    void unreadablePayloadAndResearchWithoutRecipesDoNotShowAShiftHint() {
+        ItemStack stack = stick.getStackForm();
+        ME_INPUT_BUS.write(stack, itemConfig());
+        stack.getTagCompound().setTag(ME_INPUT_BUS.getStorageKey(), new NBTTagCompound());
+        NBTTagCompound before = stack.getTagCompound().copy();
+        assertTrue(tooltip(stack, false).isEmpty());
+        assertTrue(tooltip(stack, true).isEmpty());
+        assertEquals(before, stack.getTagCompound());
+
+        ASSEMBLY_LINE.write(stack, "test:removed_research_recipe");
+        before = stack.getTagCompound().copy();
+        assertTrue(tooltip(stack, false).isEmpty());
+        assertTrue(tooltip(stack, true).isEmpty());
+        assertEquals("test:removed_research_recipe", AssemblyLineManager.peekResearchId(stack));
+        assertEquals(before, stack.getTagCompound());
+
+        ME_INPUT_HATCH.write(stack, fluidConfig());
+        assertEquals(Collections.singletonList("Hold SHIFT for more info"), tooltip(stack, false));
+        assertEquals(tooltipWith(ME_INPUT_HATCH, fluidConfig()), tooltip(stack, true));
+    }
+
+    @Test
+    void malformedSlotKeysAndNonPositiveFluidAmountsAreIgnored() {
+        NBTTagCompound config = fluidConfig();
+        NBTTagCompound slots = config.getCompoundTag("ConfigStacks");
+        NBTTagCompound water = slots.getCompoundTag("0").copy();
+        slots.setTag("2147483647", water.copy());
+        slots.setTag("-1", water.copy());
+        slots.setTag("01", water.copy());
+        slots.setTag("+2", water.copy());
+        slots.setString("3", "invalid compound");
+        slots.setTag("metadata", water.copy());
+        NBTTagCompound emptyFluid = water.copy();
+        emptyFluid.setInteger("Amount", 0);
+        slots.setTag("4", emptyFluid);
+        NBTTagCompound negativeFluid = water.copy();
+        negativeFluid.setInteger("Amount", -1000);
+        slots.setTag("5", negativeFluid);
+        assertEquals(tooltipWith(ME_INPUT_HATCH, fluidConfig()), tooltipWith(ME_INPUT_HATCH, config));
+
+        slots.removeTag("0");
+        assertEquals(Collections.singletonList("No configured slots"), tooltipWith(ME_INPUT_HATCH, config));
+    }
+
     private static List<String> tooltipWith(DataStickHandler<NBTTagCompound> handler,
                                             NBTTagCompound data) {
         ItemStack stack = stick.getStackForm();
