@@ -108,7 +108,7 @@ public class GTRecipeWrapper extends AdvancedRecipeWrapper {
                 // Scanner Output replacing, used for cycling research outputs
                 String researchId = null;
                 for (ItemStack stack : recipe.getOutputs()) {
-                    researchId = AssemblyLineManager.readResearchId(stack);
+                    researchId = AssemblyLineManager.peekResearchId(stack);
                     if (researchId != null) break;
                 }
                 if (researchId != null) {
