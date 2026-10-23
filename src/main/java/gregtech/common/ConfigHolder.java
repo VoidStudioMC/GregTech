@@ -8,9 +8,8 @@ import net.minecraftforge.common.config.Config;
 @Config(modid = GTValues.MODID, name = GTValues.MODID + '/' + GTValues.MODID)
 public class ConfigHolder {
 
-    @Config.Comment("Config options for client-only features")
-    @Config.Name("Client Options")
-    public static ClientOptions client = new ClientOptions();
+    @Config.Ignore
+    public static final ClientOptions client = ClientConfig.client;
 
     @Config.Comment("Config options for Mod Compatibility")
     @Config.Name("Compatibility Options")
