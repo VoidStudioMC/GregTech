@@ -165,6 +165,16 @@ public class ConfigHolder {
                 "This does NOT apply to the World Accelerator, but to external effects like Time in a Bottle.",
                 "Default: true" })
         public boolean allowTickAcceleration = true;
+
+        @Config.Comment({
+                "Whether to enable Ore Drilling Plants, requires for industrial mining of ores",
+                "Default: true" })
+        public boolean enableLargeMiners = true;
+
+        @Config.Comment({
+                "Whether to enable Fluid Drilling Rigs, requires for pumping out bedrock fluid veins",
+                "Default: true" })
+        public boolean enableFluidDrillingRigs = true;
     }
 
     public static class WorldGenOptions {
@@ -311,6 +321,12 @@ public class ConfigHolder {
 
         @Config.Comment({ "Whether to hide filled cells in JEI and creative search menu.", "Default: true" })
         public boolean hideFilledCellsInJEI = true;
+
+        @Config.Comment({ "Whether to hide ore veins category in JEI", "Default: false" })
+        public boolean hideOreVeinsCategoryInJEI = false;
+
+        @Config.Comment({ "Whether to hide fluid veins category in JEI", "Default: false" })
+        public boolean hideFluidVeinsCategoryInJEI = false;
 
         @Config.Comment({ "Specifies priorities of mods in Ore Dictionary item registration.",
                 "First ModID has highest priority, last has lowest. " +
@@ -730,6 +746,10 @@ public class ConfigHolder {
         @Config.RangeInt(min = 1, max = 100)
         @Config.SlidingOption
         public int magnetDelay = 10;
+
+        @Config.RequiresMcRestart
+        @Config.Comment({ "Whether to enable electric prospector scanners in the game?", "Default: true" })
+        public boolean enableProspectors = true;
     }
 
     public static class ArmorHud {

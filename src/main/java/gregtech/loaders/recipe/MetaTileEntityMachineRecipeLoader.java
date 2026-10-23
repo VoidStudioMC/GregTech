@@ -10,6 +10,7 @@ import gregtech.api.recipes.ingredients.GTRecipeOreInput;
 import gregtech.api.unification.stack.UnificationEntry;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.Mods;
+import gregtech.common.ConfigHolder;
 
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
@@ -1099,76 +1100,80 @@ public class MetaTileEntityMachineRecipeLoader {
 
         // Multiblock Miners
 
-        ASSEMBLER_RECIPES.recipeBuilder()
-                .input(HULL[EV])
-                .input(frameGt, Titanium, 4)
-                .input(circuit, Tier.EV, 4)
-                .input(ELECTRIC_MOTOR_EV, 4)
-                .input(ELECTRIC_PUMP_EV, 4)
-                .input(CONVEYOR_MODULE_EV, 4)
-                .input(gear, Tungsten, 4)
-                .circuitMeta(2)
-                .output(BASIC_LARGE_MINER)
-                .duration(400).EUt(VA[EV]).buildAndRegister();
+        if (ConfigHolder.machines.enableLargeMiners) {
+            ASSEMBLER_RECIPES.recipeBuilder()
+                    .input(HULL[EV])
+                    .input(frameGt, Titanium, 4)
+                    .input(circuit, Tier.EV, 4)
+                    .input(ELECTRIC_MOTOR_EV, 4)
+                    .input(ELECTRIC_PUMP_EV, 4)
+                    .input(CONVEYOR_MODULE_EV, 4)
+                    .input(gear, Tungsten, 4)
+                    .circuitMeta(2)
+                    .output(BASIC_LARGE_MINER)
+                    .duration(400).EUt(VA[EV]).buildAndRegister();
 
-        ASSEMBLER_RECIPES.recipeBuilder()
-                .input(HULL[IV])
-                .input(frameGt, TungstenSteel, 4)
-                .input(circuit, Tier.IV, 4)
-                .input(ELECTRIC_MOTOR_IV, 4)
-                .input(ELECTRIC_PUMP_IV, 4)
-                .input(CONVEYOR_MODULE_IV, 4)
-                .input(gear, Iridium, 4)
-                .circuitMeta(2)
-                .output(LARGE_MINER)
-                .duration(400).EUt(VA[IV]).buildAndRegister();
+            ASSEMBLER_RECIPES.recipeBuilder()
+                    .input(HULL[IV])
+                    .input(frameGt, TungstenSteel, 4)
+                    .input(circuit, Tier.IV, 4)
+                    .input(ELECTRIC_MOTOR_IV, 4)
+                    .input(ELECTRIC_PUMP_IV, 4)
+                    .input(CONVEYOR_MODULE_IV, 4)
+                    .input(gear, Iridium, 4)
+                    .circuitMeta(2)
+                    .output(LARGE_MINER)
+                    .duration(400).EUt(VA[IV]).buildAndRegister();
 
-        ASSEMBLER_RECIPES.recipeBuilder()
-                .input(HULL[LuV])
-                .input(frameGt, HSSS, 4)
-                .input(circuit, Tier.LuV, 4)
-                .input(ELECTRIC_MOTOR_LuV, 4)
-                .input(ELECTRIC_PUMP_LuV, 4)
-                .input(CONVEYOR_MODULE_LuV, 4)
-                .input(gear, Ruridit, 4)
-                .circuitMeta(2)
-                .output(ADVANCED_LARGE_MINER)
-                .duration(400).EUt(VA[LuV]).buildAndRegister();
+            ASSEMBLER_RECIPES.recipeBuilder()
+                    .input(HULL[LuV])
+                    .input(frameGt, HSSS, 4)
+                    .input(circuit, Tier.LuV, 4)
+                    .input(ELECTRIC_MOTOR_LuV, 4)
+                    .input(ELECTRIC_PUMP_LuV, 4)
+                    .input(CONVEYOR_MODULE_LuV, 4)
+                    .input(gear, Ruridit, 4)
+                    .circuitMeta(2)
+                    .output(ADVANCED_LARGE_MINER)
+                    .duration(400).EUt(VA[LuV]).buildAndRegister();
+        }
 
         // Multiblock Fluid Drills
 
-        ASSEMBLER_RECIPES.recipeBuilder()
-                .input(HULL[MV])
-                .input(frameGt, Steel, 4)
-                .input(circuit, Tier.MV, 4)
-                .input(ELECTRIC_MOTOR_MV, 4)
-                .input(ELECTRIC_PUMP_MV, 4)
-                .input(gear, VanadiumSteel, 4)
-                .circuitMeta(2)
-                .output(BASIC_FLUID_DRILLING_RIG)
-                .duration(400).EUt(VA[MV]).buildAndRegister();
+        if (ConfigHolder.machines.enableFluidDrillingRigs) {
+            ASSEMBLER_RECIPES.recipeBuilder()
+                    .input(HULL[MV])
+                    .input(frameGt, Steel, 4)
+                    .input(circuit, Tier.MV, 4)
+                    .input(ELECTRIC_MOTOR_MV, 4)
+                    .input(ELECTRIC_PUMP_MV, 4)
+                    .input(gear, VanadiumSteel, 4)
+                    .circuitMeta(2)
+                    .output(BASIC_FLUID_DRILLING_RIG)
+                    .duration(400).EUt(VA[MV]).buildAndRegister();
 
-        ASSEMBLER_RECIPES.recipeBuilder()
-                .input(HULL[EV])
-                .input(frameGt, Titanium, 4)
-                .input(circuit, Tier.EV, 4)
-                .input(ELECTRIC_MOTOR_EV, 4)
-                .input(ELECTRIC_PUMP_EV, 4)
-                .input(gear, TungstenCarbide, 4)
-                .circuitMeta(2)
-                .output(FLUID_DRILLING_RIG)
-                .duration(400).EUt(VA[EV]).buildAndRegister();
+            ASSEMBLER_RECIPES.recipeBuilder()
+                    .input(HULL[EV])
+                    .input(frameGt, Titanium, 4)
+                    .input(circuit, Tier.EV, 4)
+                    .input(ELECTRIC_MOTOR_EV, 4)
+                    .input(ELECTRIC_PUMP_EV, 4)
+                    .input(gear, TungstenCarbide, 4)
+                    .circuitMeta(2)
+                    .output(FLUID_DRILLING_RIG)
+                    .duration(400).EUt(VA[EV]).buildAndRegister();
 
-        ASSEMBLER_RECIPES.recipeBuilder()
-                .input(HULL[LuV])
-                .input(frameGt, TungstenSteel, 4)
-                .input(circuit, Tier.LuV, 4)
-                .input(ELECTRIC_MOTOR_LuV, 4)
-                .input(ELECTRIC_PUMP_LuV, 4)
-                .input(gear, Osmiridium, 4)
-                .circuitMeta(2)
-                .output(ADVANCED_FLUID_DRILLING_RIG)
-                .duration(400).EUt(VA[LuV]).buildAndRegister();
+            ASSEMBLER_RECIPES.recipeBuilder()
+                    .input(HULL[LuV])
+                    .input(frameGt, TungstenSteel, 4)
+                    .input(circuit, Tier.LuV, 4)
+                    .input(ELECTRIC_MOTOR_LuV, 4)
+                    .input(ELECTRIC_PUMP_LuV, 4)
+                    .input(gear, Osmiridium, 4)
+                    .circuitMeta(2)
+                    .output(ADVANCED_FLUID_DRILLING_RIG)
+                    .duration(400).EUt(VA[LuV]).buildAndRegister();
+        }
 
         // Long Distance Pipes
         ASSEMBLER_RECIPES.recipeBuilder()

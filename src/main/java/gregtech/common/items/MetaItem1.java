@@ -834,21 +834,25 @@ public class MetaItem1 extends StandardMetaItem {
         TERMINAL = addItem(465, "terminal")
                 .setMaxStackSize(1)
                 .setCreativeTabs(GTCreativeTabs.TAB_GREGTECH_TOOLS);
-        PROSPECTOR_LV = addItem(466, "prospector.lv")
-                .addComponents(ElectricStats.createElectricItem(100_000L, GTValues.LV),
-                        new ProspectorScannerBehavior(2, GTValues.LV))
-                .setMaxStackSize(1)
-                .setCreativeTabs(GTCreativeTabs.TAB_GREGTECH_TOOLS);
-        PROSPECTOR_HV = addItem(467, "prospector.hv")
-                .addComponents(ElectricStats.createElectricItem(1_600_000L, GTValues.HV),
-                        new ProspectorScannerBehavior(3, GTValues.HV))
-                .setMaxStackSize(1)
-                .setCreativeTabs(GTCreativeTabs.TAB_GREGTECH_TOOLS);
-        PROSPECTOR_LUV = addItem(468, "prospector.luv")
-                .addComponents(ElectricStats.createElectricItem(1_000_000_000L, GTValues.LuV),
-                        new ProspectorScannerBehavior(5, GTValues.LuV))
-                .setMaxStackSize(1)
-                .setCreativeTabs(GTCreativeTabs.TAB_GREGTECH_TOOLS);
+
+        if (ConfigHolder.tools.enableProspectors) {
+            PROSPECTOR_LV = addItem(466, "prospector.lv")
+                    .addComponents(ElectricStats.createElectricItem(100_000L, GTValues.LV),
+                            new ProspectorScannerBehavior(2, GTValues.LV))
+                    .setMaxStackSize(1)
+                    .setCreativeTabs(GTCreativeTabs.TAB_GREGTECH_TOOLS);
+            PROSPECTOR_HV = addItem(467, "prospector.hv")
+                    .addComponents(ElectricStats.createElectricItem(1_600_000L, GTValues.HV),
+                            new ProspectorScannerBehavior(3, GTValues.HV))
+                    .setMaxStackSize(1)
+                    .setCreativeTabs(GTCreativeTabs.TAB_GREGTECH_TOOLS);
+            PROSPECTOR_LUV = addItem(468, "prospector.luv")
+                    .addComponents(ElectricStats.createElectricItem(1_000_000_000L, GTValues.LuV),
+                            new ProspectorScannerBehavior(5, GTValues.LuV))
+                    .setMaxStackSize(1)
+                    .setCreativeTabs(GTCreativeTabs.TAB_GREGTECH_TOOLS);
+        }
+
         TRICORDER_SCANNER = addItem(469, "tricorder_scanner")
                 .addComponents(ElectricStats.createElectricItem(100_000L, GTValues.MV), new TricorderBehavior(2))
                 .setMaxStackSize(1)

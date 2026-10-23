@@ -827,14 +827,17 @@ final class MetaTileEntityRegistration {
         MetaTileEntities.STEAM_GRINDER = MetaTileEntities.registerMetaTileEntity(10025,
                 new MetaTileEntitySteamGrinder(gregtechId("steam_grinder")));
 
-        MetaTileEntities.BASIC_LARGE_MINER = MetaTileEntities.registerMetaTileEntity(10026,
-                new MetaTileEntityLargeMiner(gregtechId("large_miner.ev"), GTValues.EV, 16, 3, 4, Materials.Steel, 8));
-        MetaTileEntities.LARGE_MINER = MetaTileEntities.registerMetaTileEntity(10027,
-                new MetaTileEntityLargeMiner(gregtechId("large_miner.iv"),
-                        GTValues.IV, 4, 5, 5, Materials.Titanium, 16));
-        MetaTileEntities.ADVANCED_LARGE_MINER = MetaTileEntities.registerMetaTileEntity(10028,
-                new MetaTileEntityLargeMiner(gregtechId("large_miner.luv"),
-                        GTValues.LuV, 1, 7, 6, Materials.TungstenSteel, 32));
+        if (ConfigHolder.machines.enableLargeMiners) {
+            MetaTileEntities.BASIC_LARGE_MINER = MetaTileEntities.registerMetaTileEntity(10026,
+                    new MetaTileEntityLargeMiner(gregtechId("large_miner.ev"), GTValues.EV, 16, 3, 4, Materials.Steel,
+                            8));
+            MetaTileEntities.LARGE_MINER = MetaTileEntities.registerMetaTileEntity(10027,
+                    new MetaTileEntityLargeMiner(gregtechId("large_miner.iv"),
+                            GTValues.IV, 4, 5, 5, Materials.Titanium, 16));
+            MetaTileEntities.ADVANCED_LARGE_MINER = MetaTileEntities.registerMetaTileEntity(10028,
+                    new MetaTileEntityLargeMiner(gregtechId("large_miner.luv"),
+                            GTValues.LuV, 1, 7, 6, Materials.TungstenSteel, 32));
+        }
 
         MetaTileEntities.CENTRAL_MONITOR = MetaTileEntities.registerMetaTileEntity(10029,
                 new MetaTileEntityCentralMonitor(gregtechId("central_monitor")));
@@ -844,12 +847,14 @@ final class MetaTileEntityRegistration {
         MetaTileEntities.ADVANCED_PROCESSING_ARRAY = MetaTileEntities.registerMetaTileEntity(10031,
                 new MetaTileEntityProcessingArray(gregtechId("advanced_processing_array"), 1));
 
-        MetaTileEntities.BASIC_FLUID_DRILLING_RIG = MetaTileEntities.registerMetaTileEntity(10032,
-                new MetaTileEntityFluidDrill(gregtechId("fluid_drilling_rig.mv"), 2));
-        MetaTileEntities.FLUID_DRILLING_RIG = MetaTileEntities.registerMetaTileEntity(10033,
-                new MetaTileEntityFluidDrill(gregtechId("fluid_drilling_rig.hv"), 3));
-        MetaTileEntities.ADVANCED_FLUID_DRILLING_RIG = MetaTileEntities.registerMetaTileEntity(10034,
-                new MetaTileEntityFluidDrill(gregtechId("fluid_drilling_rig.ev"), 4));
+        if (ConfigHolder.machines.enableFluidDrillingRigs) {
+            MetaTileEntities.BASIC_FLUID_DRILLING_RIG = MetaTileEntities.registerMetaTileEntity(10032,
+                    new MetaTileEntityFluidDrill(gregtechId("fluid_drilling_rig.mv"), 2));
+            MetaTileEntities.FLUID_DRILLING_RIG = MetaTileEntities.registerMetaTileEntity(10033,
+                    new MetaTileEntityFluidDrill(gregtechId("fluid_drilling_rig.hv"), 3));
+            MetaTileEntities.ADVANCED_FLUID_DRILLING_RIG = MetaTileEntities.registerMetaTileEntity(10034,
+                    new MetaTileEntityFluidDrill(gregtechId("fluid_drilling_rig.ev"), 4));
+        }
 
         MetaTileEntities.CLEANROOM = MetaTileEntities.registerMetaTileEntity(10035,
                 new MetaTileEntityCleanroom(gregtechId("cleanroom")));

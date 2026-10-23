@@ -22,7 +22,9 @@ import gregtech.api.recipes.ingredients.IntCircuitIngredient;
 import gregtech.api.recipes.machines.IScannerRecipeMap;
 import gregtech.api.recipes.machines.RecipeMapFurnace;
 import gregtech.api.unification.material.Material;
+import gregtech.api.unification.material.Materials;
 import gregtech.api.unification.material.properties.PropertyKey;
+import gregtech.api.unification.ore.OrePrefix;
 import gregtech.api.util.Mods;
 import gregtech.api.worldgen.config.BedrockFluidDepositDefinition;
 import gregtech.api.worldgen.config.OreDepositDefinition;
@@ -144,8 +146,14 @@ public class JustEnoughItemsModule extends IntegrationSubmodule implements IModP
             }
         }
         registry.addRecipeCategories(new OreByProductCategory(registry.getJeiHelpers().getGuiHelper()));
-        registry.addRecipeCategories(new GTOreCategory(registry.getJeiHelpers().getGuiHelper()));
-        registry.addRecipeCategories(new GTFluidVeinCategory(registry.getJeiHelpers().getGuiHelper()));
+
+        if (!ConfigHolder.compat.hideOreVeinsCategoryInJEI) {
+            registry.addRecipeCategories(new GTOreCategory(registry.getJeiHelpers().getGuiHelper()));
+        }
+        if (!ConfigHolder.compat.hideFluidVeinsCategoryInJEI) {
+            registry.addRecipeCategories(new GTFluidVeinCategory(registry.getJeiHelpers().getGuiHelper()));
+        }
+
         registry.addRecipeCategories(new MaterialTreeCategory(registry.getJeiHelpers().getGuiHelper()));
     }
 
@@ -279,30 +287,42 @@ public class JustEnoughItemsModule extends IntegrationSubmodule implements IModP
         registry.addRecipes(materialTreeList, MaterialTreeCategory.UID);
 
         // Ore Veins
-        List<OreDepositDefinition> oreVeins = WorldGenRegistry.getOreDeposits();
-        List<GTOreInfo> oreInfoList = new ArrayList<>();
-        for (OreDepositDefinition vein : oreVeins) {
-            oreInfoList.add(new GTOreInfo(vein));
-        }
+        if (!ConfigHolder.compat.hideOreVeinsCategoryInJEI) {
+            List<OreDepositDefinition> oreVeins = WorldGenRegistry.getOreDeposits();
+            List<GTOreInfo> oreInfoList = new ArrayList<>();
+            for (OreDepositDefinition vein : oreVeins) {
+                oreInfoList.add(new GTOreInfo(vein));
+            }
 
-        String oreSpawnID = GTOreCategory.UID;
-        registry.addRecipes(oreInfoList, oreSpawnID);
-        registry.addRecipeCatalyst(MetaItems.PROSPECTOR_LV.getStackForm(), oreSpawnID);
-        registry.addRecipeCatalyst(MetaItems.PROSPECTOR_HV.getStackForm(), oreSpawnID);
-        registry.addRecipeCatalyst(MetaItems.PROSPECTOR_LUV.getStackForm(), oreSpawnID);
+            String oreSpawnID = GTOreCategory.UID;
+            registry.addRecipes(oreInfoList, oreSpawnID);
+            if (ConfigHolder.tools.enableProspectors) {
+                registry.addRecipeCatalyst(MetaItems.PROSPECTOR_LV.getStackForm(), oreSpawnID);
+                registry.addRecipeCatalyst(MetaItems.PROSPECTOR_HV.getStackForm(), oreSpawnID);
+                registry.addRecipeCatalyst(MetaItems.PROSPECTOR_LUV.getStackForm(), oreSpawnID);
+            } else {
+                registry.addRecipeCatalyst(OrePrefix.ore.getItemForm(Materials.Copper), oreSpawnID);
+            }
+        }
         // Ore Veins End
 
         // Fluid Veins
-        List<BedrockFluidDepositDefinition> fluidVeins = WorldGenRegistry.getBedrockVeinDeposits();
-        List<GTFluidVeinInfo> fluidVeinInfos = new ArrayList<>();
-        for (BedrockFluidDepositDefinition fluidVein : fluidVeins) {
-            fluidVeinInfos.add(new GTFluidVeinInfo(fluidVein));
-        }
+        if (!ConfigHolder.compat.hideFluidVeinsCategoryInJEI) {
+            List<BedrockFluidDepositDefinition> fluidVeins = WorldGenRegistry.getBedrockVeinDeposits();
+            List<GTFluidVeinInfo> fluidVeinInfos = new ArrayList<>();
+            for (BedrockFluidDepositDefinition fluidVein : fluidVeins) {
+                fluidVeinInfos.add(new GTFluidVeinInfo(fluidVein));
+            }
 
-        String fluidVeinSpawnID = GTFluidVeinCategory.UID;
-        registry.addRecipes(fluidVeinInfos, fluidVeinSpawnID);
-        registry.addRecipeCatalyst(MetaItems.PROSPECTOR_HV.getStackForm(), fluidVeinSpawnID);
-        registry.addRecipeCatalyst(MetaItems.PROSPECTOR_LUV.getStackForm(), fluidVeinSpawnID);
+            String fluidVeinSpawnID = GTFluidVeinCategory.UID;
+            registry.addRecipes(fluidVeinInfos, fluidVeinSpawnID);
+            if (ConfigHolder.tools.enableProspectors) {
+                registry.addRecipeCatalyst(MetaItems.PROSPECTOR_HV.getStackForm(), fluidVeinSpawnID);
+                registry.addRecipeCatalyst(MetaItems.PROSPECTOR_LUV.getStackForm(), fluidVeinSpawnID);
+            } else {
+                registry.addRecipeCatalyst(OrePrefix.ore.getItemForm(Materials.Oilsands), fluidVeinSpawnID);
+            }
+        }
         // Fluid Veins End
 
         ingredientRegistry = registry.getIngredientRegistry();
@@ -398,8 +418,14 @@ public class JustEnoughItemsModule extends IntegrationSubmodule implements IModP
         backIds.add(IntCircuitCategory.UID);
         backIds.add(MultiblockInfoCategory.UID);
         backIds.add(OreByProductCategory.UID);
-        backIds.add(GTOreCategory.UID);
-        backIds.add(GTFluidVeinCategory.UID);
+
+        if (!ConfigHolder.compat.hideOreVeinsCategoryInJEI) {
+            backIds.add(GTOreCategory.UID);
+        }
+        if (!ConfigHolder.compat.hideFluidVeinsCategoryInJEI) {
+            backIds.add(GTFluidVeinCategory.UID);
+        }
+
         List<String> frontIds;
         if (ConfigHolder.client.preferMaterialTreeInJEI) {
             frontIds = Collections.singletonList(MaterialTreeCategory.UID);
