@@ -506,6 +506,14 @@ public class ConfigHolder {
                     "False is incremental like the Minecraft furnace.",
                     "Default: true" })
             public boolean smoothProgressBars = true;
+
+            @Config.Comment({ "Ingredient chance/not consumed text scale in JEI recipe", "Default: 0.6" })
+            @Config.RangeDouble(min = 0.25, max = 1.2)
+            public double chanceAndNotConsumedTextScaleInJei = 0.6;
+
+            @Config.Comment({ "Fluid amount text scale in JEI recipe", "Default: 0.55" })
+            @Config.RangeDouble(min = 0.25, max = 1.2)
+            public double fluidAmountTextScaleInJei = 0.55;
         }
 
         public static class ArmorHud {

@@ -4,6 +4,7 @@ import gregtech.api.recipes.chance.boost.BoostableChanceEntry;
 import gregtech.api.recipes.chance.output.ChancedOutputLogic;
 import gregtech.api.util.TextFormattingUtil;
 import gregtech.client.utils.RenderUtil;
+import gregtech.common.ConfigHolder;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -54,20 +55,27 @@ public class FluidStackTextRenderer extends FluidStackRenderer {
 
         RenderUtil.drawFluidForGui(fluidStack, fluidStack.amount, xPosition, yPosition, 17, 17);
 
+        float amountScale = (float) ConfigHolder.client.guiConfig.fluidAmountTextScaleInJei;
+        float invAmountScale = 1.0f / amountScale;
+
         GlStateManager.pushMatrix();
-        GlStateManager.scale(0.5, 0.5, 1);
+        GlStateManager.scale(amountScale, amountScale, 1);
 
         String s = TextFormattingUtil.formatLongToCompactString(fluidStack.amount, 4) + "L";
 
         FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
-        fontRenderer.drawStringWithShadow(s, (xPosition + 6) * 2 - fontRenderer.getStringWidth(s) + 19,
-                (yPosition + 11) * 2, 0xFFFFFF);
+        fontRenderer.drawStringWithShadow(s,
+                (xPosition + 6) * invAmountScale - fontRenderer.getStringWidth(s) + 9.5f * invAmountScale,
+                (yPosition + 11) * invAmountScale, 0xFFFFFF);
 
         GlStateManager.popMatrix();
 
+        float scale = (float) ConfigHolder.client.guiConfig.chanceAndNotConsumedTextScaleInJei;
+        float invScale = 1.0f / scale;
+
         if (this.chanceBase >= 0) {
             GlStateManager.pushMatrix();
-            GlStateManager.scale(0.5, 0.5, 1);
+            GlStateManager.scale(scale, scale, 1);
             // z hackery to render the text above the item
             GlStateManager.translate(0, 0, 160);
 
@@ -79,16 +87,18 @@ public class FluidStackTextRenderer extends FluidStackRenderer {
                 s2 += "+";
             }
 
-            fontRenderer.drawStringWithShadow(s2, (xPosition + 6) * 2 - fontRenderer.getStringWidth(s2) + 19,
-                    (yPosition + 1) * 2, 0xFFFF00);
+            fontRenderer.drawStringWithShadow(s2,
+                    (xPosition + 6) * invScale - fontRenderer.getStringWidth(s2) + 9.5f * invScale,
+                    (yPosition + 1) * invScale, 0xFFFF00);
 
             GlStateManager.popMatrix();
         } else if (notConsumed) {
             GlStateManager.pushMatrix();
-            GlStateManager.scale(0.5, 0.5, 1);
+            GlStateManager.scale(scale, scale, 1);
 
-            fontRenderer.drawStringWithShadow("NC", (xPosition + 6) * 2 - fontRenderer.getStringWidth("NC") + 19,
-                    (yPosition + 1) * 2, 0xFFFF00);
+            fontRenderer.drawStringWithShadow("NC",
+                    (xPosition + 6) * invScale - fontRenderer.getStringWidth("NC") + 9.5f * invScale,
+                    (yPosition + 1) * invScale, 0xFFFF00);
 
             GlStateManager.popMatrix();
         }

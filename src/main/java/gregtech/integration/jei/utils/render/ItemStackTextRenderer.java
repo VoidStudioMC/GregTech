@@ -2,6 +2,7 @@ package gregtech.integration.jei.utils.render;
 
 import gregtech.api.recipes.chance.boost.BoostableChanceEntry;
 import gregtech.api.recipes.chance.output.ChancedOutputLogic;
+import gregtech.common.ConfigHolder;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -50,10 +51,13 @@ public class ItemStackTextRenderer extends ItemStackRenderer {
     public void render(@NotNull Minecraft minecraft, int xPosition, int yPosition, @Nullable ItemStack ingredient) {
         super.render(minecraft, xPosition, yPosition, ingredient);
 
+        float scale = (float) ConfigHolder.client.guiConfig.chanceAndNotConsumedTextScaleInJei;
+        float invScale = 1.0f / scale;
+
         if (this.chanceBase >= 0) {
             GlStateManager.disableBlend();
             GlStateManager.pushMatrix();
-            GlStateManager.scale(0.5, 0.5, 1);
+            GlStateManager.scale(scale, scale, 1);
             // z hackery to render the text above the item
             GlStateManager.translate(0, 0, 160);
 
@@ -66,21 +70,23 @@ public class ItemStackTextRenderer extends ItemStackRenderer {
             }
 
             FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
-            fontRenderer.drawStringWithShadow(s, (xPosition + 6) * 2 - fontRenderer.getStringWidth(s) + 19,
-                    (yPosition + 1) * 2, 0xFFFF00);
+            fontRenderer.drawStringWithShadow(s,
+                    (xPosition + 6) * invScale - fontRenderer.getStringWidth(s) + 9.5f * invScale,
+                    (yPosition + 1) * invScale, 0xFFFF00);
 
             GlStateManager.popMatrix();
             GlStateManager.enableBlend();
         } else if (this.notConsumed) {
             GlStateManager.disableBlend();
             GlStateManager.pushMatrix();
-            GlStateManager.scale(0.5, 0.5, 1);
+            GlStateManager.scale(scale, scale, 1);
             // z hackery to render the text above the item
             GlStateManager.translate(0, 0, 160);
 
             FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
-            fontRenderer.drawStringWithShadow("NC", (xPosition + 6) * 2 - fontRenderer.getStringWidth("NC") + 19,
-                    (yPosition + 1) * 2, 0xFFFF00);
+            fontRenderer.drawStringWithShadow("NC",
+                    (xPosition + 6) * invScale - fontRenderer.getStringWidth("NC") + 9.5f * invScale,
+                    (yPosition + 1) * invScale, 0xFFFF00);
 
             GlStateManager.popMatrix();
             GlStateManager.enableBlend();
