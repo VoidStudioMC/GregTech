@@ -93,6 +93,7 @@ public final class CustomCoilStats implements IHeatingCoilBlockStats, Comparable
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     public ActiveVariantBlockBakedModel createModel(BooleanSupplier bloomConfig) {
         return new ActiveVariantBlockBakedModel(inactive, active, bloomConfig);
     }

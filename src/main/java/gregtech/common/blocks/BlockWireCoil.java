@@ -300,6 +300,7 @@ public class BlockWireCoil extends VariantActiveBlock<BlockWireCoil.CoilType> {
                 }
 
                 @Override
+                @SideOnly(Side.CLIENT)
                 public ActiveVariantBlockBakedModel createModel(BooleanSupplier bloomConfig) {
                     return new ActiveVariantBlockBakedModel(inactive, active, bloomConfig);
                 }
