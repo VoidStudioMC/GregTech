@@ -2661,10 +2661,12 @@ gregtech.machine.steam_miner.tooltip=Добывает руды ТОЛЬКО ни
 
 # Generators
 gregtech.machine.combustion_generator.tooltip=Требуются легковоспламеняющиеся жидкости
+gregtech.machine.combustion_generator.ulv.name=Простой дизельный генератор
 gregtech.machine.combustion_generator.hv.name=Улучшенный дизельный генератор II
 gregtech.machine.combustion_generator.lv.name=Обычный дизельный генератор
 gregtech.machine.combustion_generator.mv.name=Улучшенный дизельный генератор
 gregtech.machine.steam_turbine.tooltip=Преобразует пар в EU
+gregtech.machine.steam_turbine.ulv.name=Простая паровая турбина
 gregtech.machine.steam_turbine.lv.name=Обычная паровая турбина
 gregtech.machine.steam_turbine.mv.name=Улучшенная паровая турбина
 gregtech.machine.steam_turbine.hv.name=Улучшенная паровая турбина II

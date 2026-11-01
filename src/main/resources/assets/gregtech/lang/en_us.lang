@@ -3073,12 +3073,14 @@ gregtech.machine.steam_miner.tooltip=Mines ores below the Miner!
 # Generators
 gregtech.machine.combustion_generator.tooltip=Requires flammable Liquids
 
+gregtech.machine.combustion_generator.ulv.name=Simple Combustion Generator
 gregtech.machine.combustion_generator.lv.name=Basic Combustion Generator
 gregtech.machine.combustion_generator.mv.name=Advanced Combustion Generator
 gregtech.machine.combustion_generator.hv.name=Turbo Combustion Generator
 
 gregtech.machine.steam_turbine.tooltip=Converts Steam into EU
 
+gregtech.machine.steam_turbine.ulv.name=Simple Steam Turbine
 gregtech.machine.steam_turbine.lv.name=Basic Steam Turbine
 gregtech.machine.steam_turbine.mv.name=Advanced Steam Turbine
 gregtech.machine.steam_turbine.hv.name=Turbo Steam Turbine
