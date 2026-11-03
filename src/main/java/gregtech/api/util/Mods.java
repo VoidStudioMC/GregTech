@@ -72,6 +72,7 @@ public enum Mods {
     ProjectRedCore(Names.PROJECT_RED_CORE),
     Railcraft(Names.RAILCRAFT),
     RefinedStorage(Names.REFINED_STORAGE),
+    StorageDrawers(Names.STORAGE_DRAWERS),
     TechReborn(Names.TECH_REBORN),
     TheOneProbe(Names.THE_ONE_PROBE),
     TinkersConstruct(Names.TINKERS_CONSTRUCT),
@@ -148,6 +149,7 @@ public enum Mods {
         public static final String PROJECT_RED_CORE = "projred-core";
         public static final String RAILCRAFT = "railcraft";
         public static final String REFINED_STORAGE = "refinedstorage";
+        public static final String STORAGE_DRAWERS = "storagedrawers";
         public static final String TECH_REBORN = "techreborn";
         public static final String THE_ONE_PROBE = "theoneprobe";
         public static final String TINKERS_CONSTRUCT = "tconstruct";

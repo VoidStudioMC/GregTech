@@ -9,6 +9,7 @@ import gregtech.api.mui.GTGuiTextures;
 import gregtech.api.mui.GTGuis;
 import gregtech.api.mui.sync.PagedWidgetSyncHandler;
 import gregtech.api.util.GTUtility;
+import gregtech.api.util.Mods;
 import gregtech.api.util.TextFormattingUtil;
 import gregtech.client.renderer.texture.Textures;
 import gregtech.common.inventory.handlers.SingleItemStackHandler;
@@ -24,10 +25,12 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -62,6 +65,7 @@ import com.cleanroommc.modularui.widgets.slot.ItemSlot;
 import com.cleanroommc.modularui.widgets.slot.ModularSlot;
 import com.cleanroommc.modularui.widgets.slot.SlotGroup;
 import com.google.common.base.Preconditions;
+import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerGroup;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -181,10 +185,16 @@ public class MetaTileEntityWorkbench extends MetaTileEntity {
         for (var facing : EnumFacing.VALUES) {
             var neighbor = getNeighbor(facing);
             if (neighbor == null) continue;
+            if (Mods.StorageDrawers.isModLoaded() && isDrawerStorage(neighbor)) continue;
             var handler = neighbor.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite());
             if (handler != null) handlers.add(handler);
         }
         return this.connectedInventory = new ItemHandlerList(handlers);
+    }
+
+    @Optional.Method(modid = Mods.Names.STORAGE_DRAWERS)
+    private static boolean isDrawerStorage(TileEntity tile) {
+        return tile instanceof IDrawerGroup;
     }
 
     @Override
