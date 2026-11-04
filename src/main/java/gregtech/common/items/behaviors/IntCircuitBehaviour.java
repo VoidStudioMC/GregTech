@@ -22,7 +22,6 @@ import net.minecraft.world.World;
 
 import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.api.widget.IWidget;
-import com.cleanroommc.modularui.api.widget.Interactable;
 import com.cleanroommc.modularui.drawable.ItemDrawable;
 import com.cleanroommc.modularui.factory.HandGuiData;
 import com.cleanroommc.modularui.screen.ModularPanel;
@@ -73,12 +72,14 @@ public class IntCircuitBehaviour implements IItemBehaviour, ItemUIFactory, ISubI
         for (int i = 0; i <= 32; i++) {
             int finalI = i;
             guiSyncManager.syncValue("config", i, new InteractionSyncHandler()
-                    .setOnMousePressed(b -> {
+                    .setOnMousePressed(mouseData -> {
                         ItemStack item = IntCircuitIngredient.getIntegratedCircuit(finalI);
                         item.setCount(guiData.getUsedItemStack().getCount());
-                        circuitPreview.setItem(item);
-                        if (Interactable.hasShiftDown()) panel.animateClose();
                         guiData.getPlayer().setHeldItem(guiData.getHand(), item);
+                        if (mouseData.isClient()) {
+                            circuitPreview.setItem(item);
+                            if (mouseData.shift) panel.closeIfOpen();
+                        }
                     }));
         }
 
