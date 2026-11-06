@@ -4965,6 +4965,7 @@ gregtech.multiblock.not_enough_energy=§cВНИМАНИЕ:§f Машине ну�
 gregtech.multiblock.not_enough_energy_output=§eСовет:§f Энергетический выходной разъем слишком низок!
 gregtech.multiblock.progress=Прогресс: %s%%
 gregtech.multiblock.invalid_structure=Неверная структура.
+gregtech.multiblock.incomplete_structure=Структура собрана не до конца.
 gregtech.multiblock.invalid_structure.tooltip=Этот блок является контроллером многоблочной структуры. для получения справки по созданию см. шаблон структуры в JEI.
 gregtech.multiblock.validation_failed=Неверное кол-во входов/выходов.
 gregtech.multiblock.max_energy_per_tick=Макс. EU/т: §a%s (%s§r)

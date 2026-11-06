@@ -7,6 +7,10 @@ import gregtech.api.capability.impl.ComputationRecipeLogic;
 import gregtech.api.metatileentity.MetaTileEntity;
 import gregtech.api.mui.GTByteBufAdapters;
 import gregtech.api.mui.drawable.GTObjectDrawable;
+import gregtech.api.pattern.BlockPattern;
+import gregtech.api.pattern.PatternError;
+import gregtech.api.pattern.PatternStringError;
+import gregtech.api.pattern.TraceabilityPredicate.SinglePredicateError;
 import gregtech.api.recipes.Recipe;
 import gregtech.api.recipes.RecipeMap;
 import gregtech.api.recipes.chance.output.impl.ChancedFluidOutput;
@@ -23,6 +27,7 @@ import gregtech.common.items.ToolItems;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fluids.FluidStack;
 
@@ -55,6 +60,7 @@ import java.util.function.Function;
 import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @SuppressWarnings({ "UnusedReturnValue", "unused" })
 public class MultiblockUIBuilder {
@@ -65,6 +71,11 @@ public class MultiblockUIBuilder {
     private final InternalSyncHandler syncHandler = new InternalSyncHandler();
 
     private static final int DEFAULT_MAX_RECIPE_LINES = 25;
+
+    private static final int MAX_GLOBAL_COUNT_ERROR = 0;
+    private static final int MIN_GLOBAL_COUNT_ERROR = 1;
+    private static final int MAX_LAYER_COUNT_ERROR = 2;
+    private static final int MIN_LAYER_COUNT_ERROR = 3;
 
     @Nullable
     private InternalSyncer syncer;
@@ -97,12 +108,71 @@ public class MultiblockUIBuilder {
 
     public MultiblockUIBuilder structureFormed(boolean structureFormed) {
         updateFormed(structureFormed);
-        if (!this.isStructureFormed) {
-            var base = KeyUtil.lang(TextFormatting.RED, "gregtech.multiblock.invalid_structure");
-            var hover = KeyUtil.lang(TextFormatting.GRAY,
-                    "gregtech.multiblock.invalid_structure.tooltip");
-            addHoverableKey(base, hover);
+        return this;
+    }
+
+    public MultiblockUIBuilder addStructureErrorTooltip(boolean structureFormed, @Nullable BlockPattern pattern) {
+        updateFormed(structureFormed);
+        if (this.isStructureFormed) return this;
+
+        PatternError serverError = isServer() && pattern != null ? pattern.getError() : null;
+        if (getSyncer().syncBoolean(serverError == null)) {
+            addKey(KeyUtil.lang(TextFormatting.YELLOW, "gregtech.multiblock.incomplete_structure"));
+            return this;
         }
+
+        addKey(KeyUtil.lang(TextFormatting.RED, "gregtech.multiblock.pattern.error_message_header"));
+        PatternStringError customError = serverError instanceof PatternStringError error ? error : null;
+        if (getSyncer().syncBoolean(customError != null)) {
+            String errorKey = getSyncer().<String>syncObject(() -> customError.translateKey, ByteBufAdapters.STRING);
+            addKey(KeyUtil.lang(TextFormatting.RED, errorKey));
+            return this;
+        }
+
+        SinglePredicateError countError = serverError instanceof SinglePredicateError error ? error : null;
+        boolean hasCountError = getSyncer().syncBoolean(countError != null);
+        List<ItemStack> candidates = new ArrayList<>();
+        if (isServer()) {
+            if (hasCountError &&
+                    (countError.type == MAX_GLOBAL_COUNT_ERROR || countError.type == MAX_LAYER_COUNT_ERROR)) {
+                BlockPos pos = countError.getPos();
+                MetaTileEntity part = GTUtility.getMetaTileEntity(countError.getWorld(), pos);
+                ItemStack stack = part == null ? GTUtility.toItem(countError.getWorld().getBlockState(pos)) :
+                        part.getStackForm();
+                boolean matchesError = countError.getCandidates().stream().flatMap(List::stream)
+                        .anyMatch(candidate -> ItemStack.areItemsEqual(candidate, stack));
+                if (!stack.isEmpty() && matchesError) candidates.add(stack);
+            } else {
+                for (List<ItemStack> candidate : serverError.getCandidates()) {
+                    if (!candidate.isEmpty()) candidates.add(candidate.get(0));
+                }
+            }
+        }
+        getSyncer().syncCollection(candidates, ByteBufAdapters.ITEM_STACK);
+        IKey candidateNames = KeyUtil.string(() -> candidates.stream()
+                .map(ItemStack::getDisplayName)
+                .collect(Collectors.joining(", ")));
+
+        if (hasCountError) {
+            int type = getSyncer().syncInt(() -> countError.type);
+            int limit = getSyncer().syncInt(() -> switch (countError.type) {
+                case MAX_GLOBAL_COUNT_ERROR -> countError.predicate.maxGlobalCount;
+                case MIN_GLOBAL_COUNT_ERROR -> countError.predicate.minGlobalCount;
+                case MAX_LAYER_COUNT_ERROR -> countError.predicate.maxLayerCount;
+                case MIN_LAYER_COUNT_ERROR -> countError.predicate.minLayerCount;
+                default -> -1;
+            });
+            IKey limitMessage = KeyUtil.lang(TextFormatting.RED,
+                    "gregtech.multiblock.pattern.error.limited." + type, limit);
+            addKey(candidates.isEmpty() ? limitMessage : IKey.comp(candidateNames, IKey.str(": "), limitMessage));
+            return this;
+        }
+
+        BlockPos pos = getSyncer().<BlockPos>syncObject(() -> serverError.getPos(),
+                (buffer, value) -> buffer.writeBlockPos(value), PacketBuffer::readBlockPos);
+        IKey coordinates = KeyUtil.string(pos.getX() + ", " + pos.getY() + ", " + pos.getZ());
+        IKey suggestions = IKey.comp(candidateNames, IKey.str(candidates.isEmpty() ? "..." : ", ..."));
+        addKey(KeyUtil.lang(TextFormatting.GRAY, "gregtech.multiblock.pattern.error", suggestions, coordinates));
         return this;
     }
 
