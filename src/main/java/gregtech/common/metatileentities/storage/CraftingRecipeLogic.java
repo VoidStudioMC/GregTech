@@ -17,6 +17,7 @@ import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.items.IItemHandlerModifiable;
@@ -79,6 +80,7 @@ public class CraftingRecipeLogic extends SyncHandler {
     private final IInventory craftingResultInventory = new InventoryCraftResult();
     private final CachedRecipeData cachedRecipeData;
     private final CraftingInputSlot[] inputSlots = new CraftingInputSlot[9];
+    private final NonNullList<ItemStack> lastRecipeMatrix = NonNullList.withSize(9, ItemStack.EMPTY);
 
     public CraftingRecipeLogic(World world, IItemHandlerModifiable handlers, IItemHandlerModifiable craftingMatrix) {
         this.world = world;
@@ -309,7 +311,15 @@ public class CraftingRecipeLogic extends SyncHandler {
     }
 
     public void updateCurrentRecipe() {
-        if (!cachedRecipeData.matches(craftingMatrix, world)) {
+        boolean matrixChanged = false;
+        for (int i = 0; i < craftingMatrix.getSizeInventory(); i++) {
+            ItemStack stack = craftingMatrix.getStackInSlot(i);
+            if (!ItemStack.areItemStacksEqual(stack, lastRecipeMatrix.get(i))) {
+                lastRecipeMatrix.set(i, stack.copy());
+                matrixChanged = true;
+            }
+        }
+        if (matrixChanged || !cachedRecipeData.matches(craftingMatrix, world)) {
             this.cachedRecipeData.setRecipe(CraftingManager.findMatchingRecipe(craftingMatrix, world));
         }
         IRecipe recipe = getCachedRecipe();
