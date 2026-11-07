@@ -35,6 +35,7 @@ import gregtech.common.blocks.OreItemBlock;
 import gregtech.common.blocks.StoneVariantBlock;
 import gregtech.common.items.MetaItems;
 import gregtech.common.items.ToolItems;
+import gregtech.common.items.behaviors.DataStickHandlers;
 import gregtech.common.pipelike.cable.BlockCable;
 import gregtech.common.pipelike.cable.ItemBlockCable;
 import gregtech.common.pipelike.fluidpipe.BlockFluidPipe;
@@ -443,7 +444,9 @@ public class CommonProxy {
         return itemBlock;
     }
 
-    public void onPreLoad() {}
+    public void onPreLoad() {
+        DataStickHandlers.init();
+    }
 
     public void onLoad() {
         GTDataFixers.init();

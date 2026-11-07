@@ -265,10 +265,11 @@ public class MetaTileEntityResearchStation extends RecipeMapMultiblockController
         }
         stack = syncer.syncObject(stack, ByteBufAdapters.ITEM_STACK);
         if (stack.isEmpty()) return;
-        String id = AssemblyLineManager.readResearchId(stack);
+        String id = AssemblyLineManager.peekResearchId(stack);
         if (id == null) return;
         List<String> stacks = new ArrayList<>();
         DataItemBehavior.collectResearchItems(id, stacks);
+        if (stacks.isEmpty()) return;
         stacks.remove(0);
         manager.add(KeyUtil.lang(TextFormatting.GREEN, "gregtech.machine.research_station.researching"));
         for (String line : stacks) {
