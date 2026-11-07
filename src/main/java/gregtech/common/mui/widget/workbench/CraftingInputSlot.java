@@ -10,6 +10,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemHandlerHelper;
 
+import com.cleanroommc.modularui.api.value.ISyncOrValue;
 import com.cleanroommc.modularui.api.widget.IGuiAction;
 import com.cleanroommc.modularui.api.widget.Interactable;
 import com.cleanroommc.modularui.integration.recipeviewer.RecipeViewerGhostIngredientSlot;
@@ -35,7 +36,7 @@ public class CraftingInputSlot extends Widget<CraftingOutputSlot> implements Int
 
     private CraftingInputSlot(IItemHandlerModifiable handler, int index) {
         this.syncHandler = new InputSyncHandler(handler, index);
-        setSyncHandler(this.syncHandler);
+        setSyncOrValue(this.syncHandler);
         tooltipAutoUpdate(true);
         tooltipBuilder(tooltip -> {
             if (!isSynced()) return;
@@ -69,8 +70,8 @@ public class CraftingInputSlot extends Widget<CraftingOutputSlot> implements Int
     }
 
     @Override
-    public boolean isValidSyncHandler(SyncHandler syncHandler) {
-        return syncHandler instanceof InputSyncHandler;
+    public boolean isValidSyncOrValue(@NotNull ISyncOrValue syncOrValue) {
+        return syncOrValue instanceof InputSyncHandler;
     }
 
     @Override
@@ -196,7 +197,7 @@ public class CraftingInputSlot extends Widget<CraftingOutputSlot> implements Int
         @Override
         public void detectAndSendChanges(boolean init) {
             ItemStack itemStack = getStack();
-            if (itemStack.isEmpty() && this.lastStoredItem.isEmpty()) return;
+            if (!init && itemStack.isEmpty() && this.lastStoredItem.isEmpty()) return;
             if (init || !ItemHandlerHelper.canItemStacksStack(this.lastStoredItem, itemStack)) {
                 this.listener.onChange(itemStack, false, false, init);
                 this.lastStoredItem = itemStack.isEmpty() ? ItemStack.EMPTY : itemStack.copy();

@@ -19,8 +19,8 @@ import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.crafting.IShapedRecipe;
 import net.minecraftforge.items.IItemHandlerModifiable;
+import net.minecraftforge.items.ItemHandlerHelper;
 
 import com.cleanroommc.modularui.network.NetworkUtils;
 import com.cleanroommc.modularui.value.sync.SyncHandler;
@@ -72,7 +72,6 @@ public class CraftingRecipeLogic extends SyncHandler {
     private final Object2IntMap<ItemStack> requiredItems = new Object2IntOpenCustomHashMap<>(
             this.strategy);
 
-    private final Int2IntMap compactedIndexes = new Int2IntArrayMap(9);
     private final Int2IntMap slotMap = new Int2IntArrayMap();
 
     private final Int2ObjectMap<Object2BooleanMap<ItemStack>> replaceAttemptMap = new Int2ObjectArrayMap<>();
@@ -125,7 +124,9 @@ public class CraftingRecipeLogic extends SyncHandler {
     }
 
     public boolean performRecipe() {
-        return isRecipeValid() && attemptMatchRecipe() && consumeRecipeItems();
+        if (!isRecipeValid()) return false;
+        syncInputSlots(updateInputSlots());
+        return attemptMatchRecipe() && consumeRecipeItems();
     }
 
     public boolean isRecipeValid() {
@@ -158,7 +159,9 @@ public class CraftingRecipeLogic extends SyncHandler {
             var slotList = stackLookupMap.get(stack);
 
             for (int slot : slotList) {
+                if (requestedAmount == 0) break;
                 var extracted = availableHandlers.extractItem(slot, requestedAmount, true);
+                if (extracted.isEmpty()) continue;
                 gatheredItems.put(slot, extracted.getCount());
                 requestedAmount -= extracted.getCount();
             }
@@ -168,20 +171,16 @@ public class CraftingRecipeLogic extends SyncHandler {
 
         for (var gathered : gatheredItems.entrySet()) {
             int slot = gathered.getKey(), amount = gathered.getValue();
-            var stack = availableHandlers.getStackInSlot(slot);
-            boolean hasContainer = stack.getItem().hasContainerItem(stack);
-
-            if (!hasContainer) {
-                // not a transmutable item (damagable tool, etc), extract normally
-                availableHandlers.extractItem(slot, amount, false);
-            } else if (stack.getCount() > 1) {
-                // only some stacks are transmuted, try insert non-empty stacks
-                ItemStack newStack = ForgeHooks.getContainerItem(stack.splitStack(1));
-                if (!newStack.isEmpty())
-                    GTTransferUtils.insertItem(this.availableHandlers, newStack, false);
-            } else {
-                // all stacks are transmuted, just replace
-                availableHandlers.setStackInSlot(slot, ForgeHooks.getContainerItem(stack));
+            if (amount <= 0) continue;
+            ItemStack extracted = availableHandlers.extractItem(slot, amount, false);
+            if (!extracted.isEmpty() && extracted.getItem().hasContainerItem(extracted)) {
+                for (int unit = 0; unit < extracted.getCount(); unit++) {
+                    ItemStack remainder = ForgeHooks.getContainerItem(GTUtility.copy(1, extracted));
+                    remainder = availableHandlers.insertItem(slot, remainder, false);
+                    remainder = GTTransferUtils.insertItem(this.availableHandlers, remainder, false);
+                    if (!remainder.isEmpty())
+                        ItemHandlerHelper.giveItemToPlayer(getSyncManager().getPlayer(), remainder);
+                }
             }
         }
         // we've checked everything, return true
@@ -204,7 +203,6 @@ public class CraftingRecipeLogic extends SyncHandler {
         ItemStack substitute = ItemStack.EMPTY;
 
         var recipe = getCachedRecipe();
-        int index = compactedIndexes.get(craftingIndex);
 
         // iterate stored items to find equivalent
         for (int i = 0; i < this.availableHandlers.getSlots(); i++) {
@@ -233,17 +231,11 @@ public class CraftingRecipeLogic extends SyncHandler {
                 // recipe ingredients recursively, so we fail early here if none of the recipes ingredients can
                 // take the stack
                 boolean matched = false;
-                if (!(recipe instanceof IShapedRecipe)) {
-                    for (Ingredient ing : recipe.getIngredients()) {
-                        if (ing.apply(itemStack)) {
-                            matched = true;
-                            break;
-                        }
+                for (Ingredient ing : recipe.getIngredients()) {
+                    if (ing.apply(itemStack)) {
+                        matched = true;
+                        break;
                     }
-                } else {
-                    // for shaped recipes, check the exact ingredient instead
-                    // ingredients should be in the correct order
-                    matched = cachedRecipeData.canIngredientApply(index, itemStack);
                 }
                 if (!matched) {
                     map.put(GTUtility.copy(1, itemStack), false);
@@ -251,23 +243,29 @@ public class CraftingRecipeLogic extends SyncHandler {
                 }
             }
 
-            ItemStack previousResult = recipe.getCraftingResult(craftingMatrix);
+            // Include units already selected for earlier crafting slots before accepting this variant.
+            int requiredCount = requiredItems.getOrDefault(itemStack, 0) + 1;
+            if (!simulateExtractItem(craftingIndex, itemStack, requiredCount)) continue;
 
-            // update item in slot, and check that recipe matches and output item is equal to the expected one
-            craftingMatrix.setInventorySlotContents(craftingIndex, itemStack);
-            var newResult = recipe.getCraftingResult(craftingMatrix);
-            // this will send packets every tick for the toolbelt, not sure what can be done
-            if ((cachedRecipeData.matches(craftingMatrix, world) &&
-                    ItemStack.areItemStacksEqual(newResult, previousResult)) ||
-                    recipe instanceof ShapedOreEnergyTransferRecipe) {
-                // ingredient matched, return the substitute
-                craftingMatrix.setInventorySlotContents(craftingIndex, stack);
-                map.put(GTUtility.copy(1, itemStack), true);
-                substitute = itemStack;
-                break;
+            ItemStack previousResult = recipe.getCraftingResult(craftingMatrix);
+            ItemStack previousStack = craftingMatrix.getStackInSlot(craftingIndex);
+
+            // Check the actual crafting position, including mirrored and shapeless layouts.
+            try {
+                craftingMatrix.setInventorySlotContents(craftingIndex, itemStack);
+                var newResult = recipe.getCraftingResult(craftingMatrix);
+                // this will send packets every tick for the toolbelt, not sure what can be done
+                if ((cachedRecipeData.matches(craftingMatrix, world) &&
+                        ItemStack.areItemStacksEqual(newResult, previousResult)) ||
+                        recipe instanceof ShapedOreEnergyTransferRecipe) {
+                    map.put(GTUtility.copy(1, itemStack), true);
+                    substitute = itemStack;
+                    break;
+                }
+                map.put(GTUtility.copy(1, itemStack), false);
+            } finally {
+                craftingMatrix.setInventorySlotContents(craftingIndex, previousStack);
             }
-            map.put(GTUtility.copy(1, itemStack), false);
-            craftingMatrix.setInventorySlotContents(craftingIndex, stack);
         }
         return substitute;
     }
@@ -291,7 +289,7 @@ public class CraftingRecipeLogic extends SyncHandler {
             if (slotStack.getItem() instanceof ItemGTToolbelt) {
                 ItemGTToolbelt.setCraftingSlot(slotMap.get(slot), (EntityPlayerMP) getSyncManager().getPlayer());
             }
-            if (cachedRecipeData.canIngredientApply(compactedIndexes.get(craftingIndex), slotStack)) {
+            if (matchesAtCraftingSlot(craftingIndex, slotStack)) {
                 extracted += slotStack.getCount();
                 if (extracted >= count) return true;
             }
@@ -300,16 +298,23 @@ public class CraftingRecipeLogic extends SyncHandler {
         return false;
     }
 
+    private boolean matchesAtCraftingSlot(int craftingIndex, ItemStack stack) {
+        ItemStack previousStack = craftingMatrix.getStackInSlot(craftingIndex);
+        try {
+            craftingMatrix.setInventorySlotContents(craftingIndex, stack);
+            return cachedRecipeData.matches(craftingMatrix, world);
+        } finally {
+            craftingMatrix.setInventorySlotContents(craftingIndex, previousStack);
+        }
+    }
+
     public void updateCurrentRecipe() {
         if (!cachedRecipeData.matches(craftingMatrix, world)) {
-            IRecipe newRecipe = CraftingManager.findMatchingRecipe(craftingMatrix, world);
-            ItemStack resultStack = ItemStack.EMPTY;
-            if (newRecipe != null) {
-                resultStack = newRecipe.getCraftingResult(craftingMatrix);
-            }
-            this.craftingResultInventory.setInventorySlotContents(0, resultStack);
-            this.cachedRecipeData.setRecipe(newRecipe);
+            this.cachedRecipeData.setRecipe(CraftingManager.findMatchingRecipe(craftingMatrix, world));
         }
+        IRecipe recipe = getCachedRecipe();
+        this.craftingResultInventory.setInventorySlotContents(0,
+                recipe == null ? ItemStack.EMPTY : recipe.getCraftingResult(craftingMatrix));
     }
 
     public IRecipe getCachedRecipe() {
@@ -330,10 +335,12 @@ public class CraftingRecipeLogic extends SyncHandler {
             return;
         }
 
-        Int2BooleanMap map = updateInputSlots();
+        syncInputSlots(updateInputSlots());
+    }
 
-        // only sync when something has changed
-        if (!map.isEmpty()) {
+    private void syncInputSlots(Int2BooleanMap map) {
+        // Availability can also change during a click, before the next GUI tick.
+        if (!map.isEmpty() && isValid()) {
             syncToClient(UPDATE_INGREDIENTS, buffer -> {
                 buffer.writeByte(map.size());
                 for (var set : map.entrySet()) {
@@ -350,12 +357,10 @@ public class CraftingRecipeLogic extends SyncHandler {
      * @return a map of slots that has changed since last time, if any
      */
     private Int2BooleanMap updateInputSlots() {
-        compactedIndexes.clear();
         requiredItems.clear();
         refreshStackMap();
 
         Int2BooleanMap map = new Int2BooleanArrayMap();
-        int next = 0;
         for (CraftingInputSlot slot : this.inputSlots) {
             boolean hadIngredients = slot.hasIngredients;
 
@@ -369,7 +374,6 @@ public class CraftingRecipeLogic extends SyncHandler {
                 continue;
             }
 
-            compactedIndexes.put(slot.getIndex(), next++);
             int count = requiredItems.getOrDefault(slotStack, 0) + 1;
             slot.hasIngredients = simulateExtractItem(slot.getIndex(), slotStack, count);
 
@@ -381,7 +385,9 @@ public class CraftingRecipeLogic extends SyncHandler {
                 if (!substitute.isEmpty()) {
                     count = requiredItems.getOrDefault(substitute, 0) + 1;
                     slot.hasIngredients = simulateExtractItem(slot.getIndex(), substitute, count);
-                    requiredItems.put(GTUtility.copy(1, substitute), count);
+                    if (slot.hasIngredients) {
+                        requiredItems.put(GTUtility.copy(1, substitute), count);
+                    }
                 }
             }
 

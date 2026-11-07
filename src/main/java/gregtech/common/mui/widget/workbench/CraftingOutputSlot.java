@@ -16,6 +16,7 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemHandlerHelper;
 
+import com.cleanroommc.modularui.api.value.ISyncOrValue;
 import com.cleanroommc.modularui.api.widget.Interactable;
 import com.cleanroommc.modularui.integration.recipeviewer.RecipeViewerIngredientProvider;
 import com.cleanroommc.modularui.network.NetworkUtils;
@@ -46,7 +47,7 @@ public class CraftingOutputSlot extends Widget<CraftingOutputSlot> implements In
 
     public CraftingOutputSlot(IntSyncValue amountCrafted, MetaTileEntityWorkbench workbench) {
         this.syncHandler = new CraftingSlotSH(amountCrafted, workbench);
-        setSyncHandler(this.syncHandler);
+        setSyncOrValue(this.syncHandler);
         tooltipAutoUpdate(true);
         tooltipBuilder(tooltip -> {
             if (!isSynced()) return;
@@ -57,8 +58,8 @@ public class CraftingOutputSlot extends Widget<CraftingOutputSlot> implements In
     }
 
     @Override
-    public boolean isValidSyncHandler(SyncHandler syncHandler) {
-        return syncHandler instanceof CraftingSlotSH;
+    public boolean isValidSyncOrValue(@NotNull ISyncOrValue syncOrValue) {
+        return syncOrValue instanceof CraftingSlotSH;
     }
 
     @Override
@@ -123,40 +124,44 @@ public class CraftingOutputSlot extends Widget<CraftingOutputSlot> implements In
             if (id == MOUSE_CLICK) {
                 EntityPlayer player = getSyncManager().getPlayer();
                 ForgeHooks.setCraftingPlayer(player);
-                var data = MouseData.readPacket(buf);
+                try {
+                    var data = MouseData.readPacket(buf);
+                    recipeLogic.updateCurrentRecipe();
+                    if (recipeLogic.isRecipeValid()) {
+                        ItemStack outputStack = getOutputStack().copy();
+                        boolean hasSpace = data.shift ? quickTransfer(outputStack, true) :
+                                this.slot.canTakeStack(player);
+                        if (hasSpace && recipeLogic.performRecipe()) {
+                            handleItemCraft(outputStack, player);
 
-                if (recipeLogic.isRecipeValid()) {
-                    ItemStack outputStack = getOutputStack();
-                    boolean hasSpace;
-                    if (data.shift) {
-                        hasSpace = quickTransfer(getOutputStack(), true);
-                    } else {
-                        hasSpace = this.slot.canTakeStack(player);
-                    }
-                    if (hasSpace && recipeLogic.performRecipe()) {
-                        handleItemCraft(outputStack, player);
-
-                        if (data.shift) {
-                            ItemStack finalStack = outputStack.copy();
-                            while (quickTransfer(finalStack, true) &&
-                                    canStack(finalStack, outputStack) &&
-                                    recipeLogic.performRecipe()) {
-                                finalStack.setCount(finalStack.getCount() + outputStack.getCount());
-                                handleItemCraft(outputStack, player);
+                            if (data.shift) {
+                                ItemStack finalStack = outputStack.copy();
+                                while (true) {
+                                    recipeLogic.updateCurrentRecipe();
+                                    ItemStack nextOutput = getOutputStack().copy();
+                                    if (!recipeLogic.isRecipeValid() || !canStack(finalStack, nextOutput)) break;
+                                    ItemStack combined = finalStack.copy();
+                                    combined.grow(nextOutput.getCount());
+                                    if (!quickTransfer(combined, true) || !recipeLogic.performRecipe()) break;
+                                    finalStack = combined;
+                                    handleItemCraft(nextOutput, player);
+                                }
+                                quickTransfer(finalStack, false);
+                                if (!finalStack.isEmpty()) ItemHandlerHelper.giveItemToPlayer(player, finalStack);
+                            } else {
+                                syncToClient(SYNC_STACK, packet -> syncCursorStack(packet, outputStack));
                             }
-                            quickTransfer(finalStack, false);
-                        } else {
-                            syncToClient(SYNC_STACK, this::syncCursorStack);
                         }
                     }
+                } finally {
+                    ForgeHooks.setCraftingPlayer(null);
                 }
-                ForgeHooks.setCraftingPlayer(null);
             }
         }
 
         private static boolean canStack(ItemStack a, ItemStack b) {
-            return ItemHandlerHelper.canItemStacksStackRelaxed(a, b) &&
-                    a.getCount() + b.getCount() < b.getMaxStackSize();
+            return ItemHandlerHelper.canItemStacksStack(a, b) &&
+                    a.getCount() + b.getCount() <= b.getMaxStackSize();
         }
 
         private boolean insertStack(ItemStack fromStack, ModularSlot toSlot, boolean simulate) {
@@ -182,7 +187,7 @@ public class CraftingOutputSlot extends Widget<CraftingOutputSlot> implements In
                 return fromStack.isEmpty();
             } else if (toStack.isEmpty()) {
                 if (simulate) return true;
-                int maxSize = Math.max(toSlot.getSlotStackLimit(), fromStack.getCount());
+                int maxSize = Math.min(toSlot.getSlotStackLimit(), fromStack.getMaxStackSize());
                 toSlot.putStack(fromStack.splitStack(maxSize));
                 return fromStack.isEmpty();
             }
@@ -190,6 +195,18 @@ public class CraftingOutputSlot extends Widget<CraftingOutputSlot> implements In
         }
 
         public boolean quickTransfer(ItemStack fromStack, boolean simulate) {
+            if (simulate) {
+                int remaining = fromStack.getCount();
+                for (ModularSlot toSlot : this.shiftClickSlots) {
+                    if (!toSlot.isEnabled() || !toSlot.isItemValid(fromStack)) continue;
+                    ItemStack present = toSlot.getStack();
+                    if (!present.isEmpty() && !ItemHandlerHelper.canItemStacksStack(fromStack, present)) continue;
+                    int limit = Math.min(toSlot.getSlotStackLimit(), fromStack.getMaxStackSize());
+                    remaining -= Math.max(0, limit - present.getCount());
+                    if (remaining <= 0) return true;
+                }
+                return false;
+            }
             List<ModularSlot> emptySlots = new ArrayList<>();
             for (ModularSlot toSlot : this.shiftClickSlots) {
                 if (toSlot.isEnabled() && toSlot.isItemValid(fromStack)) {
@@ -218,10 +235,10 @@ public class CraftingOutputSlot extends Widget<CraftingOutputSlot> implements In
             }
         }
 
-        private void syncCursorStack(PacketBuffer buf) {
+        private void syncCursorStack(PacketBuffer buf, ItemStack outStack) {
             ItemStack curStack = getSyncManager().getCursorItem();
-            ItemStack outStack = this.slot.getStack();
-            if (this.slot.canTakeStack(getSyncManager().getPlayer())) {
+            if (curStack.isEmpty() || (ItemHandlerHelper.canItemStacksStack(curStack, outStack) &&
+                    curStack.getCount() + outStack.getCount() <= outStack.getMaxStackSize())) {
                 ItemStack toSync = outStack.copy();
                 int combined = curStack.getCount() + outStack.getCount();
                 // clamp to max stack size
@@ -250,8 +267,7 @@ public class CraftingOutputSlot extends Widget<CraftingOutputSlot> implements In
                 if (!cachedRecipe.isDynamic()) {
                     player.unlockRecipes(Lists.newArrayList(cachedRecipe));
                 }
-                ItemStack resultStack = cachedRecipe.getCraftingResult(inventoryCrafting);
-                this.slot.notifyRecipePerformed(resultStack);
+                this.slot.notifyRecipePerformed(craftedStack);
             }
         }
     }
