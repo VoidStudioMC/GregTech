@@ -3,6 +3,7 @@ package gregtech.api.capability.impl;
 import gregtech.api.GTValues;
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.IElectricItem;
+import gregtech.common.ConfigHolder;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -27,16 +28,23 @@ public class ElectricItem implements IElectricItem, ICapabilityProvider {
 
     protected final boolean chargeable;
     protected final boolean canProvideEnergyExternally;
+    private final boolean lowerTierChargeable;
 
     protected final List<BiConsumer<ItemStack, Long>> listeners = new ArrayList<>();
 
     public ElectricItem(ItemStack itemStack, long maxCharge, int tier, boolean chargeable,
                         boolean canProvideEnergyExternally) {
+        this(itemStack, maxCharge, tier, chargeable, canProvideEnergyExternally, false);
+    }
+
+    public ElectricItem(ItemStack itemStack, long maxCharge, int tier, boolean chargeable,
+                        boolean canProvideEnergyExternally, boolean lowerTierChargeable) {
         this.itemStack = itemStack;
         this.maxCharge = maxCharge;
         this.tier = tier;
         this.chargeable = chargeable;
         this.canProvideEnergyExternally = canProvideEnergyExternally;
+        this.lowerTierChargeable = ConfigHolder.tools.lowerTierCharge && lowerTierChargeable;
     }
 
     @Override
@@ -102,6 +110,11 @@ public class ElectricItem implements IElectricItem, ICapabilityProvider {
     @Override
     public boolean chargeable() {
         return chargeable;
+    }
+
+    @Override
+    public boolean lowerTierChargeable() {
+        return lowerTierChargeable;
     }
 
     @Override

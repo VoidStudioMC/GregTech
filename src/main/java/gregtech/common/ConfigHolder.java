@@ -757,6 +757,11 @@ public class ConfigHolder {
         @Config.RequiresMcRestart
         @Config.Comment({ "Whether to enable electric prospector scanners in the game?", "Default: true" })
         public boolean enableProspectors = true;
+
+        @Config.Comment({
+                "Whether to enable charging of tools and armor in battery chargers at a level below their voltage level?",
+                "Default: false" })
+        public boolean lowerTierCharge = false;
     }
 
     public static class ArmorHud {

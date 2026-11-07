@@ -65,7 +65,7 @@ public abstract class ArmorLogicSuite implements ISpecialArmorLogic, IItemHUDPro
 
     @Override
     public void addToolComponents(ArmorMetaValueItem mvi) {
-        mvi.addComponents(new ElectricStats(maxCapacity, tier, true, false) {
+        mvi.addComponents(new ElectricStats(maxCapacity, tier, true, false, true) {
 
             @Override
             public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand) {

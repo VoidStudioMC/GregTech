@@ -1,8 +1,6 @@
 package gregtech.common.metatileentities.electric;
 
 import gregtech.api.GTValues;
-import gregtech.api.capability.GregtechCapabilities;
-import gregtech.api.capability.IElectricItem;
 import gregtech.api.capability.impl.EnergyContainerBatteryCharger;
 import gregtech.api.gui.GuiTextures;
 import gregtech.api.gui.ModularUI;
@@ -60,8 +58,7 @@ public class MetaTileEntityCharger extends TieredMetaTileEntity {
             @NotNull
             @Override
             public ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
-                IElectricItem electricItem = stack.getCapability(GregtechCapabilities.CAPABILITY_ELECTRIC_ITEM, null);
-                if ((electricItem != null && getTier() >= electricItem.getTier()) ||
+                if (EnergyContainerBatteryCharger.getBatteryContainer(stack, getTier()) != null ||
                         (ConfigHolder.compat.energy.nativeEUToFE &&
                                 stack.hasCapability(CapabilityEnergy.ENERGY, null))) {
                     return super.insertItem(slot, stack, simulate);

@@ -41,12 +41,19 @@ public class ElectricStats implements IItemComponent, IItemCapabilityProvider, I
 
     public final boolean chargeable;
     public final boolean dischargeable;
+    private final boolean lowerTierChargeable;
 
     public ElectricStats(long maxCharge, long tier, boolean chargeable, boolean dischargeable) {
+        this(maxCharge, tier, chargeable, dischargeable, false);
+    }
+
+    public ElectricStats(long maxCharge, long tier, boolean chargeable, boolean dischargeable,
+                         boolean lowerTierChargeable) {
         this.maxCharge = maxCharge;
         this.tier = (int) tier;
         this.chargeable = chargeable;
         this.dischargeable = dischargeable;
+        this.lowerTierChargeable = lowerTierChargeable;
     }
 
     @Override
@@ -203,11 +210,15 @@ public class ElectricStats implements IItemComponent, IItemCapabilityProvider, I
 
     @Override
     public ICapabilityProvider createProvider(ItemStack itemStack) {
-        return new ElectricItem(itemStack, maxCharge, tier, chargeable, dischargeable);
+        return new ElectricItem(itemStack, maxCharge, tier, chargeable, dischargeable, lowerTierChargeable);
     }
 
     public static ElectricStats createElectricItem(long maxCharge, long tier) {
-        return new ElectricStats(maxCharge, tier, true, false);
+        return createElectricItem(maxCharge, tier, false);
+    }
+
+    public static ElectricStats createElectricItem(long maxCharge, long tier, boolean lowerTierChargeable) {
+        return new ElectricStats(maxCharge, tier, true, false, lowerTierChargeable);
     }
 
     public static ElectricStats createRechargeableBattery(long maxCharge, int tier) {

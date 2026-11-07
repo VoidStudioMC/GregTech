@@ -656,7 +656,7 @@ public interface IGTTool extends ItemUIFactory, IAEWrench, IToolWrench, IToolHam
     default ICapabilityProvider definition$initCapabilities(ItemStack stack, @Nullable NBTTagCompound nbt) {
         List<ICapabilityProvider> providers = new ArrayList<>();
         if (isElectric()) {
-            providers.add(ElectricStats.createElectricItem(0L, getElectricTier()).createProvider(stack));
+            providers.add(ElectricStats.createElectricItem(0L, getElectricTier(), true).createProvider(stack));
         }
         for (IToolBehavior behavior : getBehaviors(stack)) {
             ICapabilityProvider behaviorProvider = behavior.createProvider(stack, nbt);

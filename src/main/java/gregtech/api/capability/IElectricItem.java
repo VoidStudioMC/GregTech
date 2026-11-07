@@ -17,6 +17,13 @@ public interface IElectricItem {
     boolean chargeable();
 
     /**
+     * Whether a dedicated Charger may charge this item at a tier below the item's tier.
+     */
+    default boolean lowerTierChargeable() {
+        return false;
+    }
+
+    /**
      * Adds charge listener to this electric item
      *
      * @param chargeListener listener will be called when charge changes

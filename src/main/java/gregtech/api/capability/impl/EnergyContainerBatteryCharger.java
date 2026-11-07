@@ -55,13 +55,14 @@ public class EnergyContainerBatteryCharger extends EnergyContainerHandler {
             long distributed = energy / batteries.size();
 
             for (Object item : batteries) {
-                if (item instanceof IElectricItem) {
-                    IElectricItem electricItem = (IElectricItem) item;
-                    energy -= electricItem.charge(
-                            Math.min(distributed, GTValues.V[electricItem.getTier()] * AMPS_PER_BATTERY), getTier(),
-                            true, false);
-                } else if (item instanceof IEnergyStorage) {
-                    IEnergyStorage energyStorage = (IEnergyStorage) item;
+                if (item instanceof IElectricItem electricItem) {
+                    int itemTier = electricItem.getTier();
+                    int transferTier = Math.min(itemTier, getTier());
+                    long transferLimit = GTValues.V[transferTier] * AMPS_PER_BATTERY;
+
+                    energy -= electricItem.charge(Math.min(distributed, transferLimit),
+                            Math.max(getTier(), itemTier), true, false);
+                } else if (item instanceof IEnergyStorage energyStorage) {
                     energy -= FeCompat.insertEu(energyStorage,
                             Math.min(distributed, GTValues.V[getTier()] * AMPS_PER_BATTERY));
                 }
@@ -160,8 +161,12 @@ public class EnergyContainerBatteryCharger extends EnergyContainerHandler {
     }
 
     public IElectricItem getBatteryContainer(ItemStack itemStack) {
+        return getBatteryContainer(itemStack, getTier());
+    }
+
+    public static IElectricItem getBatteryContainer(ItemStack itemStack, int chargerTier) {
         IElectricItem electricItem = itemStack.getCapability(GregtechCapabilities.CAPABILITY_ELECTRIC_ITEM, null);
-        if (electricItem != null && getTier() >= electricItem.getTier())
+        if (electricItem != null && (chargerTier >= electricItem.getTier() || electricItem.lowerTierChargeable()))
             return electricItem;
         return null;
     }
