@@ -82,8 +82,15 @@ public class MultiblockUIFactory {
         warning.setAction(this.warningText);
         warning.onRebuild(() -> warning.updateFormed(mte.isStructureFormed()));
 
+        MultiblockUIBuilder structureError = builder();
+        structureError.sync("structure_error", syncManager);
+        if (errorText != NO_OP) {
+            structureError.setAction(builder -> builder.addStructureErrorTooltip(mte.isStructureFormed(),
+                    mte.structurePattern));
+        }
+
         IDrawable indicator = new DynamicDrawable(() -> {
-            if (!error.isEmpty()) {
+            if (!error.isEmpty() || !structureError.isEmpty()) {
                 return GTGuiTextures.GREGTECH_LOGO_BLINKING_RED;
             } else if (!warning.isEmpty()) {
                 return GTGuiTextures.GREGTECH_LOGO_BLINKING_YELLOW;
@@ -99,8 +106,9 @@ public class MultiblockUIFactory {
                 .overlay(indicator)
                 .tooltipAutoUpdate(true)
                 .tooltipBuilder(t -> {
-                    if (!error.isEmpty()) {
+                    if (!error.isEmpty() || !structureError.isEmpty()) {
                         error.build(t);
+                        structureError.build(t);
                     } else if (!warning.isEmpty()) {
                         warning.build(t);
                     }

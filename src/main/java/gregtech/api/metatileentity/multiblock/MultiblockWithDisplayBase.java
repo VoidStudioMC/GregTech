@@ -375,7 +375,7 @@ public abstract class MultiblockWithDisplayBase extends MultiblockControllerBase
     protected void configureDisplayText(MultiblockUIBuilder builder) {}
 
     protected void configureErrorText(MultiblockUIBuilder builder) {
-        builder.addStructureErrorTooltip(isStructureFormed(), structurePattern);
+        builder.structureFormed(isStructureFormed());
         if (hasMufflerMechanics())
             builder.addMufflerObstructedLine(!isMufflerFaceFree());
         if (hasMaintenanceMechanics())
