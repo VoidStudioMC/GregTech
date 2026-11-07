@@ -461,6 +461,10 @@ public class MaterialRecipeHandler {
                         ingotStack, "XXX", "XXX", "XXX", 'X', new UnificationEntry(orePrefix, material));
             }
 
+            ModHandler.addShapedRecipe(String.format("ingot_to_nugget_%s", material),
+                    GTUtility.copy(9, nuggetStack), "sI",
+                    'I', ingotStack);
+
             COMPRESSOR_RECIPES.recipeBuilder()
                     .input(nugget, material, 9)
                     .output(ingot, material)
