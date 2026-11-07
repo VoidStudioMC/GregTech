@@ -107,6 +107,7 @@ public class MetaTileEntityCokeOven extends RecipeMapPrimitiveMultiblockControll
                 .disableDisplay()
                 .setSize(176, 166)
                 .addScreenChildren((parent, syncManager) -> {
+                    var creosoteTank = exportFluids.getTankAt(0);
                     parent.child(IKey.lang(getMetaFullName()).asWidget().pos(5, 5))
                             .child(new ItemSlot()
                                     .slot(new ModularSlot(importItems, 0)
@@ -125,10 +126,12 @@ public class MetaTileEntityCokeOven extends RecipeMapPrimitiveMultiblockControll
                                     .overlay(GTGuiTextures.PRIMITIVE_LARGE_FLUID_TANK_OVERLAY.asIcon()
                                             .alignment(Alignment.CenterLeft)
                                             .marginLeft(1))
-                                    .syncHandler(GTFluidSlot.sync(exportFluids.getTankAt(0))
+                                    .syncHandler(GTFluidSlot.sync(creosoteTank)
                                             .drawAlwaysFull(false)
                                             .showAmountOnSlot(false)
                                             .accessibility(true, false))
+                                    .tooltipBuilder(tooltip -> tooltip.addLine(IKey.lang("gregtech.fluid.amount",
+                                            creosoteTank.getFluidAmount(), creosoteTank.getCapacity())))
                                     .pos(134, 13)
                                     .size(20, 58));
                 });
