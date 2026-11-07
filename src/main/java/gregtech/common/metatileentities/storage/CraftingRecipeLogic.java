@@ -5,6 +5,7 @@ import gregtech.api.util.DummyContainer;
 import gregtech.api.util.GTTransferUtils;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.ItemStackHashStrategy;
+import gregtech.common.crafting.FluidReplaceRecipe;
 import gregtech.common.crafting.ShapedOreEnergyTransferRecipe;
 import gregtech.common.mui.widget.workbench.CraftingInputSlot;
 
@@ -20,6 +21,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemHandlerHelper;
 
@@ -175,7 +177,9 @@ public class CraftingRecipeLogic extends SyncHandler {
             int slot = gathered.getKey(), amount = gathered.getValue();
             if (amount <= 0) continue;
             ItemStack extracted = availableHandlers.extractItem(slot, amount, false);
-            if (!extracted.isEmpty() && extracted.getItem().hasContainerItem(extracted)) {
+            if (!extracted.isEmpty() && extracted.getItem().hasContainerItem(extracted) &&
+                    !(getCachedRecipe() instanceof FluidReplaceRecipe &&
+                            extracted.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null))) {
                 for (int unit = 0; unit < extracted.getCount(); unit++) {
                     ItemStack remainder = ForgeHooks.getContainerItem(GTUtility.copy(1, extracted));
                     remainder = availableHandlers.insertItem(slot, remainder, false);
