@@ -36,6 +36,16 @@ public class FilteredItemHandler extends GTItemStackHandler {
         return this;
     }
 
+    @NotNull
+    @Override
+    public ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
+        if (!stack.isEmpty() && !isItemValid(slot, stack)) {
+            return stack;
+        }
+
+        return super.insertItem(slot, stack, simulate);
+    }
+
     @Override
     public boolean isItemValid(int slot, @NotNull ItemStack stack) {
         return fillPredicate == null || fillPredicate.test(stack);
