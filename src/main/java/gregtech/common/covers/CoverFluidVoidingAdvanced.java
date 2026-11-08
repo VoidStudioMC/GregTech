@@ -3,6 +3,7 @@ package gregtech.common.covers;
 import gregtech.api.cover.CoverDefinition;
 import gregtech.api.cover.CoverableView;
 import gregtech.api.mui.GTGuiTextures;
+import gregtech.api.util.FluidStackHashStrategy;
 import gregtech.api.util.GTTransferUtils;
 import gregtech.client.renderer.texture.Textures;
 
@@ -30,6 +31,7 @@ import com.cleanroommc.modularui.value.sync.PanelSyncManager;
 import com.cleanroommc.modularui.value.sync.StringSyncValue;
 import com.cleanroommc.modularui.widgets.layout.Flow;
 import com.cleanroommc.modularui.widgets.textfield.TextFieldWidget;
+import it.unimi.dsi.fastutil.objects.Object2LongLinkedOpenCustomHashMap;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Predicate;
@@ -37,11 +39,11 @@ import java.util.function.Predicate;
 public class CoverFluidVoidingAdvanced extends CoverFluidVoiding {
 
     protected VoidingMode voidingMode = VoidingMode.VOID_ANY;
-    protected int transferAmount = 0;
 
     public CoverFluidVoidingAdvanced(@NotNull CoverDefinition definition, @NotNull CoverableView coverableView,
                                      @NotNull EnumFacing attachedSide) {
         super(definition, coverableView, attachedSide);
+        this.fluidFilterContainer.setMaxTransferSize(getMaxTransferRate());
     }
 
     @Override
@@ -55,16 +57,16 @@ public class CoverFluidVoidingAdvanced extends CoverFluidVoiding {
             case VOID_ANY -> GTTransferUtils.transferFluids(myFluidHandler, nullFluidTank, Integer.MAX_VALUE,
                     fluidFilterContainer::test);
             case VOID_OVERFLOW -> voidOverflow(myFluidHandler, fluidFilterContainer::test,
-                    this.transferAmount);
+                    getTransferAmount());
         }
     }
 
     /**
-     * Performs one tick worth of Keep Exact behavior.
+     * Voids fluid above the retained amount, summed across drainable tanks for each fluid.
      *
      * @param sourceHandler source(s) to move fluids from
      * @param fluidFilter   a predicate which determines what fluids may be moved
-     * @param keepAmount    the desired amount in milliBuckets of a particular fluid in the destination
+     * @param keepAmount    the desired amount in milliBuckets of each fluid to keep in the source
      */
     protected void voidOverflow(final IFluidHandler sourceHandler,
                                 final Predicate<FluidStack> fluidFilter,
@@ -72,19 +74,38 @@ public class CoverFluidVoidingAdvanced extends CoverFluidVoiding {
         if (sourceHandler == null || fluidFilter == null)
             return;
 
+        var fluidAmounts = new Object2LongLinkedOpenCustomHashMap<FluidStack>(
+                FluidStackHashStrategy.comparingAllButAmount());
         for (IFluidTankProperties tankProperties : sourceHandler.getTankProperties()) {
             FluidStack sourceFluid = tankProperties.getContents();
-            if (this.fluidFilterContainer.hasFilter() &&
-                    voidingMode == VoidingMode.VOID_OVERFLOW) {
-                keepAmount = this.fluidFilterContainer.getFilter()
-                        .getTransferLimit(sourceFluid, getMaxTransferRate());
-            }
-            if (sourceFluid == null || sourceFluid.amount == 0 ||
-                    !getFluidFilterContainer().test(sourceFluid))
+            if (!tankProperties.canDrain() || sourceFluid == null || sourceFluid.amount <= 0 ||
+                    !fluidFilter.test(sourceFluid))
                 continue;
-            sourceFluid.amount = sourceFluid.amount - keepAmount;
-            sourceHandler.drain(sourceFluid, true);
+            fluidAmounts.addTo(sourceFluid.copy(), sourceFluid.amount);
         }
+
+        for (var entry : fluidAmounts.object2LongEntrySet()) {
+            FluidStack sourceFluid = entry.getKey();
+            int retainedAmount = this.fluidFilterContainer.hasFilter() && voidingMode == VoidingMode.VOID_OVERFLOW ?
+                    this.fluidFilterContainer.getTransferLimit(sourceFluid) : keepAmount;
+            long overflowAmount = entry.getLongValue() - retainedAmount;
+            while (overflowAmount > 0) {
+                FluidStack toDrain = sourceFluid.copy();
+                toDrain.amount = (int) Math.min(overflowAmount, Integer.MAX_VALUE);
+                FluidStack drained = sourceHandler.drain(toDrain, true);
+                if (drained == null || drained.amount <= 0) {
+                    break;
+                }
+                overflowAmount -= drained.amount;
+            }
+        }
+    }
+
+    @Override
+    public void setStringTransferRate(String s) {
+        long amount = Integer.parseInt(s);
+        if (getBucketMode() == BucketMode.BUCKET) amount *= 1000;
+        this.fluidFilterContainer.setTransferSize((int) Math.max(1, Math.min(amount, Integer.MAX_VALUE)));
     }
 
     public int getTransferAmount() {
@@ -109,6 +130,7 @@ public class CoverFluidVoidingAdvanced extends CoverFluidVoiding {
     @Override
     protected Flow createUI(GuiData data, PanelSyncManager syncManager) {
         var voidingMode = new EnumSyncValue<>(VoidingMode.class, this::getVoidingMode, this::setVoidingMode);
+        voidingMode.updateCacheFromSource(true);
         syncManager.syncValue("voiding_mode", voidingMode);
 
         var bucketMode = new EnumSyncValue<>(BucketMode.class, this::getBucketMode, this::setBucketMode);
@@ -116,6 +138,7 @@ public class CoverFluidVoidingAdvanced extends CoverFluidVoiding {
         syncManager.syncValue("bucket_mode", bucketMode);
 
         var filterTransferSize = new StringSyncValue(this::getStringTransferRate, this::setStringTransferRate);
+        filterTransferSize.updateCacheFromSource(true);
         var transferTextField = new TextFieldWidget().widthRel(0.5f).right(0);
         transferTextField.setEnabled(this.fluidFilterContainer.showGlobalTransferLimitSlider() &&
                 this.voidingMode == VoidingMode.VOID_OVERFLOW);
@@ -133,7 +156,7 @@ public class CoverFluidVoidingAdvanced extends CoverFluidVoiding {
                         .child(transferTextField
                                 .setEnabledIf(w -> this.fluidFilterContainer.showGlobalTransferLimitSlider() &&
                                         this.voidingMode == VoidingMode.VOID_OVERFLOW)
-                                .setNumbers(0, Integer.MAX_VALUE)
+                                .setNumbers(1, Integer.MAX_VALUE)
                                 .value(filterTransferSize)
                                 .setTextColor(Color.WHITE.darker(1))));
     }
@@ -165,14 +188,17 @@ public class CoverFluidVoidingAdvanced extends CoverFluidVoiding {
     public void writeToNBT(@NotNull NBTTagCompound tagCompound) {
         super.writeToNBT(tagCompound);
         tagCompound.setInteger("VoidingMode", voidingMode.ordinal());
-        tagCompound.setInteger("TransferAmount", transferAmount);
+        tagCompound.setInteger("TransferAmount", getTransferAmount());
     }
 
     @Override
     public void readFromNBT(@NotNull NBTTagCompound tagCompound) {
         this.voidingMode = VoidingMode.VALUES[tagCompound.getInteger("VoidingMode")];
         this.fluidFilterContainer.setMaxTransferSize(this.voidingMode.maxStackSize);
-        this.transferAmount = tagCompound.getInteger("TransferAmount");
         super.readFromNBT(tagCompound);
+        if (!tagCompound.getCompoundTag("Filter").hasKey("TransferStackSize") &&
+                tagCompound.hasKey("TransferAmount")) {
+            this.fluidFilterContainer.setTransferSize(tagCompound.getInteger("TransferAmount"));
+        }
     }
 }
