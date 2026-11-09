@@ -11,9 +11,15 @@ import net.minecraft.item.ItemStack;
 
 import com.cleanroommc.modularui.api.IPanelHandler;
 import com.cleanroommc.modularui.factory.GuiManager;
+import com.cleanroommc.modularui.factory.PlayerInventoryGuiData;
+import com.cleanroommc.modularui.factory.inventory.InventoryTypes;
 import com.cleanroommc.modularui.screen.ModularPanel;
+import com.cleanroommc.modularui.screen.UISettings;
 import com.cleanroommc.modularui.utils.Alignment;
+import com.cleanroommc.modularui.value.sync.PanelSyncManager;
 import com.cleanroommc.modularui.widgets.ButtonWidget;
+import com.cleanroommc.modularui.widgets.slot.ModularSlot;
+import com.cleanroommc.modularui.widgets.slot.PlayerSlotGroup;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,6 +32,25 @@ public class GTGuis {
         GuiManager.registerFactory(MetaTileEntityGuiFactory.INSTANCE);
         GuiManager.registerFactory(MetaItemGuiFactory.INSTANCE);
         GuiManager.registerFactory(CoverGuiFactory.INSTANCE);
+    }
+
+    /**
+     * Binds the player inventory once and protects the item whose menu is open.
+     */
+    public static void bindPlayerInventory(PlayerInventoryGuiData guiData, PanelSyncManager syncManager,
+                                           UISettings settings) {
+        if (syncManager.getSlotGroup(PlayerSlotGroup.NAME) != null) return;
+
+        syncManager.bindPlayerInventory(guiData.getPlayer(), (inventory, index) -> {
+            boolean accessible = guiData.getInventoryType() != InventoryTypes.PLAYER || index != guiData.getSlotIndex();
+            return new ModularSlot(inventory, index).accessibility(accessible, accessible);
+        });
+
+        ItemStack usedStack = guiData.getUsedItemStack();
+        // Client inventory synchronization replaces stacks with copies; require identity only on the server.
+        settings.canInteractWith(player -> player == guiData.getPlayer() && !guiData.getUsedItemStack().isEmpty() &&
+                (guiData.isClient() || guiData.getUsedItemStack() == usedStack));
+        settings.customContainer(ItemGuiContainer::new);
     }
 
     public static ModularPanel createPanel(String name, int width, int height) {

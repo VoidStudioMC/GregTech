@@ -50,7 +50,7 @@ import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.OreIngredient;
 
 import com.cleanroommc.modularui.api.drawable.IKey;
-import com.cleanroommc.modularui.factory.HandGuiData;
+import com.cleanroommc.modularui.factory.PlayerInventoryGuiData;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.screen.UISettings;
 import com.cleanroommc.modularui.value.sync.PanelSyncManager;
@@ -108,7 +108,8 @@ public class ItemGTToolbelt extends ItemGTTool implements IDyeableItem {
     }
 
     @Override
-    public ModularPanel buildUI(HandGuiData guiData, PanelSyncManager guiSyncManager, UISettings settings) {
+    public ModularPanel buildUI(PlayerInventoryGuiData guiData, PanelSyncManager guiSyncManager, UISettings settings) {
+        GTGuis.bindPlayerInventory(guiData, guiSyncManager, settings);
         final var usedStack = guiData.getUsedItemStack();
         final var handler = getHandler(usedStack);
         final var selected = handler.getSelectedStack();
