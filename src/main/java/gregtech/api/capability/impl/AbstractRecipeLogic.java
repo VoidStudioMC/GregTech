@@ -361,7 +361,7 @@ public abstract class AbstractRecipeLogic extends MTETrait implements IWorkable,
             if (this.hasNotEnoughEnergy && getEnergyInputPerSecond() > 19L * recipeEUt) {
                 this.hasNotEnoughEnergy = false;
             }
-        } else if (recipeEUt > 0) {
+        } else if (recipeEUt > 0 && consumesEnergy()) {
             // only set hasNotEnoughEnergy if this recipe is consuming recipe
             // generators always have enough energy
             this.hasNotEnoughEnergy = true;
