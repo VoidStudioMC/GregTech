@@ -73,6 +73,10 @@ public abstract class MetaTileEntityMultiblockNotifiablePart extends MetaTileEnt
                         }
                     } else if (handler instanceof INotifiableHandler notifiableHandler) {
                         notifiableHandlers.add(notifiableHandler);
+                    } else if (handler instanceof IMultipleTankHandler.ITankEntry entry) {
+                        if (entry.getDelegate() instanceof INotifiableHandler notifiableTank) {
+                            notifiableHandlers.add(notifiableTank);
+                        }
                     }
                 }
             }
