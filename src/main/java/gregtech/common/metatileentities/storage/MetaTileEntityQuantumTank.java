@@ -264,8 +264,16 @@ public class MetaTileEntityQuantumTank extends MetaTileEntityQuantumStorage<IFlu
                 Textures.FLUID_OUTPUT_OVERLAY.renderSided(outputFacing, renderState, translation, pipeline);
             }
         }
-        QuantumStorageRenderer.renderTankFluid(renderState, translation, pipeline, fluidTank, getWorld(), getPos(),
-                getFrontFacing());
+        FluidTank tankForRendering = fluidTank;
+        if (getWorld() == null && renderContextStack != null) {
+            NBTTagCompound tag = renderContextStack.getTagCompound();
+            FluidStack fluid = tag == null ? null :
+                    FluidStack.loadFluidStackFromNBT(tag.getCompoundTag(FLUID_NBT_KEY));
+            // Item rendering uses a shared MTE, so keep the stack's fluid separate from its inventory.
+            tankForRendering = new FluidTank(fluid, maxFluidCapacity);
+        }
+        QuantumStorageRenderer.renderTankFluid(renderState, translation, pipeline, tankForRendering,
+                getWorld(), getPos(), getFrontFacing());
         renderIndicatorOverlay(renderState, translation, pipeline);
     }
 

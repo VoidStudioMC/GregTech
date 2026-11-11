@@ -493,6 +493,14 @@ public class ConfigHolder {
                 "Default: true" })
         public boolean enableFancyChestRender = true;
 
+        @Config.Comment({ "Render the fluid texture behind filled Super/Quantum Tank items in inventory slots.",
+                "Default: true" })
+        public boolean colorQuantumTankSlots = true;
+
+        @Config.Comment({ "Show the fluid texture background only while holding either Shift key.",
+                "Requires colorQuantumTankSlots to be enabled.", "Default: true" })
+        public boolean colorQuantumTankSlotsOnlyOnShift = true;
+
         @Config.Comment({ "Whether to prefer the Material Tree over other categories in JEI", "Default: false" })
         public boolean preferMaterialTreeInJEI = false;
 

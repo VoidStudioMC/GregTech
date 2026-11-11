@@ -145,7 +145,7 @@ public class QuantumStorageRenderer implements IconRegistrar {
     public static void renderTankFluid(CCRenderState renderState, Matrix4 translation, IVertexOperation[] pipeline,
                                        FluidTank tank, IBlockAccess world, BlockPos pos, EnumFacing frontFacing) {
         FluidStack stack = tank.getFluid();
-        if (stack == null || stack.amount == 0 || !ConfigHolder.client.enableFancyChestRender) {
+        if (stack == null || stack.amount == 0 || (world != null && !ConfigHolder.client.enableFancyChestRender)) {
             return;
         }
 

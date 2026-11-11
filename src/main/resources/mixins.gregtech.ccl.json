@@ -7,6 +7,8 @@
   "mixins" : [
     "CCLDescriptionMixin"
   ],
-  "client" : [],
+  "client" : [
+    "CCRenderItemMixin"
+  ],
   "server" : []
 }

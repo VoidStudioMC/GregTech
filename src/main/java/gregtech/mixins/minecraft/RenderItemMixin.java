@@ -4,10 +4,12 @@ import gregtech.api.items.metaitem.MetaItem;
 import gregtech.api.items.toolitem.IGTTool;
 import gregtech.api.util.Mods;
 import gregtech.client.renderer.handler.LampItemOverlayRenderer;
+import gregtech.client.renderer.handler.QuantumTankItemRenderer;
 import gregtech.client.utils.ToolChargeBarRenderer;
 
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.RenderItem;
+import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.item.ItemStack;
 
 import org.jetbrains.annotations.NotNull;
@@ -19,6 +21,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(RenderItem.class)
 public class RenderItemMixin {
+
+    @Inject(method = "renderItemModelIntoGUI", at = @At("HEAD"))
+    private void gregTechCEu$renderQuantumTankBackground(ItemStack stack, int x, int y, IBakedModel model,
+                                                         CallbackInfo ci) {
+        QuantumTankItemRenderer.renderSlotBackground(stack, x, y);
+    }
 
     // The easy part of translating the item render stuff
     @Inject(method = "renderItemOverlayIntoGUI", at = @At(value = "HEAD"))
