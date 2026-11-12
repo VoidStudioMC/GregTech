@@ -144,6 +144,7 @@ public class MetaTileEntityMultiblockTank extends MultiblockWithDisplayBase {
                 .disableDisplay()
                 .disableButtons()
                 .addScreenChildren((parent, syncManager) -> {
+                    var tank = importFluids.getTankAt(0);
                     parent.child(IKey.lang(getMetaFullName())
                             .asWidget()
                             .pos(5, 5));
@@ -154,9 +155,11 @@ public class MetaTileEntityMultiblockTank extends MultiblockWithDisplayBase {
                             .overlay(GTGuiTextures.PRIMITIVE_LARGE_FLUID_TANK_OVERLAY.asIcon()
                                     .alignment(Alignment.CenterLeft)
                                     .size(30, 58))
-                            .syncHandler(GTFluidSlot.sync(importFluids.getTankAt(0))
+                            .syncHandler(GTFluidSlot.sync(tank)
                                     .showAmountOnSlot(false)
-                                    .drawAlwaysFull(false)));
+                                    .drawAlwaysFull(false))
+                            .tooltipBuilder(tooltip -> tooltip.addLine(IKey.lang("gregtech.fluid.amount",
+                                    tank.getFluidAmount(), tank.getCapacity()))));
                 });
     }
 
