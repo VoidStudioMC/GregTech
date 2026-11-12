@@ -431,9 +431,9 @@ public class GTFluidSyncHandler extends SyncHandler {
         if (fluidHandlerItem == null || heldFluid == tankFluid)
             return ItemStack.EMPTY;
 
-        if (canLockFluid() && isLocked.getAsBoolean()) {
+        if (canLockFluid() && isLocked.getAsBoolean() && heldFluid != null) {
             FluidStack lockedFluid = getLockedFluid();
-            if (lockedFluid == null && heldFluid != null) {
+            if (lockedFluid == null) {
                 lockFluid(heldFluid);
             } else if (!Objects.equals(heldFluid, lockedFluid)) {
                 return ItemStack.EMPTY;
@@ -446,14 +446,16 @@ public class GTFluidSyncHandler extends SyncHandler {
         if (canFillSlot && tankFluid == null) {
             returnable = fillTankFromStack(fluidHandlerItem, heldFluid, tryFillAll);
 
-            // hand is empty, try to drain tank
-        } else if (canDrainSlot && heldFluid == null) {
-            returnable = drainTankIntoStack(fluidHandlerItem, tankFluid, tryFillAll);
+            // Empty containers, or matching partially filled containers in drain-only slots, can drain the tank.
+        } else if (canDrainSlot && tankFluid != null &&
+                (heldFluid == null || (!canFillSlot && tankFluid.isFluidEqual(heldFluid)))) {
+                    returnable = drainTankIntoStack(fluidHandlerItem, tankFluid, tryFillAll);
 
-            // neither is empty but tank is not full, try to fill tank
-        } else if (canFillSlot && tank.getFluidAmount() < tank.getCapacity() && heldFluid != null) {
-            returnable = fillTankFromStack(fluidHandlerItem, heldFluid, tryFillAll);
-        }
+                    // neither is empty but tank is not full, try to fill tank
+                } else
+            if (canFillSlot && tank.getFluidAmount() < tank.getCapacity() && heldFluid != null) {
+                returnable = fillTankFromStack(fluidHandlerItem, heldFluid, tryFillAll);
+            }
 
         syncToClient(UPDATE_TANK, buffer -> NetworkUtils.writeFluidStack(buffer, tank.getFluid()));
 
@@ -594,6 +596,13 @@ public class GTFluidSyncHandler extends SyncHandler {
     public void toggleLockFluid() {
         ItemStack cursorItem = getSyncManager().getCursorItem();
         FluidStack fluidStack = FluidUtil.getFluidContained(cursorItem);
+        FluidStack tankFluid = getFluid();
+        // Compatible containers interact with the tank without changing its fluid lock.
+        if (FluidUtil.getFluidHandler(cursorItem) != null &&
+                (GTUtility.isEmpty(fluidStack) ||
+                        (canDrainSlot && tankFluid != null && tankFluid.isFluidEqual(fluidStack)))) {
+            return;
+        }
         FluidStack stack;
         if (GTUtility.isEmpty(getLockedFluid()) && !GTUtility.isEmpty(fluidStack)) {
             stack = fluidStack.copy();
