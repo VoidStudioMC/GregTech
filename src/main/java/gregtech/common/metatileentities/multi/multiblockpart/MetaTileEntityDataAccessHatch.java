@@ -135,9 +135,9 @@ public class MetaTileEntityDataAccessHatch extends MetaTileEntityMultiblockNotif
         recipes.clear();
         for (int i = 0; i < this.importItems.getSlots(); i++) {
             ItemStack stack = this.importItems.getStackInSlot(i);
+            if (!AssemblyLineManager.isStackDataItem(stack, isDataBank)) continue;
             String researchId = AssemblyLineManager.readResearchId(stack);
-            boolean isValid = AssemblyLineManager.isStackDataItem(stack, isDataBank);
-            if (researchId != null && isValid) {
+            if (researchId != null) {
                 Collection<Recipe> collection = ((IResearchRecipeMap) RecipeMaps.ASSEMBLY_LINE_RECIPES)
                         .getDataStickEntry(researchId);
                 if (collection != null) {
