@@ -1,7 +1,6 @@
 package gregtech.api.metatileentity;
 
 import gregtech.api.metatileentity.interfaces.INeighborCache;
-import gregtech.api.pipenet.PipeNetEventHandler;
 import gregtech.api.pipenet.PipeNetUtils;
 
 import net.minecraft.tileentity.TileEntity;
@@ -65,8 +64,8 @@ public abstract class NeighborCacheTileEntityBase extends SyncedTileEntityBase i
     @Override
     public void onLoad() {
         super.onLoad();
+        // Neighbors may have been queried before deferred tile initialization finished.
         invalidateNeighbors();
-        PipeNetEventHandler.scheduleChunkCacheInvalidation(world, pos);
     }
 
     @MustBeInvokedByOverriders
