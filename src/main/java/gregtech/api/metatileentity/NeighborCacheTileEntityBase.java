@@ -5,7 +5,10 @@ import gregtech.api.metatileentity.interfaces.INeighborCache;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.gen.ChunkProviderServer;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
@@ -60,6 +63,13 @@ public abstract class NeighborCacheTileEntityBase extends SyncedTileEntityBase i
 
     @MustBeInvokedByOverriders
     @Override
+    public void onLoad() {
+        super.onLoad();
+        invalidateNeighbors();
+    }
+
+    @MustBeInvokedByOverriders
+    @Override
     public void onChunkUnload() {
         super.onChunkUnload();
         invalidateNeighbors();
@@ -68,16 +78,35 @@ public abstract class NeighborCacheTileEntityBase extends SyncedTileEntityBase i
     @Override
     public @Nullable TileEntity getNeighbor(@NotNull EnumFacing facing) {
         if (world == null || pos == null) return null;
+        // Chunk unload does not invalidate its tile entities. Never reuse them across an unloaded border,
+        // and do not load the neighboring chunk just to look up a connection.
+        if (!isNeighborChunkLoaded(facing)) {
+            onNeighborChanged(facing);
+            return null;
+        }
         // if the ref is INVALID, compute neighbor, otherwise, return TE or null
         WeakReference<TileEntity> ref = invalidRef(facing) ? computeNeighbor(facing) : getRef(facing);
         return ref.get();
     }
 
+    private boolean isNeighborChunkLoaded(EnumFacing facing) {
+        int x = (pos.getX() + facing.getXOffset()) >> 4;
+        int z = (pos.getZ() + facing.getZOffset()) >> 4;
+        if (x == pos.getX() >> 4 && z == pos.getZ() >> 4) return true;
+        if (world.getChunkProvider() instanceof ChunkProviderServer provider) {
+            Chunk chunk = provider.loadedChunks.get(ChunkPos.asLong(x, z));
+            // During Unload the chunk is still in the provider, but its tile entities are no longer usable.
+            return chunk != null && chunk.isLoaded();
+        }
+        return world.isBlockLoaded(pos.offset(facing));
+    }
+
     private boolean invalidRef(EnumFacing facing) {
         WeakReference<TileEntity> ref = getRef(facing);
         if (ref == INVALID) return true;
+        if (ref == NULL) return false;
         TileEntity te = ref.get();
-        return te != null && te.isInvalid();
+        return te == null || te.isInvalid();
     }
 
     @NotNull
