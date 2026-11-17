@@ -4,6 +4,7 @@ import gregtech.api.GTValues;
 import gregtech.api.metatileentity.interfaces.INeighborCache;
 import gregtech.api.pipenet.block.BlockPipe;
 import gregtech.api.pipenet.tile.IPipeTile;
+import gregtech.api.util.TaskScheduler;
 
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -16,7 +17,6 @@ import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
@@ -32,9 +32,22 @@ public class PipeNetEventHandler {
     private static final int ALL_FACES = (1 << EnumFacing.VALUES.length) - 1;
     private static final Map<World, Set<ChunkPos>> pendingLoads = new HashMap<>();
 
-    public static void scheduleChunkCacheInvalidation(World world, BlockPos pos) {
-        if (world == null || world.isRemote) return;
-        pendingLoads.computeIfAbsent(world, key -> new HashSet<>()).add(new ChunkPos(pos));
+    private static void scheduleChunkCacheInvalidation(World world, ChunkPos pos) {
+        Set<ChunkPos> pending = pendingLoads.get(world);
+        if (pending == null) {
+            pending = new HashSet<>();
+            pendingLoads.put(world, pending);
+            Set<ChunkPos> batch = pending;
+            TaskScheduler.scheduleTask(world, () -> {
+                // A stale task from an unloaded world must not consume a newer batch.
+                if (pendingLoads.get(world) == batch) {
+                    pendingLoads.remove(world);
+                    invalidatePendingChunkCaches(world, batch);
+                }
+                return false;
+            });
+        }
+        pending.add(pos);
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -45,7 +58,7 @@ public class PipeNetEventHandler {
         invalidateChunkCaches(chunk);
         // TileEntity.onLoad can be deferred until the end of updateEntities. An earlier route lookup
         // must not keep a missing capability cached after those tile entities finish initializing.
-        pendingLoads.computeIfAbsent(world, key -> new HashSet<>()).add(chunk.getPos());
+        scheduleChunkCacheInvalidation(world, chunk.getPos());
     }
 
     @SubscribeEvent
@@ -55,15 +68,12 @@ public class PipeNetEventHandler {
         invalidateChunkCaches(event.getChunk());
     }
 
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void onWorldTick(TickEvent.WorldTickEvent event) {
-        if (event.world.isRemote || event.phase != TickEvent.Phase.END) return;
-        Set<ChunkPos> pending = pendingLoads.remove(event.world);
-        if (pending == null || pending.isEmpty()) return;
+    private static void invalidatePendingChunkCaches(World world, Set<ChunkPos> pending) {
+        if (pending.isEmpty()) return;
 
         if (pending.size() == 1) {
             ChunkPos pos = pending.iterator().next();
-            Chunk chunk = PipeNetUtils.getLoadedChunk(event.world, pos.x, pos.z);
+            Chunk chunk = PipeNetUtils.getLoadedChunk(world, pos.x, pos.z);
             if (chunk != null) invalidateChunkCaches(chunk);
             return;
         }
@@ -72,7 +82,7 @@ public class PipeNetEventHandler {
         // even if another pending chunk also includes it as a neighbor.
         Long2IntMap affectedChunks = new Long2IntOpenHashMap();
         for (ChunkPos pos : pending) {
-            if (PipeNetUtils.getLoadedChunk(event.world, pos.x, pos.z) == null) continue;
+            if (PipeNetUtils.getLoadedChunk(world, pos.x, pos.z) == null) continue;
             affectedChunks.put(ChunkPos.asLong(pos.x, pos.z), ALL_FACES);
             for (EnumFacing facing : EnumFacing.HORIZONTALS) {
                 long neighbor = ChunkPos.asLong(pos.x + facing.getXOffset(), pos.z + facing.getZOffset());
@@ -83,7 +93,7 @@ public class PipeNetEventHandler {
         Set<PipeNet<?>> networks = new HashSet<>();
         for (Long2IntMap.Entry entry : affectedChunks.long2IntEntrySet()) {
             long pos = entry.getLongKey();
-            Chunk chunk = PipeNetUtils.getLoadedChunk(event.world, (int) pos, (int) (pos >> 32));
+            Chunk chunk = PipeNetUtils.getLoadedChunk(world, (int) pos, (int) (pos >> 32));
             if (chunk != null) invalidateNeighbors(chunk, entry.getIntValue(), networks);
         }
         networks.forEach(PipeNet::onPipeConnectionsUpdate);

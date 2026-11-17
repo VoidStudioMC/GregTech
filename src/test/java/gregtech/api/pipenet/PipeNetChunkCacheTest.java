@@ -10,6 +10,7 @@ import gregtech.api.metatileentity.NeighborCacheTileEntityBase;
 import gregtech.api.unification.material.properties.FluidPipeProperties;
 import gregtech.api.unification.material.properties.ItemPipeProperties;
 import gregtech.api.unification.material.properties.WireProperties;
+import gregtech.api.util.TaskScheduler;
 import gregtech.common.pipelike.cable.BlockCable;
 import gregtech.common.pipelike.cable.Insulation;
 import gregtech.common.pipelike.cable.net.EnergyNet;
@@ -108,6 +109,7 @@ class PipeNetChunkCacheTest {
     @AfterEach
     void unloadWorld() {
         PipeNetEventHandler.onWorldUnload(new WorldEvent.Unload(world));
+        TaskScheduler.onWorldUnload(new WorldEvent.Unload(world));
     }
 
     @BeforeEach
@@ -154,6 +156,29 @@ class PipeNetChunkCacheTest {
         source.onLoad();
 
         assertSame(neighbor, source.getNeighbor(EnumFacing.EAST));
+    }
+
+    @Test
+    void tileLoadPreservesRoutesWithoutSchedulingChunkRefresh() {
+        runScheduledTasks();
+        world.setData("gregtech.e_net", new CountingWorldENet());
+        TestCable source = world.put(new BlockPos(1, 64, 1), new TestCable(EnumFacing.EAST));
+        EnergyConsumer consumer = world.put(source.getPos().east(), new EnergyConsumer());
+        WorldENet worldNet = WorldENet.getWorldENet(world);
+        addNode(worldNet, source);
+        CountingEnergyNet net = (CountingEnergyNet) worldNet.getNetFromPos(source.getPos());
+        List<?> routes = net.getNetData(source.getPos());
+        net.updates = 0;
+
+        source.onLoad();
+        world.put(new BlockPos(5, 64, 5), new CacheTile()).onLoad();
+        runScheduledTasks();
+
+        assertEquals(0, net.updates, "Tile initialization must not refresh every pipe in its chunk");
+        assertSame(routes, net.getNetData(source.getPos()));
+        EnergyNetHandler handler = new EnergyNetHandler(net, source, EnumFacing.WEST);
+        assertEquals(1, handler.acceptEnergyFromNetwork(EnumFacing.WEST, 32, 1));
+        assertEquals(31, consumer.energy);
     }
 
     @ParameterizedTest
@@ -291,7 +316,7 @@ class PipeNetChunkCacheTest {
         WorldENet worldNet = WorldENet.getWorldENet(world);
         addNode(worldNet, source);
         EnergyNet net = worldNet.getNetFromPos(source.getPos());
-        PipeNetEventHandler.onWorldTick(new TickEvent.WorldTickEvent(Side.SERVER, TickEvent.Phase.END, world));
+        runScheduledTasks();
         List<?> routes = net.getNetData(source.getPos());
         assertNull(source.getNeighbor(EnumFacing.EAST));
 
@@ -300,7 +325,7 @@ class PipeNetChunkCacheTest {
         world.load(target);
         assertSame(routes, net.getNetData(source.getPos()), "A disconnected border cannot change the routes");
         assertSame(neighbor, source.getNeighbor(EnumFacing.EAST));
-        PipeNetEventHandler.onWorldTick(new TickEvent.WorldTickEvent(Side.SERVER, TickEvent.Phase.END, world));
+        runScheduledTasks();
         assertSame(routes, net.getNetData(source.getPos()));
         world.unload(target);
         assertSame(routes, net.getNetData(source.getPos()));
@@ -313,7 +338,7 @@ class PipeNetChunkCacheTest {
 
     @Test
     void mergedBorderRefreshIncludesConnectedFaceAtChunkCorner() {
-        PipeNetEventHandler.onWorldTick(new TickEvent.WorldTickEvent(Side.SERVER, TickEvent.Phase.END, world));
+        runScheduledTasks();
         world.setData("gregtech.e_net", new CountingWorldENet());
         TestCable source = world.put(new BlockPos(15, 64, 15), new TestCable(EnumFacing.EAST));
         WorldENet worldNet = WorldENet.getWorldENet(world);
@@ -328,7 +353,7 @@ class PipeNetChunkCacheTest {
         consumer.onLoad();
         net.updates = 0;
 
-        PipeNetEventHandler.onWorldTick(new TickEvent.WorldTickEvent(Side.SERVER, TickEvent.Phase.END, world));
+        runScheduledTasks();
 
         assertEquals(1, net.updates);
         assertEquals(1, handler.acceptEnergyFromNetwork(EnumFacing.WEST, 32, 1));
@@ -431,6 +456,8 @@ class PipeNetChunkCacheTest {
 
     @Test
     void energyRoutesRecoverWhenCapabilityInitializesAfterChunkLoad() {
+        // A chunk loaded during tile updates initializes its tiles before the next scheduled pass.
+        runScheduledTasks();
         TestCable source = world.put(new BlockPos(15, 64, 0), new TestCable(EnumFacing.EAST));
         WorldENet worldNet = WorldENet.getWorldENet(world);
         addNode(worldNet, source);
@@ -440,11 +467,9 @@ class PipeNetChunkCacheTest {
         LateEnergyConsumer consumer = world.put(target, source.getPos().east(), new LateEnergyConsumer());
         world.load(target);
         assertEquals(0, handler.acceptEnergyFromNetwork(EnumFacing.WEST, 32, 1));
-        PipeNetEventHandler.onWorldTick(new TickEvent.WorldTickEvent(Side.SERVER, TickEvent.Phase.START, world));
-        assertEquals(0, handler.acceptEnergyFromNetwork(EnumFacing.WEST, 32, 1));
         consumer.onLoad();
 
-        PipeNetEventHandler.onWorldTick(new TickEvent.WorldTickEvent(Side.SERVER, TickEvent.Phase.END, world));
+        runScheduledTasks();
 
         assertEquals(1, handler.acceptEnergyFromNetwork(EnumFacing.WEST, 32, 1));
         assertEquals(31, consumer.getEnergyStored());
@@ -591,7 +616,7 @@ class PipeNetChunkCacheTest {
     }
 
     @Test
-    void postLoadRefreshClearsSharedNetworkOncePerTick() {
+    void postLoadRefreshClearsSharedNetworkOnce() {
         world.setData("gregtech.e_net", new CountingWorldENet());
         TestCable source = world.put(new BlockPos(15, 64, 0), new TestCable(EnumFacing.EAST));
         WorldENet worldNet = WorldENet.getWorldENet(world);
@@ -603,9 +628,9 @@ class PipeNetChunkCacheTest {
         CountingEnergyNet net = (CountingEnergyNet) worldNet.getNetFromPos(source.getPos());
         net.updates = 0;
 
-        PipeNetEventHandler.onWorldTick(new TickEvent.WorldTickEvent(Side.SERVER, TickEvent.Phase.END, world));
+        runScheduledTasks();
         assertEquals(1, net.updates);
-        PipeNetEventHandler.onWorldTick(new TickEvent.WorldTickEvent(Side.SERVER, TickEvent.Phase.END, world));
+        runScheduledTasks();
         assertEquals(1, net.updates, "Completed initialization must not trigger repeated route rebuilding");
     }
 
@@ -624,7 +649,7 @@ class PipeNetChunkCacheTest {
         world.load(new TestChunk(world, 0, 1));
         Arrays.fill(changes, 0);
 
-        PipeNetEventHandler.onWorldTick(new TickEvent.WorldTickEvent(Side.SERVER, TickEvent.Phase.END, world));
+        runScheduledTasks();
 
         assertArrayEquals(new int[] { 1, 1, 1, 1, 1, 1 }, changes,
                 "A full refresh must subsume the border refreshes from adjacent pending chunks");
@@ -636,7 +661,7 @@ class PipeNetChunkCacheTest {
         if (world.loadedChunk(x >> 4, z >> 4) == null) {
             world.load(new TestChunk(world, x >> 4, z >> 4));
         }
-        PipeNetEventHandler.onWorldTick(new TickEvent.WorldTickEvent(Side.SERVER, TickEvent.Phase.END, world));
+        runScheduledTasks();
         int[] changes = new int[EnumFacing.VALUES.length];
         CacheTile source = world.put(new BlockPos(x, 64, z), new CacheTile() {
 
@@ -656,7 +681,7 @@ class PipeNetChunkCacheTest {
         world.load(south);
         Arrays.fill(changes, 0);
 
-        PipeNetEventHandler.onWorldTick(new TickEvent.WorldTickEvent(Side.SERVER, TickEvent.Phase.END, world));
+        runScheduledTasks();
 
         int[] expected = new int[EnumFacing.VALUES.length];
         expected[EnumFacing.EAST.getIndex()] = 1;
@@ -694,7 +719,7 @@ class PipeNetChunkCacheTest {
             });
         }
 
-        PipeNetEventHandler.onWorldTick(new TickEvent.WorldTickEvent(Side.SERVER, TickEvent.Phase.END, world));
+        runScheduledTasks();
 
         assertEquals(0, replacementChanges[0], "Refresh only the tile instances present when the scan started");
         assertTrue((changes[0] == 6 && changes[1] == 0) || (changes[0] == 0 && changes[1] == 6));
@@ -709,9 +734,34 @@ class PipeNetChunkCacheTest {
         CountingEnergyNet net = (CountingEnergyNet) worldNet.getNetFromPos(source.getPos());
         PipeNetEventHandler.onWorldUnload(new WorldEvent.Unload(world));
 
-        PipeNetEventHandler.onWorldTick(new TickEvent.WorldTickEvent(Side.SERVER, TickEvent.Phase.END, world));
+        runScheduledTasks();
 
         assertEquals(0, net.updates);
+    }
+
+    @Test
+    void discardedRefreshDoesNotConsumeNewChunkLoadBatch() {
+        // Leave the old scheduled task queued, then start a new batch in a different chunk.
+        PipeNetEventHandler.onWorldUnload(new WorldEvent.Unload(world));
+        world.setData("gregtech.e_net", new CountingWorldENet());
+        world.load(new TestChunk(world, 10, 10));
+        TestCable source = world.put(new BlockPos(175, 64, 160), new TestCable(EnumFacing.EAST));
+        WorldENet worldNet = WorldENet.getWorldENet(world);
+        addNode(worldNet, source);
+        CountingEnergyNet net = (CountingEnergyNet) worldNet.getNetFromPos(source.getPos());
+        EnergyNetHandler handler = new EnergyNetHandler(net, source, EnumFacing.WEST);
+        TestChunk target = new TestChunk(world, 11, 10);
+        LateEnergyConsumer consumer = world.put(target, source.getPos().east(), new LateEnergyConsumer());
+        world.load(target);
+        assertEquals(0, handler.acceptEnergyFromNetwork(EnumFacing.WEST, 32, 1));
+        consumer.onLoad();
+        net.updates = 0;
+
+        runScheduledTasks();
+
+        assertEquals(1, net.updates);
+        assertEquals(1, handler.acceptEnergyFromNetwork(EnumFacing.WEST, 32, 1));
+        assertEquals(31, consumer.getEnergyStored());
     }
 
     @Test
@@ -750,6 +800,10 @@ class PipeNetChunkCacheTest {
         assertThrows(IllegalStateException.class, () -> handler.acceptEnergyFromNetwork(EnumFacing.WEST, 32, 1));
         assertEquals(1, handler.acceptEnergyFromNetwork(EnumFacing.WEST, 32, 1));
         assertEquals(31, consumer.energy);
+    }
+
+    private void runScheduledTasks() {
+        TaskScheduler.onWorldTick(new TickEvent.WorldTickEvent(Side.SERVER, TickEvent.Phase.START, world));
     }
 
     private static void addNode(WorldENet worldNet, TestCable cable) {
