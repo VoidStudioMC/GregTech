@@ -18,9 +18,9 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
-import org.jetbrains.annotations.Nullable;
+import it.unimi.dsi.fastutil.longs.Long2IntMap;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -29,6 +29,7 @@ import java.util.Set;
 @EventBusSubscriber(modid = GTValues.MODID)
 public class PipeNetEventHandler {
 
+    private static final int ALL_FACES = (1 << EnumFacing.VALUES.length) - 1;
     private static final Map<World, Set<ChunkPos>> pendingLoads = new HashMap<>();
 
     public static void scheduleChunkCacheInvalidation(World world, BlockPos pos) {
@@ -58,12 +59,32 @@ public class PipeNetEventHandler {
     public static void onWorldTick(TickEvent.WorldTickEvent event) {
         if (event.world.isRemote || event.phase != TickEvent.Phase.END) return;
         Set<ChunkPos> pending = pendingLoads.remove(event.world);
-        if (pending == null) return;
+        if (pending == null || pending.isEmpty()) return;
+
+        if (pending.size() == 1) {
+            ChunkPos pos = pending.iterator().next();
+            Chunk chunk = PipeNetUtils.getLoadedChunk(event.world, pos.x, pos.z);
+            if (chunk != null) invalidateChunkCaches(chunk);
+            return;
+        }
+
+        // Merge shared borders before scanning tile entities. A changed chunk needs all faces refreshed,
+        // even if another pending chunk also includes it as a neighbor.
+        Long2IntMap affectedChunks = new Long2IntOpenHashMap();
+        for (ChunkPos pos : pending) {
+            if (PipeNetUtils.getLoadedChunk(event.world, pos.x, pos.z) == null) continue;
+            affectedChunks.put(ChunkPos.asLong(pos.x, pos.z), ALL_FACES);
+            for (EnumFacing facing : EnumFacing.HORIZONTALS) {
+                long neighbor = ChunkPos.asLong(pos.x + facing.getXOffset(), pos.z + facing.getZOffset());
+                affectedChunks.put(neighbor, affectedChunks.get(neighbor) | (1 << facing.getOpposite().getIndex()));
+            }
+        }
 
         Set<PipeNet<?>> networks = new HashSet<>();
-        for (ChunkPos pos : pending) {
-            Chunk chunk = PipeNetUtils.getLoadedChunk(event.world, pos.x, pos.z);
-            if (chunk != null) invalidateChunkCaches(chunk, networks);
+        for (Long2IntMap.Entry entry : affectedChunks.long2IntEntrySet()) {
+            long pos = entry.getLongKey();
+            Chunk chunk = PipeNetUtils.getLoadedChunk(event.world, (int) pos, (int) (pos >> 32));
+            if (chunk != null) invalidateNeighbors(chunk, entry.getIntValue(), networks);
         }
         networks.forEach(PipeNet::onPipeConnectionsUpdate);
     }
@@ -85,31 +106,31 @@ public class PipeNetEventHandler {
     private static void invalidateChunkCaches(Chunk chunk, Set<PipeNet<?>> networks) {
         World world = chunk.getWorld();
         // A consumer can be in the changed chunk while every pipe is in a neighboring chunk.
-        invalidateNeighbors(chunk, null, networks);
+        invalidateNeighbors(chunk, ALL_FACES, networks);
         for (EnumFacing facing : EnumFacing.HORIZONTALS) {
             int x = chunk.x + facing.getXOffset();
             int z = chunk.z + facing.getZOffset();
             Chunk neighbor = PipeNetUtils.getLoadedChunk(world, x, z);
             if (neighbor != null) {
-                invalidateNeighbors(neighbor, facing.getOpposite(), networks);
+                invalidateNeighbors(neighbor, 1 << facing.getOpposite().getIndex(), networks);
             }
         }
     }
 
-    private static void invalidateNeighbors(Chunk chunk, @Nullable EnumFacing border, Set<PipeNet<?>> networks) {
+    private static void invalidateNeighbors(Chunk chunk, int faces, Set<PipeNet<?>> networks) {
+        Map<BlockPos, TileEntity> tiles = chunk.getTileEntityMap();
         // Addon callbacks can replace tile entities while their neighbors are being invalidated.
-        for (Map.Entry<BlockPos, TileEntity> entry : new ArrayList<>(chunk.getTileEntityMap().entrySet())) {
-            BlockPos pos = entry.getKey();
-            if (chunk.getTileEntityMap().get(pos) != entry.getValue()) continue;
-            if (border != null && !isOnBorder(pos, border)) continue;
-            if (!(entry.getValue() instanceof INeighborCache cache)) continue;
+        for (TileEntity tile : tiles.values().toArray(new TileEntity[0])) {
+            if (!(tile instanceof INeighborCache cache)) continue;
+            BlockPos pos = tile.getPos();
+            if (tiles.get(pos) != tile) continue;
+            int affectedFaces = faces == ALL_FACES ? ALL_FACES : faces & getBorderFaces(pos);
+            if (affectedFaces == 0) continue;
 
-            if (border == null) {
-                for (EnumFacing facing : EnumFacing.VALUES) {
+            for (EnumFacing facing : EnumFacing.VALUES) {
+                if ((affectedFaces & (1 << facing.getIndex())) != 0) {
                     cache.onNeighborChanged(facing);
                 }
-            } else {
-                cache.onNeighborChanged(border);
             }
 
             if (cache instanceof IPipeTile<?, ?>pipe) {
@@ -121,13 +142,14 @@ public class PipeNetEventHandler {
         }
     }
 
-    private static boolean isOnBorder(BlockPos pos, EnumFacing border) {
-        return switch (border) {
-            case WEST -> (pos.getX() & 15) == 0;
-            case EAST -> (pos.getX() & 15) == 15;
-            case NORTH -> (pos.getZ() & 15) == 0;
-            case SOUTH -> (pos.getZ() & 15) == 15;
-            default -> false;
-        };
+    private static int getBorderFaces(BlockPos pos) {
+        int faces = 0;
+        int x = pos.getX() & 15;
+        int z = pos.getZ() & 15;
+        if (x == 0) faces |= 1 << EnumFacing.WEST.getIndex();
+        if (x == 15) faces |= 1 << EnumFacing.EAST.getIndex();
+        if (z == 0) faces |= 1 << EnumFacing.NORTH.getIndex();
+        if (z == 15) faces |= 1 << EnumFacing.SOUTH.getIndex();
+        return faces;
     }
 }
