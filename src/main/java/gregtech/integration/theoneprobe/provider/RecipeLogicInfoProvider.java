@@ -3,15 +3,8 @@ package gregtech.integration.theoneprobe.provider;
 import gregtech.api.GTValues;
 import gregtech.api.capability.GregtechTileCapabilities;
 import gregtech.api.capability.impl.AbstractRecipeLogic;
-import gregtech.api.capability.impl.PrimitiveRecipeLogic;
-import gregtech.api.metatileentity.MetaTileEntity;
-import gregtech.api.metatileentity.SteamMetaTileEntity;
-import gregtech.api.metatileentity.interfaces.IGregTechTileEntity;
-import gregtech.api.metatileentity.multiblock.RecipeMapSteamMultiblockController;
-import gregtech.api.unification.material.Materials;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.TextFormattingUtil;
-import gregtech.common.metatileentities.multi.MetaTileEntityLargeBoiler;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
@@ -41,32 +34,19 @@ public class RecipeLogicInfoProvider extends CapabilityInfoProvider<AbstractReci
                                 @NotNull EntityPlayer player, @NotNull TileEntity tileEntity,
                                 @NotNull IProbeHitData data) {
         // do not show energy usage on machines that do not use energy
-        if (capability.isWorking()) {
-            if (capability instanceof PrimitiveRecipeLogic) {
-                return; // do not show info for primitive machines, as they are supposed to appear powerless
-            }
+        if (capability.isWorking() && capability.usesEnergy()) {
             long eut = capability.getInfoProviderEUt();
-            String text = null;
-
-            if (tileEntity instanceof IGregTechTileEntity) {
-                IGregTechTileEntity gtTileEntity = (IGregTechTileEntity) tileEntity;
-                MetaTileEntity mte = gtTileEntity.getMetaTileEntity();
-                if (mte instanceof SteamMetaTileEntity || mte instanceof MetaTileEntityLargeBoiler ||
-                        mte instanceof RecipeMapSteamMultiblockController) {
-                    text = TextFormatting.AQUA + TextFormattingUtil.formatNumbers(eut) +
-                            TextStyleClass.INFO + " L/t {*" +
-                            Materials.Steam.getUnlocalizedName() + "*}";
-                }
-            }
-            if (text == null) {
-                // Default behavior, if this TE is not a steam machine (or somehow not instanceof
-                // IGregTechTileEntity...)
+            if (eut == 0) return;
+            String text;
+            var energyFluid = capability.getEnergyFluid();
+            if (energyFluid != null) {
+                text = TextFormatting.AQUA + TextFormattingUtil.formatNumbers(eut) +
+                        TextStyleClass.INFO + " L/t {*" + energyFluid.getUnlocalizedName() + "*}";
+            } else {
                 text = TextFormatting.RED + TextFormattingUtil.formatNumbers(eut) + TextStyleClass.INFO +
                         " EU/t" + TextFormatting.GREEN +
                         " (" + GTValues.VOCNF[GTUtility.getOCTierByVoltage(eut)] + TextFormatting.GREEN + ")";
             }
-
-            if (eut == 0) return; // do not display 0 eut
 
             if (capability.consumesEnergy()) {
                 probeInfo.text(TextStyleClass.INFO + "{*gregtech.top.energy_consumption*} " + text);

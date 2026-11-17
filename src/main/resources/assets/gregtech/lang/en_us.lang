@@ -6645,3 +6645,35 @@ gregtech.scanner.forestry.pollen=§oScanned Pollen
 gregtech.mutation.block_of=Block of %s
 
 record.sus=Leonz - Among Us Drip
+
+# Additional The One Probe details
+gregtech.top.energy_input_average=Average input
+gregtech.top.energy_output_average=Average output
+gregtech.top.max_voltage=Maximum recipe voltage
+gregtech.top.running=Running
+gregtech.top.idling=Idle
+gregtech.top.voiding=Voiding mode
+gregtech.top.distinct=Separate input buses
+gregtech.top.enabled=Enabled
+gregtech.top.disabled=Disabled
+gregtech.top.recipe_map=Recipe type
+gregtech.top.parallels=Parallel recipes
+gregtech.top.not_enough_energy=Insufficient energy
+gregtech.top.outputs_full=Output storage full
+gregtech.top.computation=Computation
+gregtech.top.not_enough_computation=Insufficient computation
+gregtech.top.fuel=Fuel per cycle
+gregtech.top.fuel_duration=Fuel cycle duration
+gregtech.top.item_outputs=Item outputs
+gregtech.top.fluid_outputs=Fluid outputs
+gregtech.top.tier=Machine tier
+gregtech.top.part_attached=Connected to multiblock
+gregtech.top.part_detached=Disconnected from multiblock
+gregtech.top.cable_load=Cable load
+gregtech.top.cable_voltage=Cable voltage
+gregtech.top.cable_amperage=Cable amperage
+gregtech.top.cleanliness=Cleanliness
+gregtech.top.computation_supplied=Supplied computation
+gregtech.top.computation_current=Current computation
+gregtech.top.energy_stored=Stored energy
+gregtech.top.energy_capacity=Energy capacity

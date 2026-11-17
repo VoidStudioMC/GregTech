@@ -4,6 +4,7 @@ import gregtech.api.GTValues;
 import gregtech.api.modules.GregTechModule;
 import gregtech.api.util.Mods;
 import gregtech.integration.IntegrationSubmodule;
+import gregtech.integration.theoneprobe.element.FluidStackElement;
 import gregtech.integration.theoneprobe.provider.*;
 import gregtech.integration.theoneprobe.provider.debug.DebugPipeNetInfoProvider;
 import gregtech.integration.theoneprobe.provider.debug.DebugTickTimeProvider;
@@ -47,6 +48,17 @@ public class TheOneProbeModule extends IntegrationSubmodule {
         oneProbe.registerProvider(new ActiveTransformerInfoProvider());
         oneProbe.registerProvider(new BatteryBufferInfoProvider());
         oneProbe.registerProvider(new AEMultiblockHatchProvider());
+
+        FluidStackElement.register(oneProbe);
+        oneProbe.registerProvider(new CableInfoProvider());
+        oneProbe.registerProvider(new MachineDetailsInfoProvider());
+        oneProbe.registerProvider(new RecipeDetailsInfoProvider());
+        oneProbe.registerProvider(new RecipeParallelInfoProvider());
+        oneProbe.registerProvider(new RecipeItemOutputInfoProvider());
+        oneProbe.registerProvider(new RecipeFluidOutputInfoProvider());
+        oneProbe.registerProvider(new CleanroomInfoProvider());
+        oneProbe.registerProvider(new ComputationInfoProvider());
+        oneProbe.registerProvider(new PowerSubstationInfoProvider());
 
         // Dev environment debug providers
         oneProbe.registerProvider(new DebugPipeNetInfoProvider());

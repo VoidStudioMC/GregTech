@@ -1,7 +1,7 @@
 package gregtech.integration.theoneprobe.provider;
 
-import gregtech.api.metatileentity.interfaces.IGregTechTileEntity;
 import gregtech.common.metatileentities.multi.multiblockpart.appeng.MetaTileEntityAEHostablePart;
+import gregtech.integration.theoneprobe.ProbeInfoUtil;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -23,8 +23,8 @@ public class AEMultiblockHatchProvider implements IProbeInfoProvider {
     public void addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, EntityPlayer entityPlayer, World world,
                              IBlockState blockState, IProbeHitData probeHitData) {
         if (blockState.getBlock().hasTileEntity(blockState) &&
-                world.getTileEntity(probeHitData.getPos()) instanceof IGregTechTileEntity gtte &&
-                gtte.getMetaTileEntity() instanceof MetaTileEntityAEHostablePart<?>aeHostablePart) {
+                ProbeInfoUtil.getMetaTileEntity(world.getTileEntity(
+                        probeHitData.getPos())) instanceof MetaTileEntityAEHostablePart<?>aeHostablePart) {
             if (aeHostablePart.isOnline()) {
                 probeInfo.text("{*gregtech.gui.me_network.online*}");
             } else {

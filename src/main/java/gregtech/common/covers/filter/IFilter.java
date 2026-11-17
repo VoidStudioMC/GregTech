@@ -5,6 +5,7 @@ import gregtech.api.util.IDirtyNotifiable;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.IStringSerializable;
 
 import com.cleanroommc.modularui.api.IPanelHandler;
 import com.cleanroommc.modularui.screen.ModularPanel;
@@ -15,6 +16,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface IFilter {
+
+    default @NotNull String getFilterExpression() {
+        return "";
+    }
+
+    default @Nullable IStringSerializable getFilterMode() {
+        return null;
+    }
 
     /** Uses Cleanroom MUI */
     @NotNull

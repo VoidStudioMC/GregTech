@@ -52,6 +52,11 @@ public class BoilerRecipeLogic extends AbstractRecipeLogic implements ICategoryO
     }
 
     @Override
+    public Fluid getEnergyFluid() {
+        return Materials.Steam.getFluid();
+    }
+
+    @Override
     public void update() {
         if ((!isActive() || !canProgressRecipe() || !isWorkingEnabled()) && currentHeat > 0) {
             setHeat(currentHeat - 1);

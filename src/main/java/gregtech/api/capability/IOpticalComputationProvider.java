@@ -11,6 +11,16 @@ import java.util.Collection;
  */
 public interface IOpticalComputationProvider {
 
+    /** @return installed computation capacity in CWU/t, or -1 if not reported */
+    default int getComputationCapacity() {
+        return -1;
+    }
+
+    /** @return computation supplied during the last completed tick, or -1 if not reported */
+    default int getCurrentCWUt() {
+        return -1;
+    }
+
     /**
      * Request some amount of CWU/t (Compute Work Units per tick) from this Machine.
      * Implementors should expect these requests to occur each tick that computation is required.

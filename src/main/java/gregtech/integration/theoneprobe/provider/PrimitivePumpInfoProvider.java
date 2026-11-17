@@ -2,9 +2,9 @@ package gregtech.integration.theoneprobe.provider;
 
 import gregtech.api.GTValues;
 import gregtech.api.metatileentity.MetaTileEntity;
-import gregtech.api.metatileentity.interfaces.IGregTechTileEntity;
 import gregtech.api.metatileentity.multiblock.IPrimitivePump;
 import gregtech.api.util.TextFormattingUtil;
+import gregtech.integration.theoneprobe.ProbeInfoUtil;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -27,14 +27,12 @@ public class PrimitivePumpInfoProvider implements IProbeInfoProvider {
                              @NotNull World world, @NotNull IBlockState blockState, @NotNull IProbeHitData data) {
         if (blockState.getBlock().hasTileEntity(blockState)) {
             TileEntity tileEntity = world.getTileEntity(data.getPos());
-            if (!(tileEntity instanceof IGregTechTileEntity)) return;
-
-            MetaTileEntity metaTileEntity = ((IGregTechTileEntity) tileEntity).getMetaTileEntity();
-            if (metaTileEntity instanceof IPrimitivePump) {
+            MetaTileEntity metaTileEntity = ProbeInfoUtil.getMetaTileEntity(tileEntity);
+            if (metaTileEntity instanceof IPrimitivePump pump) {
                 probeInfo.text(
                         TextStyleClass.INFO + "{*gregtech.top.primitive_pump_production*} " + TextFormatting.AQUA +
                                 TextFormattingUtil
-                                        .formatNumbers(((IPrimitivePump) metaTileEntity).getFluidProduction()) +
+                                        .formatNumbers(pump.getFluidProduction()) +
                                 TextFormatting.RESET + " L/s");
             }
         }

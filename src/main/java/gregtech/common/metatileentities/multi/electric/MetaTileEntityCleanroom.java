@@ -576,6 +576,11 @@ public class MetaTileEntityCleanroom extends MultiblockWithDisplayBase
     }
 
     @Override
+    public int getCleanAmount() {
+        return cleanAmount;
+    }
+
+    @Override
     public void setCleanAmount(int amount) {
         this.cleanAmount = amount;
     }

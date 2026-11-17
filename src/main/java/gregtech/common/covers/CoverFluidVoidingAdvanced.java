@@ -108,6 +108,7 @@ public class CoverFluidVoidingAdvanced extends CoverFluidVoiding {
         this.fluidFilterContainer.setTransferSize((int) Math.max(1, Math.min(amount, Integer.MAX_VALUE)));
     }
 
+    @Override
     public int getTransferAmount() {
         return this.fluidFilterContainer.getTransferSize();
     }
@@ -118,6 +119,7 @@ public class CoverFluidVoidingAdvanced extends CoverFluidVoiding {
         this.markDirty();
     }
 
+    @Override
     public VoidingMode getVoidingMode() {
         return voidingMode;
     }

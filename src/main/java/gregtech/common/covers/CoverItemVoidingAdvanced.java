@@ -138,6 +138,7 @@ public class CoverItemVoidingAdvanced extends CoverItemVoiding {
         this.getCoverableView().markDirty();
     }
 
+    @Override
     public VoidingMode getVoidingMode() {
         return voidingMode;
     }

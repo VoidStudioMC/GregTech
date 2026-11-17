@@ -180,6 +180,7 @@ public class CoverRoboticArm extends CoverConveyor {
         }
     }
 
+    @Override
     public TransferMode getTransferMode() {
         return transferMode;
     }

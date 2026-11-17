@@ -3,7 +3,6 @@ package gregtech.integration.theoneprobe.provider;
 import gregtech.api.GTValues;
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.IEnergyContainer;
-import gregtech.api.capability.ILaserContainer;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
@@ -30,7 +29,7 @@ public class ElectricContainerInfoProvider extends CapabilityInfoProvider<IEnerg
 
     @Override
     protected boolean allowDisplaying(@NotNull IEnergyContainer capability) {
-        return !capability.isOneProbeHidden() && !(capability instanceof ILaserContainer);
+        return !capability.isOneProbeHidden() && !capability.isLaser();
     }
 
     @Override

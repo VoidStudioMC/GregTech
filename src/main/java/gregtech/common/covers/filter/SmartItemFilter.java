@@ -29,6 +29,11 @@ import java.util.Collections;
 
 public class SmartItemFilter extends BaseFilter {
 
+    @Override
+    public SmartFilteringMode getFilterMode() {
+        return getFilteringMode();
+    }
+
     private final SmartItemFilterReader filterReader;
 
     public SmartItemFilter(ItemStack stack) {

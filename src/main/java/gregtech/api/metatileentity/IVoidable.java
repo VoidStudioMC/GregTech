@@ -10,6 +10,18 @@ public interface IVoidable {
 
     boolean canVoidRecipeFluidOutputs();
 
+    default boolean shouldShowVoidingModeButton() {
+        return false;
+    }
+
+    default int getVoidingMode() {
+        return (canVoidRecipeItemOutputs() ? 1 : 0) + (canVoidRecipeFluidOutputs() ? 2 : 0);
+    }
+
+    default @NotNull String getVoidingModeTooltip(int mode) {
+        return VoidingMode.VALUES[mode].getName();
+    }
+
     // -1 is taken into account as a skip case. I would have passed Integer.MAX_VALUE, but that would have been bad for
     // some sublisting stuff
     default int getItemOutputLimit() {

@@ -62,6 +62,7 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenCustomHashSet;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.Map;
@@ -113,6 +114,19 @@ public class CoverConveyor extends CoverBase implements CoverWithUI, ITickable, 
 
     public int getTransferRate() {
         return transferRate;
+    }
+
+    /** @return whether this cover displays an ordinary transfer rate */
+    public boolean shouldShowTransferRate() {
+        return getTransferMode() == null || getTransferMode() == TransferMode.TRANSFER_ANY;
+    }
+
+    public @Nullable TransferMode getTransferMode() {
+        return null;
+    }
+
+    public @Nullable VoidingMode getVoidingMode() {
+        return null;
     }
 
     protected void adjustTransferRate(int amount) {

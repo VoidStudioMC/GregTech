@@ -6,6 +6,7 @@ import gregtech.api.capability.GregtechDataCodes;
 import gregtech.api.capability.GregtechTileCapabilities;
 import gregtech.api.capability.IControllable;
 import gregtech.api.capability.IEnergyContainer;
+import gregtech.api.capability.IEnergyStorageInfo;
 import gregtech.api.capability.impl.EnergyContainerList;
 import gregtech.api.metatileentity.MetaTileEntity;
 import gregtech.api.metatileentity.interfaces.IGregTechTileEntity;
@@ -72,7 +73,7 @@ import java.util.function.UnaryOperator;
 import static gregtech.api.util.RelativeDirection.*;
 
 public class MetaTileEntityPowerSubstation extends MultiblockWithDisplayBase
-                                           implements IControllable, ProgressBarMultiblock {
+                                           implements IControllable, ProgressBarMultiblock, IEnergyStorageInfo {
 
     // Structure Constants
     public static final int MAX_BATTERY_LAYERS = 18;
@@ -194,6 +195,28 @@ public class MetaTileEntityPowerSubstation extends MultiblockWithDisplayBase
                 netOutLastSec += energyDebanked;
             }
         }
+    }
+
+    @Override
+    public BigInteger getStoredEnergy() {
+        return energyBank == null ? BigInteger.ZERO : energyBank.getStored();
+    }
+
+    @Override
+    public BigInteger getEnergyCapacity() {
+        return energyBank == null ? BigInteger.ZERO : energyBank.getCapacity();
+    }
+
+    /** @return average energy input over the last second, in EU/t */
+    @Override
+    public long getAverageInput() {
+        return averageInLastSec;
+    }
+
+    /** @return average energy output over the last second, in EU/t, including passive drain */
+    @Override
+    public long getAverageOutput() {
+        return averageOutLastSec;
     }
 
     public long getPassiveDrain() {

@@ -337,10 +337,12 @@ public abstract class MultiblockWithDisplayBase extends MultiblockControllerBase
         return new TraceabilityPredicate();
     }
 
+    @Override
     public boolean shouldShowVoidingModeButton() {
         return true;
     }
 
+    @Override
     public final int getVoidingMode() {
         return voidingMode.ordinal();
     }
@@ -363,6 +365,7 @@ public abstract class MultiblockWithDisplayBase extends MultiblockControllerBase
         markDirty();
     }
 
+    @Override
     public @NotNull String getVoidingModeTooltip(int mode) {
         return VoidingMode.VALUES[mode].getName();
     }

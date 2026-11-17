@@ -9,6 +9,7 @@ import gregtech.api.recipes.Recipe;
 import gregtech.api.recipes.RecipeMap;
 import gregtech.api.recipes.logic.OCParams;
 import gregtech.api.recipes.logic.OCResult;
+import gregtech.api.unification.material.Materials;
 import gregtech.api.util.GTUtility;
 import gregtech.common.ConfigHolder;
 import gregtech.core.advancement.AdvancementTriggers;
@@ -27,6 +28,7 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.IFluidTank;
 
 import org.jetbrains.annotations.NotNull;
@@ -52,6 +54,11 @@ public class RecipeLogicSteam extends AbstractRecipeLogic implements IVentable {
     @Override
     public boolean isVentingStuck() {
         return needsVenting && ventingStuck;
+    }
+
+    @Override
+    public Fluid getEnergyFluid() {
+        return Materials.Steam.getFluid();
     }
 
     @Override

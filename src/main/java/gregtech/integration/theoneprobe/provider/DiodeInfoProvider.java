@@ -2,8 +2,8 @@ package gregtech.integration.theoneprobe.provider;
 
 import gregtech.api.capability.IEnergyContainer;
 import gregtech.api.metatileentity.MetaTileEntity;
-import gregtech.api.metatileentity.interfaces.IGregTechTileEntity;
 import gregtech.common.metatileentities.electric.MetaTileEntityDiode;
+import gregtech.integration.theoneprobe.ProbeInfoUtil;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
@@ -24,18 +24,16 @@ public class DiodeInfoProvider extends ElectricContainerInfoProvider {
     @Override
     protected void addProbeInfo(@NotNull IEnergyContainer capability, @NotNull IProbeInfo probeInfo,
                                 EntityPlayer player, @NotNull TileEntity tileEntity, @NotNull IProbeHitData data) {
-        if (tileEntity instanceof IGregTechTileEntity) {
-            MetaTileEntity metaTileEntity = ((IGregTechTileEntity) tileEntity).getMetaTileEntity();
-            if (metaTileEntity instanceof MetaTileEntityDiode) {
-                if (capability.inputsEnergy(data.getSideHit())) {
-                    probeInfo.text(
-                            TextStyleClass.INFO + TextFormatting.GOLD.toString() + "{*gregtech.top.transform_input*} " +
-                                    TextFormatting.RESET + capability.getInputAmperage() + " A");
-                } else if (capability.outputsEnergy(data.getSideHit())) {
-                    probeInfo.text(TextStyleClass.INFO + TextFormatting.BLUE.toString() +
-                            "{*gregtech.top.transform_output*} " + TextFormatting.RESET +
-                            capability.getOutputAmperage() + " A");
-                }
+        MetaTileEntity metaTileEntity = ProbeInfoUtil.getMetaTileEntity(tileEntity);
+        if (metaTileEntity instanceof MetaTileEntityDiode) {
+            if (capability.inputsEnergy(data.getSideHit())) {
+                probeInfo.text(
+                        TextStyleClass.INFO + TextFormatting.GOLD.toString() + "{*gregtech.top.transform_input*} " +
+                                TextFormatting.RESET + capability.getInputAmperage() + " A");
+            } else if (capability.outputsEnergy(data.getSideHit())) {
+                probeInfo.text(TextStyleClass.INFO + TextFormatting.BLUE.toString() +
+                        "{*gregtech.top.transform_output*} " + TextFormatting.RESET +
+                        capability.getOutputAmperage() + " A");
             }
         }
     }

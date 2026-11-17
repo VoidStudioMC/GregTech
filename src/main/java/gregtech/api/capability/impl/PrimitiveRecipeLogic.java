@@ -49,6 +49,11 @@ public class PrimitiveRecipeLogic extends AbstractRecipeLogic {
     }
 
     @Override
+    public boolean usesEnergy() {
+        return false;
+    }
+
+    @Override
     protected void runOverclockingLogic(@NotNull OCParams ocParams, @NotNull OCResult ocResult,
                                         @NotNull RecipePropertyStorage propertyStorage, long maxVoltage) {
         ocParams.setEut(1L);

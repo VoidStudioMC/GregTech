@@ -37,6 +37,11 @@ import org.jetbrains.annotations.NotNull;
 
 public class CoverFluidVoiding extends CoverPump {
 
+    @Override
+    public boolean shouldShowTransferRate() {
+        return false;
+    }
+
     protected final NullFluidTank nullFluidTank = new NullFluidTank();
 
     public CoverFluidVoiding(@NotNull CoverDefinition definition, @NotNull CoverableView coverableView,

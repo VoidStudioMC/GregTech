@@ -118,14 +118,17 @@ public class ComputationRecipeLogic extends MultiblockRecipeLogic {
         this.currentDrawnCWUt = 0;
     }
 
+    @Override
     public int getRecipeCWUt() {
         return recipeCWUt;
     }
 
+    @Override
     public int getCurrentDrawnCWUt() {
         return isDurationTotalCWU ? currentDrawnCWUt : recipeCWUt;
     }
 
+    @Override
     public boolean isHasNotEnoughComputation() {
         return hasNotEnoughComputation;
     }
@@ -153,6 +156,7 @@ public class ComputationRecipeLogic extends MultiblockRecipeLogic {
     /**
      * @return Whether TOP / WAILA should show the recipe progress as duration or as total computation.
      */
+    @Override
     public boolean shouldShowDuration() {
         return !isDurationTotalCWU;
     }

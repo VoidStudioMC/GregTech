@@ -59,6 +59,11 @@ public class OreDictionaryItemFilter extends BaseFilter {
         return this.filterReader.getExpression();
     }
 
+    @Override
+    public @NotNull String getFilterExpression() {
+        return getExpression();
+    }
+
     protected void recompile() {
         clearCache();
         this.filterReader.recompile();

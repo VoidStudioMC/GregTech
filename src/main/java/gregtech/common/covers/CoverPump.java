@@ -104,6 +104,24 @@ public class CoverPump extends CoverBase implements CoverWithUI, ITickable, ICon
         return bucketMode == BucketMode.BUCKET ? transferRate / 1000 : transferRate;
     }
 
+    /** @return whether this cover displays an ordinary transfer rate */
+    public boolean shouldShowTransferRate() {
+        return getTransferMode() == null || getTransferMode() == TransferMode.TRANSFER_ANY;
+    }
+
+    public @Nullable TransferMode getTransferMode() {
+        return null;
+    }
+
+    public @Nullable VoidingMode getVoidingMode() {
+        return null;
+    }
+
+    /** @return transfer amount in liters, independent of the display unit */
+    public int getTransferAmount() {
+        return transferRate;
+    }
+
     protected void adjustTransferRate(int amount) {
         amount *= this.bucketMode == BucketMode.BUCKET ? 1000 : 1;
         setTransferRate(this.transferRate + amount);

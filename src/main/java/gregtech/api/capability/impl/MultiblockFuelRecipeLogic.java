@@ -18,7 +18,9 @@ import net.minecraftforge.fluids.FluidStack;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MultiblockFuelRecipeLogic extends MultiblockRecipeLogic {
 
@@ -104,6 +106,14 @@ public class MultiblockFuelRecipeLogic extends MultiblockRecipeLogic {
     @Override
     public boolean consumesEnergy() {
         return false;
+    }
+
+    @Override
+    public List<FluidStack> getRecipeFuelInputs() {
+        if (previousRecipe == null) return Collections.emptyList();
+        return previousRecipe.getFluidInputs().stream()
+                .map(input -> input.getInputFluidStack().copy())
+                .collect(Collectors.toList());
     }
 
     @Override

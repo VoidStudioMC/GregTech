@@ -232,6 +232,7 @@ public class CoverFluidRegulator extends CoverPump {
         }
     }
 
+    @Override
     public TransferMode getTransferMode() {
         return transferMode;
     }

@@ -34,6 +34,11 @@ import org.jetbrains.annotations.NotNull;
 
 public class CoverItemVoiding extends CoverConveyor {
 
+    @Override
+    public boolean shouldShowTransferRate() {
+        return false;
+    }
+
     protected final NullItemHandler nullItemHandler = new NullItemHandler();
 
     public CoverItemVoiding(@NotNull CoverDefinition definition, @NotNull CoverableView coverableView,

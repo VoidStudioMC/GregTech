@@ -2,9 +2,9 @@ package gregtech.integration.theoneprobe.provider;
 
 import gregtech.api.GTValues;
 import gregtech.api.metatileentity.MetaTileEntity;
-import gregtech.api.metatileentity.interfaces.IGregTechTileEntity;
 import gregtech.api.pipenet.longdist.ILDEndpoint;
 import gregtech.api.pipenet.longdist.LongDistanceNetwork;
+import gregtech.integration.theoneprobe.ProbeInfoUtil;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -28,41 +28,39 @@ public class LDPipeProvider implements IProbeInfoProvider {
         BlockPos pos = probeHitData.getPos();
 
         TileEntity tileEntity = world.getTileEntity(pos);
-        if (tileEntity instanceof IGregTechTileEntity iGregTechTileEntity) {
-            MetaTileEntity metaTileEntity = iGregTechTileEntity.getMetaTileEntity();
-            if (metaTileEntity instanceof ILDEndpoint endpoint) {
-                LongDistanceNetwork network = LongDistanceNetwork.get(world, pos);
-                if (network == null) {
-                    probeInfo.text(TextStyleClass.ERROR + "{*gregtech.top.ld_pipe_no_network*}");
-                } else {
-                    ILDEndpoint other = endpoint.getLink();
-                    if (other != null) {
-                        probeInfo.text(TextStyleClass.OK + "{*gregtech.top.ld_pipe_connected*}");
-                        probeInfo.text(TextStyleClass.INFO + "{*gregtech.top.ld_pipe_length*} " +
-                                TextStyleClass.INFOIMP + network.getTotalSize());
+        MetaTileEntity metaTileEntity = ProbeInfoUtil.getMetaTileEntity(tileEntity);
+        if (metaTileEntity instanceof ILDEndpoint endpoint) {
+            LongDistanceNetwork network = LongDistanceNetwork.get(world, pos);
+            if (network == null) {
+                probeInfo.text(TextStyleClass.ERROR + "{*gregtech.top.ld_pipe_no_network*}");
+            } else {
+                ILDEndpoint other = endpoint.getLink();
+                if (other != null) {
+                    probeInfo.text(TextStyleClass.OK + "{*gregtech.top.ld_pipe_connected*}");
+                    probeInfo.text(TextStyleClass.INFO + "{*gregtech.top.ld_pipe_length*} " +
+                            TextStyleClass.INFOIMP + network.getTotalSize());
 
-                        addIOText(probeInfo, endpoint);
+                    addIOText(probeInfo, endpoint);
 
-                        if (entityPlayer.isSneaking()) {
-                            BlockPos otherPos = other.pos();
-                            String prefix = null;
-                            if (other.isInput()) {
-                                prefix = "{*gregtech.top.ld_pipe_input_endpoint*}";
-                            } else if (other.isOutput()) {
-                                prefix = "{*gregtech.top.ld_pipe_output_endpoint*}";
-                            }
-
-                            if (prefix != null) {
-                                probeInfo.text(TextStyleClass.INFO + prefix +
-                                        TextStyleClass.INFO + " x: " + TextStyleClass.OK + otherPos.getX() +
-                                        TextStyleClass.INFO + " y: " + TextStyleClass.OK + otherPos.getY() +
-                                        TextStyleClass.INFO + " z: " + TextStyleClass.OK + otherPos.getZ());
-                            }
+                    if (entityPlayer.isSneaking()) {
+                        BlockPos otherPos = other.pos();
+                        String prefix = null;
+                        if (other.isInput()) {
+                            prefix = "{*gregtech.top.ld_pipe_input_endpoint*}";
+                        } else if (other.isOutput()) {
+                            prefix = "{*gregtech.top.ld_pipe_output_endpoint*}";
                         }
-                    } else {
-                        probeInfo.text(TextStyleClass.WARNING + "{*gregtech.top.ld_pipe_incomplete*}");
-                        addIOText(probeInfo, endpoint);
+
+                        if (prefix != null) {
+                            probeInfo.text(TextStyleClass.INFO + prefix +
+                                    TextStyleClass.INFO + " x: " + TextStyleClass.OK + otherPos.getX() +
+                                    TextStyleClass.INFO + " y: " + TextStyleClass.OK + otherPos.getY() +
+                                    TextStyleClass.INFO + " z: " + TextStyleClass.OK + otherPos.getZ());
+                        }
                     }
+                } else {
+                    probeInfo.text(TextStyleClass.WARNING + "{*gregtech.top.ld_pipe_incomplete*}");
+                    addIOText(probeInfo, endpoint);
                 }
             }
         }

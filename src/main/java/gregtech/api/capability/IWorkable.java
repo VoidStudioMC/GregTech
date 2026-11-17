@@ -15,6 +15,11 @@ public interface IWorkable extends IControllable {
      */
     int getMaxProgress();
 
+    /** @return whether progress is measured in ticks rather than total computation */
+    default boolean shouldShowDuration() {
+        return true;
+    }
+
     /**
      * @return true is machine is active
      */

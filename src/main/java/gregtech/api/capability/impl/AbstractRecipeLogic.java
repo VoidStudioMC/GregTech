@@ -34,6 +34,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.IFluidTank;
 import net.minecraftforge.items.IItemHandlerModifiable;
@@ -258,6 +259,49 @@ public abstract class AbstractRecipeLogic extends MTETrait implements IWorkable,
     @Nullable
     public Recipe getPreviousRecipe() {
         return previousRecipe;
+    }
+
+    /** @return an unmodifiable view of the item outputs prepared for the current recipe */
+    public List<ItemStack> getRecipeItemOutputs() {
+        return Collections.unmodifiableList(itemOutputs);
+    }
+
+    /** @return an unmodifiable view of the fluid outputs prepared for the current recipe */
+    public List<FluidStack> getRecipeFluidOutputs() {
+        return Collections.unmodifiableList(fluidOutputs);
+    }
+
+    public boolean isRecipeOutputsFull() {
+        return isOutputsFull;
+    }
+
+    /** @return whether this logic uses energy, including fluid-based energy */
+    public boolean usesEnergy() {
+        return true;
+    }
+
+    /** @return the fluid used as energy, or null for electrical energy */
+    public @Nullable Fluid getEnergyFluid() {
+        return null;
+    }
+
+    /** @return computation required by the current recipe, in CWU/t */
+    public int getRecipeCWUt() {
+        return 0;
+    }
+
+    /** @return computation drawn by the current recipe, in CWU/t */
+    public int getCurrentDrawnCWUt() {
+        return 0;
+    }
+
+    public boolean isHasNotEnoughComputation() {
+        return false;
+    }
+
+    /** @return fluid inputs consumed as fuel per recipe cycle */
+    public List<FluidStack> getRecipeFuelInputs() {
+        return Collections.emptyList();
     }
 
     /**
@@ -1032,6 +1076,11 @@ public abstract class AbstractRecipeLogic extends MTETrait implements IWorkable,
      * @return the previous recipe's duration
      */
     public int getPreviousRecipeDuration() {
+        return getPreviousRecipe() == null ? 0 : getPreviousRecipe().getDuration();
+    }
+
+    /** @return fuel-cycle duration for informational displays, in ticks */
+    public int getInfoProviderFuelDuration() {
         return getPreviousRecipe() == null ? 0 : getPreviousRecipe().getDuration();
     }
 

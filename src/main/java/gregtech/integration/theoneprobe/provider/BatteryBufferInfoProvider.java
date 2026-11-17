@@ -4,10 +4,10 @@ import gregtech.api.GTValues;
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.IEnergyContainer;
 import gregtech.api.metatileentity.MetaTileEntity;
-import gregtech.api.metatileentity.interfaces.IGregTechTileEntity;
 import gregtech.api.util.TextComponentUtil;
 import gregtech.api.util.TextFormattingUtil;
 import gregtech.common.metatileentities.electric.MetaTileEntityBatteryBuffer;
+import gregtech.integration.theoneprobe.ProbeInfoUtil;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
@@ -36,32 +36,29 @@ public class BatteryBufferInfoProvider extends CapabilityInfoProvider<IEnergyCon
     @Override
     protected void addProbeInfo(IEnergyContainer capability, IProbeInfo probeInfo, EntityPlayer player,
                                 TileEntity tileEntity, IProbeHitData data) {
-        if (tileEntity instanceof IGregTechTileEntity iGregTechTileEntity) {
-            MetaTileEntity metaTileEntity = iGregTechTileEntity.getMetaTileEntity();
+        MetaTileEntity metaTileEntity = ProbeInfoUtil.getMetaTileEntity(tileEntity);
+        if (metaTileEntity instanceof MetaTileEntityBatteryBuffer) {
+            long averageIn = capability.getInputPerSec() / 20;
+            ITextComponent averageInFormatted = TextComponentUtil.translationWithColor(
+                    TextFormatting.GREEN,
+                    "gregtech.battery_buffer.average_input.top",
+                    TextComponentUtil.stringWithColor(
+                            TextFormatting.WHITE,
+                            player.isSneaking() || averageIn < 10_000 ?
+                                    TextFormattingUtil.formatNumbers(averageIn) + " EU/t" :
+                                    ElementProgress.format(averageIn, NumberFormat.COMPACT, "EU/t")));
+            probeInfo.text(averageInFormatted.getFormattedText());
 
-            if (metaTileEntity instanceof MetaTileEntityBatteryBuffer) {
-                long averageIn = capability.getInputPerSec() / 20;
-                ITextComponent averageInFormatted = TextComponentUtil.translationWithColor(
-                        TextFormatting.GREEN,
-                        "gregtech.battery_buffer.average_input.top",
-                        TextComponentUtil.stringWithColor(
-                                TextFormatting.WHITE,
-                                player.isSneaking() || averageIn < 10_000 ?
-                                        TextFormattingUtil.formatNumbers(averageIn) + " EU/t" :
-                                        ElementProgress.format(averageIn, NumberFormat.COMPACT, "EU/t")));
-                probeInfo.text(averageInFormatted.getFormattedText());
-
-                long averageOut = capability.getOutputPerSec() / 20;
-                ITextComponent averageOutFormatted = TextComponentUtil.translationWithColor(
-                        TextFormatting.RED,
-                        "gregtech.battery_buffer.average_output.top",
-                        TextComponentUtil.stringWithColor(
-                                TextFormatting.WHITE,
-                                player.isSneaking() || averageOut < 10_000 ?
-                                        TextFormattingUtil.formatNumbers(averageOut) + " EU/t" :
-                                        ElementProgress.format(averageOut, NumberFormat.COMPACT, "EU/t")));
-                probeInfo.text(averageOutFormatted.getFormattedText());
-            }
+            long averageOut = capability.getOutputPerSec() / 20;
+            ITextComponent averageOutFormatted = TextComponentUtil.translationWithColor(
+                    TextFormatting.RED,
+                    "gregtech.battery_buffer.average_output.top",
+                    TextComponentUtil.stringWithColor(
+                            TextFormatting.WHITE,
+                            player.isSneaking() || averageOut < 10_000 ?
+                                    TextFormattingUtil.formatNumbers(averageOut) + " EU/t" :
+                                    ElementProgress.format(averageOut, NumberFormat.COMPACT, "EU/t")));
+            probeInfo.text(averageOutFormatted.getFormattedText());
         }
     }
 }

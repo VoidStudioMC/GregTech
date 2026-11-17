@@ -3,8 +3,9 @@ package gregtech.integration.theoneprobe.provider;
 import gregtech.api.GTValues;
 import gregtech.api.capability.IQuantumController;
 import gregtech.api.capability.IQuantumStorage;
-import gregtech.api.metatileentity.interfaces.IGregTechTileEntity;
+import gregtech.api.metatileentity.MetaTileEntity;
 import gregtech.api.util.GTUtility;
+import gregtech.integration.theoneprobe.ProbeInfoUtil;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -28,9 +29,9 @@ public class QuantumStorageProvider implements IProbeInfoProvider {
     @Override
     public void addProbeInfo(ProbeMode mode, IProbeInfo probeInfo, EntityPlayer player, World world,
                              IBlockState blockState, IProbeHitData data) {
-        if (blockState.getBlock().hasTileEntity(blockState) &&
-                world.getTileEntity(data.getPos()) instanceof IGregTechTileEntity gtte) {
-            if (gtte.getMetaTileEntity() instanceof IQuantumController controller) {
+        if (blockState.getBlock().hasTileEntity(blockState)) {
+            MetaTileEntity machine = ProbeInfoUtil.getMetaTileEntity(world.getTileEntity(data.getPos()));
+            if (machine instanceof IQuantumController controller) {
                 String eutText = configureEnergyUsage(controller.getEnergyUsage() / 10);
                 if (controller.getCount(IQuantumStorage.Type.ENERGY) == 0) {
                     probeInfo.text("{*gregtech.top.quantum_controller.no_hatches*}");
@@ -41,7 +42,7 @@ public class QuantumStorageProvider implements IProbeInfoProvider {
                 } else {
                     probeInfo.text(TextStyleClass.INFO + "{*gregtech.top.energy_consumption*} " + eutText);
                 }
-            } else if (gtte.getMetaTileEntity() instanceof IQuantumStorage<?>storage &&
+            } else if (machine instanceof IQuantumStorage<?>storage &&
                     (storage.getType() == IQuantumStorage.Type.ITEM ||
                             storage.getType() == IQuantumStorage.Type.FLUID)) {
                                 probeInfo.text(getConnectionStatus(storage));

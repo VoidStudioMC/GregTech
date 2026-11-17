@@ -4,6 +4,11 @@ import net.minecraft.util.EnumFacing;
 
 public interface IEnergyContainer {
 
+    /** @return whether this container transports energy through lasers */
+    default boolean isLaser() {
+        return false;
+    }
+
     /**
      * This method is basically {@link #changeEnergy(long)}, but it also handles amperes.
      * This method should always be used when energy is passed between blocks.

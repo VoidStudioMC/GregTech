@@ -13,6 +13,11 @@ public interface ICleanroomProvider {
      */
     boolean checkCleanroomType(@NotNull CleanroomType type);
 
+    /** @return cleanliness in percent, or -1 if this provider does not report it */
+    default int getCleanAmount() {
+        return -1;
+    }
+
     /**
      * Sets the cleanroom's clean amount
      *
