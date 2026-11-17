@@ -559,6 +559,93 @@ class PipeNetChunkCacheTest {
     }
 
     @Test
+    void postLoadRefreshInvalidatesSharedChunkFacesOnce() {
+        int[] changes = new int[EnumFacing.VALUES.length];
+        world.put(new BlockPos(15, 64, 15), new CacheTile() {
+
+            @Override
+            public void onNeighborChanged(@NotNull EnumFacing facing) {
+                super.onNeighborChanged(facing);
+                changes[facing.getIndex()]++;
+            }
+        });
+        world.load(new TestChunk(world, 1, 0));
+        world.load(new TestChunk(world, 0, 1));
+        Arrays.fill(changes, 0);
+
+        PipeNetEventHandler.onWorldTick(new TickEvent.WorldTickEvent(Side.SERVER, TickEvent.Phase.END, world));
+
+        assertArrayEquals(new int[] { 1, 1, 1, 1, 1, 1 }, changes,
+                "A full refresh must subsume the border refreshes from adjacent pending chunks");
+    }
+
+    @Test
+    void postLoadRefreshMergesBothBordersAtChunkCorner() {
+        PipeNetEventHandler.onWorldTick(new TickEvent.WorldTickEvent(Side.SERVER, TickEvent.Phase.END, world));
+        int[] changes = new int[EnumFacing.VALUES.length];
+        CacheTile source = world.put(new BlockPos(15, 64, 15), new CacheTile() {
+
+            @Override
+            public void onNeighborChanged(@NotNull EnumFacing facing) {
+                super.onNeighborChanged(facing);
+                changes[facing.getIndex()]++;
+            }
+        });
+        assertNull(source.getNeighbor(EnumFacing.EAST));
+        assertNull(source.getNeighbor(EnumFacing.SOUTH));
+        TestChunk east = new TestChunk(world, 1, 0);
+        CacheTile eastNeighbor = world.put(east, source.getPos().east(), new CacheTile());
+        world.load(east);
+        TestChunk south = new TestChunk(world, 0, 1);
+        CacheTile southNeighbor = world.put(south, source.getPos().south(), new CacheTile());
+        world.load(south);
+        Arrays.fill(changes, 0);
+
+        PipeNetEventHandler.onWorldTick(new TickEvent.WorldTickEvent(Side.SERVER, TickEvent.Phase.END, world));
+
+        int[] expected = new int[EnumFacing.VALUES.length];
+        expected[EnumFacing.EAST.getIndex()] = 1;
+        expected[EnumFacing.SOUTH.getIndex()] = 1;
+        assertArrayEquals(expected, changes);
+        assertSame(eastNeighbor, source.getNeighbor(EnumFacing.EAST));
+        assertSame(southNeighbor, source.getNeighbor(EnumFacing.SOUTH));
+    }
+
+    @Test
+    void neighborRefreshSkipsTilesReplacedByCallbacks() {
+        CacheTile[] tiles = new CacheTile[2];
+        int[] changes = new int[2];
+        int[] replacementChanges = new int[1];
+        CacheTile replacement = new CacheTile() {
+
+            @Override
+            public void onNeighborChanged(@NotNull EnumFacing facing) {
+                replacementChanges[0]++;
+                super.onNeighborChanged(facing);
+            }
+        };
+        for (int i = 0; i < tiles.length; i++) {
+            int index = i;
+            tiles[i] = world.put(new BlockPos(i + 1, 64, 1), new CacheTile() {
+
+                @Override
+                public void onNeighborChanged(@NotNull EnumFacing facing) {
+                    super.onNeighborChanged(facing);
+                    changes[index]++;
+                    if (changes[0] + changes[1] == 1) {
+                        PipeNetChunkCacheTest.this.world.put(tiles[1 - index].getPos(), replacement);
+                    }
+                }
+            });
+        }
+
+        PipeNetEventHandler.onWorldTick(new TickEvent.WorldTickEvent(Side.SERVER, TickEvent.Phase.END, world));
+
+        assertEquals(0, replacementChanges[0], "Refresh only the tile instances present when the scan started");
+        assertTrue((changes[0] == 6 && changes[1] == 0) || (changes[0] == 0 && changes[1] == 6));
+    }
+
+    @Test
     void worldUnloadDiscardsPendingRefreshes() {
         world.setData("gregtech.e_net", new CountingWorldENet());
         TestCable source = world.put(new BlockPos(1, 64, 1), new TestCable(EnumFacing.EAST));
