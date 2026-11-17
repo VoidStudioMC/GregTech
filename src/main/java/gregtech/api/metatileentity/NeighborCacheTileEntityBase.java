@@ -1,14 +1,14 @@
 package gregtech.api.metatileentity;
 
 import gregtech.api.metatileentity.interfaces.INeighborCache;
+import gregtech.api.pipenet.PipeNetEventHandler;
+import gregtech.api.pipenet.PipeNetUtils;
 
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.gen.ChunkProviderServer;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
@@ -66,6 +66,7 @@ public abstract class NeighborCacheTileEntityBase extends SyncedTileEntityBase i
     public void onLoad() {
         super.onLoad();
         invalidateNeighbors();
+        PipeNetEventHandler.scheduleChunkCacheInvalidation(world, pos);
     }
 
     @MustBeInvokedByOverriders
@@ -93,12 +94,8 @@ public abstract class NeighborCacheTileEntityBase extends SyncedTileEntityBase i
         int x = (pos.getX() + facing.getXOffset()) >> 4;
         int z = (pos.getZ() + facing.getZOffset()) >> 4;
         if (x == pos.getX() >> 4 && z == pos.getZ() >> 4) return true;
-        if (world.getChunkProvider() instanceof ChunkProviderServer provider) {
-            Chunk chunk = provider.loadedChunks.get(ChunkPos.asLong(x, z));
-            // During Unload the chunk is still in the provider, but its tile entities are no longer usable.
-            return chunk != null && chunk.isLoaded();
-        }
-        return world.isBlockLoaded(pos.offset(facing));
+        Chunk chunk = PipeNetUtils.getLoadedChunk(world, x, z);
+        return chunk != null;
     }
 
     private boolean invalidRef(EnumFacing facing) {
@@ -111,7 +108,7 @@ public abstract class NeighborCacheTileEntityBase extends SyncedTileEntityBase i
 
     @NotNull
     private WeakReference<TileEntity> computeNeighbor(EnumFacing facing) {
-        TileEntity te = super.getNeighbor(facing);
+        TileEntity te = PipeNetUtils.getTileEntityIfLoaded(world, pos.offset(facing));
         // avoid making new references to null TEs
         WeakReference<TileEntity> ref = te == null ? NULL : new WeakReference<>(te);
         this.neighbors.set(facing.getIndex(), ref);

@@ -1,6 +1,7 @@
 package gregtech.common.pipelike.itempipe.net;
 
 import gregtech.api.cover.Cover;
+import gregtech.api.pipenet.PipeNetUtils;
 import gregtech.api.pipenet.PipeNetWalker;
 import gregtech.api.unification.material.properties.ItemPipeProperties;
 import gregtech.api.util.GTUtility;
@@ -27,7 +28,7 @@ import java.util.function.Predicate;
 public class ItemNetWalker extends PipeNetWalker<TileEntityItemPipe> {
 
     public static List<ItemRoutePath> createNetData(World world, BlockPos sourcePipe, EnumFacing faceToSourceHandler) {
-        if (!(world.getTileEntity(sourcePipe) instanceof TileEntityItemPipe)) {
+        if (!(PipeNetUtils.getTileEntityIfLoaded(world, sourcePipe) instanceof TileEntityItemPipe)) {
             return null;
         }
         ItemNetWalker walker = new ItemNetWalker(world, sourcePipe, 1, new ArrayList<>(), null);

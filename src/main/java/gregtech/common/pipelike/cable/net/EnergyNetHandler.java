@@ -1,6 +1,7 @@
 package gregtech.common.pipelike.cable.net;
 
 import gregtech.api.capability.IEnergyContainer;
+import gregtech.api.pipenet.PipeNetUtils;
 import gregtech.api.util.GTLog;
 import gregtech.api.util.GTUtility;
 import gregtech.common.pipelike.cable.tile.TileEntityCable;
@@ -35,14 +36,21 @@ public class EnergyNetHandler implements IEnergyContainer {
         return net;
     }
 
+    private boolean isValid() {
+        if (!PipeNetUtils.isTileEntityLoaded(cable)) return false;
+        if (net != null && net.isValid() && net.containsNode(cable.getPos())) return true;
+        net = WorldENet.getWorldENet(cable.getWorld()).getNetFromPos(cable.getPos());
+        return net != null && net.isValid() && net.containsNode(cable.getPos());
+    }
+
     @Override
     public long getInputPerSec() {
-        return net.getEnergyFluxPerSec();
+        return isValid() ? net.getEnergyFluxPerSec() : 0;
     }
 
     @Override
     public long getOutputPerSec() {
-        return net.getEnergyFluxPerSec();
+        return isValid() ? net.getEnergyFluxPerSec() : 0;
     }
 
     @Override
@@ -52,7 +60,7 @@ public class EnergyNetHandler implements IEnergyContainer {
 
     @Override
     public long acceptEnergyFromNetwork(EnumFacing side, long voltage, long amperage) {
-        if (transfer) return 0;
+        if (transfer || !isValid()) return 0;
         if (side == null) {
             if (facing == null) return 0;
             side = facing;
@@ -99,8 +107,12 @@ public class EnergyNetHandler implements IEnergyContainer {
             if (cableBroken) continue;
 
             transfer = true;
-            long amps = dest.acceptEnergyFromNetwork(facing, pathVoltage, amperage - amperesUsed);
-            transfer = false;
+            long amps;
+            try {
+                amps = dest.acceptEnergyFromNetwork(facing, pathVoltage, amperage - amperesUsed);
+            } finally {
+                transfer = false;
+            }
             if (amps == 0) continue;
 
             amperesUsed += amps;
@@ -132,21 +144,23 @@ public class EnergyNetHandler implements IEnergyContainer {
 
     @Override
     public long getInputAmperage() {
-        return cable.getNodeData().getAmperage();
+        return isValid() ? cable.getNodeData().getAmperage() : 0;
     }
 
     @Override
     public long getInputVoltage() {
-        return cable.getNodeData().getVoltage();
+        return isValid() ? cable.getNodeData().getVoltage() : 0;
     }
 
     @Override
     public long getEnergyCapacity() {
-        return getInputVoltage() * getInputAmperage();
+        if (!isValid()) return 0;
+        return (long) cable.getNodeData().getVoltage() * cable.getNodeData().getAmperage();
     }
 
     @Override
     public long changeEnergy(long energyToAdd) {
+        if (!isValid()) return 0;
         GTLog.logger.fatal("Do not use changeEnergy() for cables! Use acceptEnergyFromNetwork()");
         return acceptEnergyFromNetwork(facing == null ? EnumFacing.UP : facing,
                 energyToAdd / getInputAmperage(),
@@ -155,12 +169,12 @@ public class EnergyNetHandler implements IEnergyContainer {
 
     @Override
     public boolean outputsEnergy(EnumFacing side) {
-        return true;
+        return isValid();
     }
 
     @Override
     public boolean inputsEnergy(EnumFacing side) {
-        return true;
+        return isValid();
     }
 
     @Override

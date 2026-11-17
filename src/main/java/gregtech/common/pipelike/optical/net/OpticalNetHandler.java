@@ -3,6 +3,7 @@ package gregtech.common.pipelike.optical.net;
 import gregtech.api.capability.IDataAccessHatch;
 import gregtech.api.capability.IOpticalComputationProvider;
 import gregtech.api.capability.IOpticalDataAccessHatch;
+import gregtech.api.pipenet.PipeNetUtils;
 import gregtech.api.recipes.Recipe;
 import gregtech.common.pipelike.optical.tile.TileEntityOpticalPipe;
 
@@ -69,14 +70,17 @@ public class OpticalNetHandler implements IDataAccessHatch, IOpticalComputationP
 
     private void setPipesActive() {
         for (BlockPos pos : net.getAllNodes().keySet()) {
-            if (world.getTileEntity(pos) instanceof TileEntityOpticalPipe opticalPipe) {
+            if (PipeNetUtils.getTileEntityIfLoaded(world, pos) instanceof TileEntityOpticalPipe opticalPipe) {
                 opticalPipe.setActive(true, 100);
             }
         }
     }
 
     private boolean isNetInvalidForTraversal() {
-        return net == null || pipe == null || pipe.isInvalid();
+        if (!PipeNetUtils.isTileEntityLoaded(pipe)) return true;
+        if (net != null && net.isValid() && net.containsNode(pipe.getPos())) return false;
+        net = pipe.getOpticalPipeNet();
+        return net == null || !net.isValid() || !net.containsNode(pipe.getPos());
     }
 
     private boolean traverseRecipeAvailable(@NotNull Recipe recipe, @NotNull Collection<IDataAccessHatch> seen) {

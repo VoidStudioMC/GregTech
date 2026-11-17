@@ -1,6 +1,7 @@
 package gregtech.common.pipelike.laser.net;
 
 import gregtech.api.capability.ILaserContainer;
+import gregtech.api.pipenet.PipeNetUtils;
 import gregtech.common.pipelike.laser.tile.TileEntityLaserPipe;
 
 import net.minecraft.util.EnumFacing;
@@ -27,7 +28,7 @@ public class LaserNetHandler implements ILaserContainer {
 
     private void setPipesActive() {
         for (BlockPos pos : net.getAllNodes().keySet()) {
-            if (pipe.getWorld().getTileEntity(pos) instanceof TileEntityLaserPipe laserPipe) {
+            if (PipeNetUtils.getTileEntityIfLoaded(pipe.getWorld(), pos) instanceof TileEntityLaserPipe laserPipe) {
                 laserPipe.setActive(true, 100);
             }
         }
@@ -35,8 +36,12 @@ public class LaserNetHandler implements ILaserContainer {
 
     @Nullable
     private ILaserContainer getInnerContainer() {
-        if (net == null || pipe == null || pipe.isInvalid() || facing == null) {
+        if (!PipeNetUtils.isTileEntityLoaded(pipe) || facing == null) {
             return null;
+        }
+        if (net == null || !net.isValid() || !net.containsNode(pipe.getPos())) {
+            net = pipe.getLaserPipeNet();
+            if (net == null || !net.isValid() || !net.containsNode(pipe.getPos())) return null;
         }
 
         LaserRoutePath data = net.getNetData(pipe.getPipePos(), facing);

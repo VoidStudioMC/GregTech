@@ -2,6 +2,7 @@ package gregtech.common.pipelike.cable.net;
 
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.IEnergyContainer;
+import gregtech.api.pipenet.PipeNetUtils;
 import gregtech.api.pipenet.PipeNetWalker;
 import gregtech.common.pipelike.cable.tile.TileEntityCable;
 
@@ -19,7 +20,7 @@ import java.util.List;
 public class EnergyNetWalker extends PipeNetWalker<TileEntityCable> {
 
     public static List<EnergyRoutePath> createNetData(World world, BlockPos sourcePipe) {
-        if (!(world.getTileEntity(sourcePipe) instanceof TileEntityCable)) {
+        if (!(PipeNetUtils.getTileEntityIfLoaded(world, sourcePipe) instanceof TileEntityCable)) {
             return null;
         }
         EnergyNetWalker walker = new EnergyNetWalker(world, sourcePipe, 1, new ArrayList<>());
