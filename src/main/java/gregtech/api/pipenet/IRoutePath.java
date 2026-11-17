@@ -27,6 +27,7 @@ public interface IRoutePath<T extends IPipeTile<?, ?>> {
 
     @Nullable
     default TileEntity getTargetTileEntity() {
+        if (getTargetPipe() instanceof TileEntity tile && !PipeNetUtils.isTileEntityLoaded(tile)) return null;
         return getTargetPipe().getNeighbor(getTargetFacing());
     }
 

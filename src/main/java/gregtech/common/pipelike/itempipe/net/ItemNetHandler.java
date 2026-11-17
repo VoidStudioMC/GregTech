@@ -3,6 +3,7 @@ package gregtech.common.pipelike.itempipe.net;
 import gregtech.api.capability.GregtechTileCapabilities;
 import gregtech.api.cover.Cover;
 import gregtech.api.cover.CoverHolder;
+import gregtech.api.pipenet.PipeNetUtils;
 import gregtech.api.util.FacingPos;
 import gregtech.api.util.GTTransferUtils;
 import gregtech.api.util.ItemStackHashStrategy;
@@ -62,6 +63,13 @@ public class ItemNetHandler implements IItemHandler {
         return facing;
     }
 
+    private boolean isValid() {
+        if (!PipeNetUtils.isTileEntityLoaded(pipe)) return false;
+        if (net != null && net.isValid() && net.containsNode(pipe.getPos())) return true;
+        net = pipe.getItemPipeNet();
+        return net != null && net.isValid() && net.containsNode(pipe.getPos());
+    }
+
     private void copyTransferred() {
         simulatedTransfers = pipe.getTransferredItems();
         simulatedTransfersGlobalRoundRobin.clear();
@@ -73,7 +81,7 @@ public class ItemNetHandler implements IItemHandler {
     public ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
         if (stack.isEmpty()) return stack;
 
-        if (net == null || pipe == null || pipe.isInvalid() || pipe.isFaceBlocked(facing)) {
+        if (!isValid() || pipe.isFaceBlocked(facing)) {
             return stack;
         }
 
@@ -113,6 +121,7 @@ public class ItemNetHandler implements IItemHandler {
     }
 
     public ItemStack insertFirst(ItemStack stack, boolean simulate) {
+        if (!isValid()) return stack;
         for (ItemRoutePath inv : net.getNetData(pipe.getPipePos(), facing)) {
             stack = insert(inv, stack, simulate);
             if (stack.isEmpty())
@@ -122,6 +131,7 @@ public class ItemNetHandler implements IItemHandler {
     }
 
     public ItemStack insertRoundRobin(ItemStack stack, boolean simulate, boolean global) {
+        if (!isValid()) return stack;
         List<ItemRoutePath> routePaths = net.getNetData(pipe.getPipePos(), facing);
         if (routePaths.isEmpty())
             return stack;
@@ -302,6 +312,7 @@ public class ItemNetHandler implements IItemHandler {
     }
 
     public ItemStack insert(ItemRoutePath routePath, ItemStack stack, boolean simulate, boolean ignoreLimit) {
+        if (!isValid()) return stack;
         int allowed = ignoreLimit ? stack.getCount() :
                 checkTransferable(routePath.getProperties().getTransferRate(), stack.getCount(), simulate);
         if (allowed == 0 || !routePath.matchesFilters(stack)) {

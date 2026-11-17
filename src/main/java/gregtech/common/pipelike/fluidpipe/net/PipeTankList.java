@@ -1,5 +1,6 @@
 package gregtech.common.pipelike.fluidpipe.net;
 
+import gregtech.api.pipenet.PipeNetUtils;
 import gregtech.common.pipelike.fluidpipe.tile.TileEntityFluidPipe;
 import gregtech.common.pipelike.fluidpipe.tile.TileEntityFluidPipeTickable;
 
@@ -31,6 +32,7 @@ public class PipeTankList implements IFluidHandler, Iterable<FluidTank> {
 
     @Override
     public IFluidTankProperties[] getTankProperties() {
+        if (!PipeNetUtils.isTileEntityLoaded(pipe)) return new IFluidTankProperties[0];
         if (properties == null) {
             properties = new IFluidTankProperties[tanks.length];
             for (int i = 0; i < tanks.length; i++) {
@@ -56,6 +58,7 @@ public class PipeTankList implements IFluidHandler, Iterable<FluidTank> {
 
     @Override
     public int fill(FluidStack resource, boolean doFill) {
+        if (!PipeNetUtils.isTileEntityLoaded(pipe)) return 0;
         int channel;
         if (pipe.isFaceBlocked(facing) || resource == null || resource.amount <= 0 ||
                 (channel = findChannel(resource)) < 0)
@@ -101,7 +104,7 @@ public class PipeTankList implements IFluidHandler, Iterable<FluidTank> {
     @Nullable
     @Override
     public FluidStack drain(int maxDrain, boolean doDrain) {
-        if (maxDrain <= 0) return null;
+        if (maxDrain <= 0 || !PipeNetUtils.isTileEntityLoaded(pipe)) return null;
         for (FluidTank tank : tanks) {
             FluidStack drained = tank.drain(maxDrain, doDrain);
             if (drained != null) return drained;
@@ -112,7 +115,7 @@ public class PipeTankList implements IFluidHandler, Iterable<FluidTank> {
     @Nullable
     @Override
     public FluidStack drain(FluidStack fluidStack, boolean doDrain) {
-        if (fluidStack == null || fluidStack.amount <= 0) return null;
+        if (fluidStack == null || fluidStack.amount <= 0 || !PipeNetUtils.isTileEntityLoaded(pipe)) return null;
         fluidStack = fluidStack.copy();
         for (FluidTank tank : tanks) {
             FluidStack drained = tank.drain(fluidStack, doDrain);

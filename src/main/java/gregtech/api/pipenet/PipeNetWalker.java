@@ -181,7 +181,8 @@ public abstract class PipeNetWalker<T extends IPipeTile<?, ?>> {
         nextPipeFacings.clear();
         nextPipes.clear();
         if (currentPipe == null) {
-            TileEntity thisPipe = world.getTileEntity(currentPos);
+            TileEntity thisPipe = PipeNetUtils.getTileEntityIfLoaded(world, currentPos);
+            if (thisPipe == null) return false;
             if (!(thisPipe instanceof IPipeTile<?, ?>)) {
                 GTLog.logger.fatal("PipeWalker expected a pipe, but found {} at {}", thisPipe, currentPos);
                 return false;
@@ -191,6 +192,7 @@ public abstract class PipeNetWalker<T extends IPipeTile<?, ?>> {
             }
             currentPipe = (T) thisPipe;
         }
+        if (currentPipe instanceof TileEntity tile && !PipeNetUtils.isTileEntityLoaded(tile)) return false;
         T pipeTile = currentPipe;
         checkPipe(pipeTile, currentPos);
         root.walked.add(pipeTile);

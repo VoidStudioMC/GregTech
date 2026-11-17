@@ -3,7 +3,12 @@ package gregtech.api.pipenet;
 import gregtech.Bootstrap;
 import gregtech.api.GregTechAPI;
 import gregtech.api.capability.IEnergyContainer;
+import gregtech.api.capability.ILaserContainer;
+import gregtech.api.capability.IOpticalComputationProvider;
+import gregtech.api.cover.Cover;
 import gregtech.api.metatileentity.NeighborCacheTileEntityBase;
+import gregtech.api.unification.material.properties.FluidPipeProperties;
+import gregtech.api.unification.material.properties.ItemPipeProperties;
 import gregtech.api.unification.material.properties.WireProperties;
 import gregtech.common.pipelike.cable.BlockCable;
 import gregtech.common.pipelike.cable.Insulation;
@@ -13,10 +18,30 @@ import gregtech.common.pipelike.cable.net.WorldENet;
 import gregtech.common.pipelike.cable.tile.TileEntityCable;
 import gregtech.common.pipelike.fluidpipe.BlockFluidPipe;
 import gregtech.common.pipelike.fluidpipe.FluidPipeType;
+import gregtech.common.pipelike.fluidpipe.net.PipeTankList;
 import gregtech.common.pipelike.fluidpipe.tile.TileEntityFluidPipe;
+import gregtech.common.pipelike.fluidpipe.tile.TileEntityFluidPipeTickable;
+import gregtech.common.pipelike.itempipe.BlockItemPipe;
+import gregtech.common.pipelike.itempipe.ItemPipeType;
+import gregtech.common.pipelike.itempipe.net.ItemNetHandler;
+import gregtech.common.pipelike.itempipe.net.ItemPipeNet;
+import gregtech.common.pipelike.itempipe.net.WorldItemPipeNet;
+import gregtech.common.pipelike.itempipe.tile.TileEntityItemPipe;
+import gregtech.common.pipelike.laser.BlockLaserPipe;
+import gregtech.common.pipelike.laser.LaserPipeType;
+import gregtech.common.pipelike.laser.net.LaserNetHandler;
+import gregtech.common.pipelike.laser.net.WorldLaserPipeNet;
+import gregtech.common.pipelike.laser.tile.TileEntityLaserPipe;
+import gregtech.common.pipelike.optical.BlockOpticalPipe;
+import gregtech.common.pipelike.optical.OpticalPipeType;
+import gregtech.common.pipelike.optical.net.OpticalNetHandler;
+import gregtech.common.pipelike.optical.net.WorldOpticalPipeNet;
+import gregtech.common.pipelike.optical.tile.TileEntityOpticalPipe;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.profiler.Profiler;
@@ -33,8 +58,16 @@ import net.minecraft.world.storage.WorldInfo;
 import net.minecraft.world.storage.WorldSavedData;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.event.world.ChunkEvent;
+import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidTank;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.items.ItemStackHandler;
 
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,6 +77,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -55,6 +90,9 @@ class PipeNetChunkCacheTest {
 
     private static BlockCable cableBlock;
     private static BlockFluidPipe fluidPipeBlock;
+    private static BlockItemPipe itemPipeBlock;
+    private static BlockLaserPipe laserPipeBlock;
+    private static BlockOpticalPipe opticalPipeBlock;
     private TestWorld world;
 
     @BeforeAll
@@ -62,6 +100,14 @@ class PipeNetChunkCacheTest {
         Bootstrap.perform();
         cableBlock = new BlockCable(Insulation.WIRE_SINGLE, GregTechAPI.materialManager.getRegistry("gregtech"));
         fluidPipeBlock = new BlockFluidPipe(FluidPipeType.NORMAL, GregTechAPI.materialManager.getRegistry("gregtech"));
+        itemPipeBlock = new BlockItemPipe(ItemPipeType.NORMAL, GregTechAPI.materialManager.getRegistry("gregtech"));
+        laserPipeBlock = new BlockLaserPipe(LaserPipeType.NORMAL);
+        opticalPipeBlock = new BlockOpticalPipe(OpticalPipeType.NORMAL);
+    }
+
+    @AfterEach
+    void unloadWorld() {
+        PipeNetEventHandler.onWorldUnload(new WorldEvent.Unload(world));
     }
 
     @BeforeEach
@@ -94,6 +140,7 @@ class PipeNetChunkCacheTest {
         assertEquals(lookups, world.tileLookups);
 
         CacheTile neighbor = world.put(source.getPos().east(), new CacheTile());
+        assertNull(source.getNeighbor(EnumFacing.EAST), "A known empty side stays cached until a neighbor update");
         source.onNeighborChanged(EnumFacing.EAST);
         assertSame(neighbor, source.getNeighbor(EnumFacing.EAST));
     }
@@ -268,6 +315,301 @@ class PipeNetChunkCacheTest {
         assertSame(newNeighbor, source.getNeighbor(EnumFacing.EAST));
     }
 
+    @Test
+    void cachedEnergyHandlerRejectsUnloadingAndUnloadedOwner() {
+        TestCable source = world.put(new BlockPos(1, 64, 1), new TestCable(EnumFacing.EAST));
+        EnergyConsumer consumer = world.put(source.getPos().east(), new EnergyConsumer());
+        WorldENet worldNet = WorldENet.getWorldENet(world);
+        addNode(worldNet, source);
+        EnergyNetHandler handler = new EnergyNetHandler(worldNet.getNetFromPos(source.getPos()), source,
+                EnumFacing.WEST);
+        assertEquals(1, handler.acceptEnergyFromNetwork(EnumFacing.WEST, 32, 1));
+
+        TestChunk chunk = world.loadedChunk(0, 0);
+        chunk.loaded = false;
+        assertFalse(source.isInvalid());
+        int lookups = world.tileLookups;
+        assertEquals(0, handler.acceptEnergyFromNetwork(EnumFacing.WEST, 32, 1));
+        assertEquals(0, handler.getEnergyCanBeInserted());
+        assertFalse(handler.inputsEnergy(EnumFacing.WEST));
+        assertEquals(lookups, world.tileLookups);
+
+        world.unload(chunk);
+        lookups = world.tileLookups;
+        assertEquals(0, handler.acceptEnergyFromNetwork(EnumFacing.WEST, 32, 1));
+        assertTrue(handler.getNet().getNetData(source.getPos()).isEmpty());
+        assertEquals(31, consumer.energy);
+        assertEquals(lookups, world.tileLookups);
+    }
+
+    @Test
+    void cachedEnergyHandlerRejectsReplacementAtSamePosition() {
+        TestCable source = world.put(new BlockPos(1, 64, 1), new TestCable(EnumFacing.EAST));
+        WorldENet worldNet = WorldENet.getWorldENet(world);
+        addNode(worldNet, source);
+        EnergyNetHandler oldHandler = new EnergyNetHandler(worldNet.getNetFromPos(source.getPos()), source,
+                EnumFacing.WEST);
+        world.unload(world.loadedChunk(0, 0));
+
+        TestChunk replacement = new TestChunk(world, 0, 0);
+        world.put(replacement, source.getPos(), new TestCable(EnumFacing.EAST));
+        EnergyConsumer consumer = world.put(replacement, source.getPos().east(), new EnergyConsumer());
+        world.load(replacement);
+
+        assertFalse(source.isInvalid());
+        assertEquals(0, oldHandler.acceptEnergyFromNetwork(EnumFacing.WEST, 32, 1));
+        assertEquals(0, consumer.energy);
+    }
+
+    @Test
+    void cachedEnergyHandlerFollowsNetworkAfterReconnect() {
+        TestCable source = world.put(new BlockPos(1, 64, 1), new TestCable(EnumFacing.EAST));
+        EnergyConsumer consumer = world.put(source.getPos().east(), new EnergyConsumer());
+        WorldENet worldNet = WorldENet.getWorldENet(world);
+        addNode(worldNet, source);
+        EnergyNet oldNet = worldNet.getNetFromPos(source.getPos());
+        EnergyNetHandler handler = new EnergyNetHandler(oldNet, source, EnumFacing.WEST);
+        worldNet.removeNode(source.getPos());
+        addNode(worldNet, source);
+        assertNotSame(oldNet, worldNet.getNetFromPos(source.getPos()));
+
+        assertEquals(1, handler.acceptEnergyFromNetwork(EnumFacing.WEST, 32, 1));
+        assertEquals(31, consumer.energy);
+        assertSame(worldNet.getNetFromPos(source.getPos()), handler.getNet());
+    }
+
+    @Test
+    void energyRoutesRecoverWhenCapabilityInitializesAfterChunkLoad() {
+        TestCable source = world.put(new BlockPos(15, 64, 0), new TestCable(EnumFacing.EAST));
+        WorldENet worldNet = WorldENet.getWorldENet(world);
+        addNode(worldNet, source);
+        EnergyNetHandler handler = new EnergyNetHandler(worldNet.getNetFromPos(source.getPos()), source,
+                EnumFacing.WEST);
+        TestChunk target = new TestChunk(world, 1, 0);
+        LateEnergyConsumer consumer = world.put(target, source.getPos().east(), new LateEnergyConsumer());
+        world.load(target);
+        assertEquals(0, handler.acceptEnergyFromNetwork(EnumFacing.WEST, 32, 1));
+        PipeNetEventHandler.onWorldTick(new TickEvent.WorldTickEvent(Side.SERVER, TickEvent.Phase.START, world));
+        assertEquals(0, handler.acceptEnergyFromNetwork(EnumFacing.WEST, 32, 1));
+        consumer.onLoad();
+
+        PipeNetEventHandler.onWorldTick(new TickEvent.WorldTickEvent(Side.SERVER, TickEvent.Phase.END, world));
+
+        assertEquals(1, handler.acceptEnergyFromNetwork(EnumFacing.WEST, 32, 1));
+        assertEquals(31, consumer.getEnergyStored());
+    }
+
+    @Test
+    void cachedEnergyHandlerResumesForSameDormantTile() {
+        TestCable source = world.put(new BlockPos(1, 64, 1), new TestCable(EnumFacing.EAST));
+        EnergyConsumer consumer = world.put(source.getPos().east(), new EnergyConsumer());
+        WorldENet worldNet = WorldENet.getWorldENet(world);
+        addNode(worldNet, source);
+        EnergyNetHandler handler = new EnergyNetHandler(worldNet.getNetFromPos(source.getPos()), source,
+                EnumFacing.WEST);
+        TestChunk chunk = world.loadedChunk(0, 0);
+        world.unload(chunk);
+        assertEquals(0, handler.acceptEnergyFromNetwork(EnumFacing.WEST, 32, 1));
+        world.load(chunk);
+
+        assertEquals(1, handler.acceptEnergyFromNetwork(EnumFacing.WEST, 32, 1));
+        assertEquals(31, consumer.energy);
+    }
+
+    @Test
+    void cachedItemHandlerRejectsReplacementAtSamePosition() {
+        TestItemPipe source = world.put(new BlockPos(1, 64, 1), new TestItemPipe());
+        WorldItemPipeNet worldNet = WorldItemPipeNet.getWorldPipeNet(world);
+        worldNet.addNode(source.getPos(), source.getNodeData(), 0, 63, true);
+        ItemNetHandler handler = new ItemNetHandler(worldNet.getNetFromPos(source.getPos()), source, EnumFacing.WEST) {
+
+            @Override
+            public Cover getCoverOnNeighbour(TileEntityItemPipe pipe, EnumFacing side) {
+                return null;
+            }
+        };
+        world.unload(world.loadedChunk(0, 0));
+        ItemStack stack = new ItemStack(Items.APPLE, 16);
+        assertSame(stack, handler.insertItem(0, stack, false));
+        assertTrue(handler.getNet().getNetData(source.getPos(), EnumFacing.WEST).isEmpty());
+
+        TestChunk replacement = new TestChunk(world, 0, 0);
+        world.put(replacement, source.getPos(), new TestItemPipe());
+        InventoryTile inventory = world.put(replacement, source.getPos().east(), new InventoryTile());
+        world.load(replacement);
+
+        assertSame(stack, handler.insertItem(0, stack, false));
+        assertTrue(inventory.inventory.getStackInSlot(0).isEmpty());
+    }
+
+    @Test
+    void cachedFluidHandlerDoesNotModifyUnloadedTanks() {
+        TestTickableFluidPipe source = world.put(new BlockPos(1, 64, 1), new TestTickableFluidPipe());
+        FluidTank tank = new FluidTank(new FluidStack(FluidRegistry.WATER, 100), 1000);
+        PipeTankList handler = new PipeTankList(source, EnumFacing.WEST, tank);
+        assertEquals(1, handler.getTankProperties().length);
+        world.unload(world.loadedChunk(0, 0));
+
+        assertEquals(0, handler.fill(new FluidStack(FluidRegistry.WATER, 100), true));
+        assertNull(handler.drain(50, true));
+        assertNull(handler.drain(new FluidStack(FluidRegistry.WATER, 50), true));
+        assertEquals(0, handler.getTankProperties().length);
+        assertEquals(100, tank.getFluidAmount());
+
+        TestChunk replacement = new TestChunk(world, 0, 0);
+        TestTickableFluidPipe newPipe = world.put(replacement, source.getPos(), new TestTickableFluidPipe());
+        world.load(replacement);
+        assertEquals(0, handler.fill(new FluidStack(FluidRegistry.WATER, 100), true));
+        assertNull(handler.drain(50, true));
+        assertEquals(100, tank.getFluidAmount());
+        assertEquals(0, newPipe.getFluidTanks()[0].getFluidAmount());
+    }
+
+    @Test
+    void laserActivationSkipsUnloadedNetworkNodes() {
+        TestLaserPipe source = world.put(new BlockPos(15, 64, 0), new TestLaserPipe());
+        LaserConsumer consumer = world.put(source.getPos().west(), new LaserConsumer());
+        TestChunk target = new TestChunk(world, 1, 0);
+        TestLaserPipe remote = world.put(target, source.getPos().east(), new TestLaserPipe());
+        world.load(target);
+        WorldLaserPipeNet worldNet = WorldLaserPipeNet.getWorldPipeNet(world);
+        worldNet.addNode(source.getPos(), source.getNodeData(), 0, 63, true);
+        worldNet.addNode(remote.getPos(), remote.getNodeData(), 0, 63, true);
+        LaserNetHandler handler = new LaserNetHandler(worldNet.getNetFromPos(source.getPos()), source, EnumFacing.EAST);
+        world.unload(target);
+
+        assertEquals(1, handler.acceptEnergyFromNetwork(EnumFacing.EAST, 32, 1));
+        assertEquals(32, consumer.getEnergyStored());
+        assertEquals(1, source.activeCalls);
+        assertEquals(0, remote.activeCalls);
+    }
+
+    @Test
+    void cachedLaserHandlerRejectsReplacementAtSamePosition() {
+        TestLaserPipe source = world.put(new BlockPos(1, 64, 1), new TestLaserPipe());
+        WorldLaserPipeNet worldNet = WorldLaserPipeNet.getWorldPipeNet(world);
+        worldNet.addNode(source.getPos(), source.getNodeData(), 0, 63, true);
+        LaserNetHandler handler = new LaserNetHandler(worldNet.getNetFromPos(source.getPos()), source, EnumFacing.WEST);
+        world.unload(world.loadedChunk(0, 0));
+        assertEquals(0, handler.acceptEnergyFromNetwork(EnumFacing.WEST, 32, 1));
+        TestChunk replacement = new TestChunk(world, 0, 0);
+        world.put(replacement, source.getPos(), new TestLaserPipe());
+        LaserConsumer consumer = world.put(replacement, source.getPos().east(), new LaserConsumer());
+        world.load(replacement);
+
+        assertEquals(0, handler.acceptEnergyFromNetwork(EnumFacing.WEST, 32, 1));
+        assertEquals(0, consumer.getEnergyStored());
+    }
+
+    @Test
+    void opticalActivationSkipsUnloadedNetworkNodes() {
+        TestOpticalPipe source = world.put(new BlockPos(15, 64, 0), new TestOpticalPipe());
+        ComputationTile consumer = world.put(source.getPos().west(), new ComputationTile());
+        TestChunk target = new TestChunk(world, 1, 0);
+        TestOpticalPipe remote = world.put(target, source.getPos().east(), new TestOpticalPipe());
+        world.load(target);
+        WorldOpticalPipeNet worldNet = WorldOpticalPipeNet.getWorldPipeNet(world);
+        worldNet.addNode(source.getPos(), source.getNodeData(), 0, 63, true);
+        worldNet.addNode(remote.getPos(), remote.getNodeData(), 0, 63, true);
+        OpticalNetHandler handler = new OpticalNetHandler(worldNet.getNetFromPos(source.getPos()), source,
+                EnumFacing.EAST);
+        world.unload(target);
+
+        assertEquals(32, handler.requestCWUt(32, false, Collections.emptySet()));
+        assertEquals(1, consumer.requests);
+        assertEquals(1, source.activeCalls);
+        assertEquals(0, remote.activeCalls);
+    }
+
+    @Test
+    void cachedOpticalHandlerRejectsReplacementAtSamePosition() {
+        TestOpticalPipe source = world.put(new BlockPos(1, 64, 1), new TestOpticalPipe());
+        WorldOpticalPipeNet worldNet = WorldOpticalPipeNet.getWorldPipeNet(world);
+        worldNet.addNode(source.getPos(), source.getNodeData(), 0, 63, true);
+        OpticalNetHandler handler = new OpticalNetHandler(worldNet.getNetFromPos(source.getPos()), source,
+                EnumFacing.WEST);
+        world.unload(world.loadedChunk(0, 0));
+        assertEquals(0, handler.requestCWUt(32, false, Collections.emptySet()));
+        TestChunk replacement = new TestChunk(world, 0, 0);
+        world.put(replacement, source.getPos(), new TestOpticalPipe());
+        ComputationTile consumer = world.put(replacement, source.getPos().east(), new ComputationTile());
+        world.load(replacement);
+
+        assertEquals(0, handler.requestCWUt(32, false, Collections.emptySet()));
+        assertEquals(0, consumer.requests);
+    }
+
+    @Test
+    void postLoadRefreshClearsSharedNetworkOncePerTick() {
+        world.setData("gregtech.e_net", new CountingWorldENet());
+        TestCable source = world.put(new BlockPos(15, 64, 0), new TestCable(EnumFacing.EAST));
+        WorldENet worldNet = WorldENet.getWorldENet(world);
+        addNode(worldNet, source);
+        TestChunk target = new TestChunk(world, 1, 0);
+        TestCable remote = world.put(target, source.getPos().east(), new TestCable(EnumFacing.WEST));
+        world.load(target);
+        addNode(worldNet, remote);
+        CountingEnergyNet net = (CountingEnergyNet) worldNet.getNetFromPos(source.getPos());
+        net.updates = 0;
+
+        PipeNetEventHandler.onWorldTick(new TickEvent.WorldTickEvent(Side.SERVER, TickEvent.Phase.END, world));
+        assertEquals(1, net.updates);
+        PipeNetEventHandler.onWorldTick(new TickEvent.WorldTickEvent(Side.SERVER, TickEvent.Phase.END, world));
+        assertEquals(1, net.updates, "Completed initialization must not trigger repeated route rebuilding");
+    }
+
+    @Test
+    void worldUnloadDiscardsPendingRefreshes() {
+        world.setData("gregtech.e_net", new CountingWorldENet());
+        TestCable source = world.put(new BlockPos(1, 64, 1), new TestCable(EnumFacing.EAST));
+        WorldENet worldNet = WorldENet.getWorldENet(world);
+        addNode(worldNet, source);
+        CountingEnergyNet net = (CountingEnergyNet) worldNet.getNetFromPos(source.getPos());
+        PipeNetEventHandler.onWorldUnload(new WorldEvent.Unload(world));
+
+        PipeNetEventHandler.onWorldTick(new TickEvent.WorldTickEvent(Side.SERVER, TickEvent.Phase.END, world));
+
+        assertEquals(0, net.updates);
+    }
+
+    @Test
+    void neighborLookupPreservesQueuedUnload() {
+        CacheTile source = world.put(new BlockPos(15, 64, 0), new CacheTile());
+        TestChunk target = new TestChunk(world, 1, 0);
+        CacheTile neighbor = world.put(target, source.getPos().east(), new CacheTile());
+        world.load(target);
+        target.unloadQueued = true;
+
+        assertSame(neighbor, source.getNeighbor(EnumFacing.EAST));
+        assertTrue(target.unloadQueued);
+    }
+
+    @Test
+    void energyHandlerRecoversWhenRecipientThrows() {
+        TestCable source = world.put(new BlockPos(1, 64, 1), new TestCable(EnumFacing.EAST));
+        EnergyConsumer consumer = world.put(source.getPos().east(), new EnergyConsumer() {
+
+            private boolean throwOnce = true;
+
+            @Override
+            public long acceptEnergyFromNetwork(EnumFacing side, long voltage, long amperage) {
+                if (throwOnce) {
+                    throwOnce = false;
+                    throw new IllegalStateException("Recipient failed");
+                }
+                return super.acceptEnergyFromNetwork(side, voltage, amperage);
+            }
+        });
+        WorldENet worldNet = WorldENet.getWorldENet(world);
+        addNode(worldNet, source);
+        EnergyNetHandler handler = new EnergyNetHandler(worldNet.getNetFromPos(source.getPos()), source,
+                EnumFacing.WEST);
+
+        assertThrows(IllegalStateException.class, () -> handler.acceptEnergyFromNetwork(EnumFacing.WEST, 32, 1));
+        assertEquals(1, handler.acceptEnergyFromNetwork(EnumFacing.WEST, 32, 1));
+        assertEquals(31, consumer.energy);
+    }
+
     private static void addNode(WorldENet worldNet, TestCable cable) {
         int connections = 0;
         for (EnumFacing facing : cable.connections) {
@@ -335,7 +677,6 @@ class PipeNetChunkCacheTest {
 
         @Override
         public TileEntity getTileEntity(@NotNull BlockPos pos) {
-            tileLookups++;
             return getChunk(pos).getTileEntityMap().get(pos);
         }
 
@@ -367,6 +708,12 @@ class PipeNetChunkCacheTest {
         @Override
         public boolean isLoaded() {
             return loaded;
+        }
+
+        @Override
+        public Map<BlockPos, TileEntity> getTileEntityMap() {
+            ((TestWorld) getWorld()).tileLookups++;
+            return super.getTileEntityMap();
         }
     }
 
@@ -430,6 +777,122 @@ class PipeNetChunkCacheTest {
         }
     }
 
+    private static class TestItemPipe extends TileEntityItemPipe {
+
+        @Override
+        public BlockItemPipe getPipeBlock() {
+            return itemPipeBlock;
+        }
+
+        @Override
+        public ItemPipeProperties getNodeData() {
+            return new ItemPipeProperties(1, 64);
+        }
+
+        @Override
+        public boolean isConnected(EnumFacing side) {
+            return side.getAxis() == EnumFacing.Axis.X;
+        }
+    }
+
+    private static class TestTickableFluidPipe extends TileEntityFluidPipeTickable {
+
+        @Override
+        public BlockFluidPipe getPipeBlock() {
+            return fluidPipeBlock;
+        }
+
+        @Override
+        public FluidPipeProperties getNodeData() {
+            return new FluidPipeProperties(1000, 100, true, true, true, true);
+        }
+    }
+
+    private static class TestLaserPipe extends TileEntityLaserPipe {
+
+        private int activeCalls;
+
+        @Override
+        public BlockLaserPipe getPipeBlock() {
+            return laserPipeBlock;
+        }
+
+        @Override
+        public boolean isConnected(EnumFacing side) {
+            return side.getAxis() == EnumFacing.Axis.X;
+        }
+
+        @Override
+        public void setActive(boolean active, int duration) {
+            if (active) activeCalls++;
+        }
+    }
+
+    private static class TestOpticalPipe extends TileEntityOpticalPipe {
+
+        private int activeCalls;
+
+        @Override
+        public BlockOpticalPipe getPipeBlock() {
+            return opticalPipeBlock;
+        }
+
+        @Override
+        public boolean isConnected(EnumFacing side) {
+            return side.getAxis() == EnumFacing.Axis.X;
+        }
+
+        @Override
+        public void setActive(boolean active, int duration) {
+            if (active) activeCalls++;
+        }
+    }
+
+    private static class InventoryTile extends TileEntity {
+
+        private final ItemStackHandler inventory = new ItemStackHandler(1);
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public <T> T getCapability(@NotNull Capability<T> capability, EnumFacing side) {
+            return (T) inventory;
+        }
+    }
+
+    private static class LaserConsumer extends EnergyConsumer implements ILaserContainer {}
+
+    private static class ComputationTile extends TileEntity implements IOpticalComputationProvider {
+
+        private int requests;
+
+        @Override
+        public boolean hasCapability(@NotNull Capability<?> capability, EnumFacing side) {
+            return true;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public <T> T getCapability(@NotNull Capability<T> capability, EnumFacing side) {
+            return (T) this;
+        }
+
+        @Override
+        public int requestCWUt(int amount, boolean simulate, @NotNull Collection<IOpticalComputationProvider> seen) {
+            if (!simulate) requests++;
+            return amount;
+        }
+
+        @Override
+        public int getMaxCWUt(@NotNull Collection<IOpticalComputationProvider> seen) {
+            return 32;
+        }
+
+        @Override
+        public boolean canBridge(@NotNull Collection<IOpticalComputationProvider> seen) {
+            return true;
+        }
+    }
+
     private static class EnergyConsumer extends TileEntity implements IEnergyContainer {
 
         private long energy;
@@ -475,6 +938,49 @@ class PipeNetChunkCacheTest {
         @Override
         public long getInputVoltage() {
             return 32;
+        }
+    }
+
+    private static class LateEnergyConsumer extends EnergyConsumer {
+
+        private boolean ready;
+
+        @Override
+        public void onLoad() {
+            super.onLoad();
+            ready = true;
+        }
+
+        @Override
+        public <T> T getCapability(@NotNull Capability<T> capability, EnumFacing side) {
+            return ready ? super.getCapability(capability, side) : null;
+        }
+    }
+
+    private static class CountingWorldENet extends WorldENet {
+
+        CountingWorldENet() {
+            super("gregtech.e_net");
+        }
+
+        @Override
+        protected EnergyNet createNetInstance() {
+            return new CountingEnergyNet(this);
+        }
+    }
+
+    private static class CountingEnergyNet extends EnergyNet {
+
+        private int updates;
+
+        CountingEnergyNet(WorldENet world) {
+            super(world);
+        }
+
+        @Override
+        public void onPipeConnectionsUpdate() {
+            super.onPipeConnectionsUpdate();
+            updates++;
         }
     }
 }
