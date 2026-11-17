@@ -285,6 +285,57 @@ class PipeNetChunkCacheTest {
     }
 
     @Test
+    void disconnectedBorderKeepsCachedEnergyRoutes() {
+        TestCable source = world.put(new BlockPos(15, 64, 1), new TestCable(EnumFacing.WEST));
+        EnergyConsumer consumer = world.put(source.getPos().west(), new EnergyConsumer());
+        WorldENet worldNet = WorldENet.getWorldENet(world);
+        addNode(worldNet, source);
+        EnergyNet net = worldNet.getNetFromPos(source.getPos());
+        PipeNetEventHandler.onWorldTick(new TickEvent.WorldTickEvent(Side.SERVER, TickEvent.Phase.END, world));
+        List<?> routes = net.getNetData(source.getPos());
+        assertNull(source.getNeighbor(EnumFacing.EAST));
+
+        TestChunk target = new TestChunk(world, 1, 0);
+        CacheTile neighbor = world.put(target, source.getPos().east(), new CacheTile());
+        world.load(target);
+        assertSame(routes, net.getNetData(source.getPos()), "A disconnected border cannot change the routes");
+        assertSame(neighbor, source.getNeighbor(EnumFacing.EAST));
+        PipeNetEventHandler.onWorldTick(new TickEvent.WorldTickEvent(Side.SERVER, TickEvent.Phase.END, world));
+        assertSame(routes, net.getNetData(source.getPos()));
+        world.unload(target);
+        assertSame(routes, net.getNetData(source.getPos()));
+        assertNull(source.getNeighbor(EnumFacing.EAST));
+
+        EnergyNetHandler handler = new EnergyNetHandler(net, source, EnumFacing.EAST);
+        assertEquals(1, handler.acceptEnergyFromNetwork(EnumFacing.EAST, 32, 1));
+        assertEquals(31, consumer.energy);
+    }
+
+    @Test
+    void mergedBorderRefreshIncludesConnectedFaceAtChunkCorner() {
+        PipeNetEventHandler.onWorldTick(new TickEvent.WorldTickEvent(Side.SERVER, TickEvent.Phase.END, world));
+        world.setData("gregtech.e_net", new CountingWorldENet());
+        TestCable source = world.put(new BlockPos(15, 64, 15), new TestCable(EnumFacing.EAST));
+        WorldENet worldNet = WorldENet.getWorldENet(world);
+        addNode(worldNet, source);
+        CountingEnergyNet net = (CountingEnergyNet) worldNet.getNetFromPos(source.getPos());
+        EnergyNetHandler handler = new EnergyNetHandler(net, source, EnumFacing.WEST);
+        TestChunk east = new TestChunk(world, 1, 0);
+        LateEnergyConsumer consumer = world.put(east, source.getPos().east(), new LateEnergyConsumer());
+        world.load(east);
+        world.load(new TestChunk(world, 0, 1));
+        assertEquals(0, handler.acceptEnergyFromNetwork(EnumFacing.WEST, 32, 1));
+        consumer.onLoad();
+        net.updates = 0;
+
+        PipeNetEventHandler.onWorldTick(new TickEvent.WorldTickEvent(Side.SERVER, TickEvent.Phase.END, world));
+
+        assertEquals(1, net.updates);
+        assertEquals(1, handler.acceptEnergyFromNetwork(EnumFacing.WEST, 32, 1));
+        assertEquals(31, consumer.getEnergyStored());
+    }
+
+    @Test
     void chunkReloadInvalidatesCachedMissingNeighbor() {
         CacheTile source = world.put(new BlockPos(15, 64, 0), new CacheTile());
         TestChunk targetChunk = new TestChunk(world, 1, 0);
@@ -579,11 +630,15 @@ class PipeNetChunkCacheTest {
                 "A full refresh must subsume the border refreshes from adjacent pending chunks");
     }
 
-    @Test
-    void postLoadRefreshMergesBothBordersAtChunkCorner() {
+    @ParameterizedTest
+    @CsvSource({ "15, 15", "-1, -1" })
+    void postLoadRefreshMergesBothBordersAtChunkCorner(int x, int z) {
+        if (world.loadedChunk(x >> 4, z >> 4) == null) {
+            world.load(new TestChunk(world, x >> 4, z >> 4));
+        }
         PipeNetEventHandler.onWorldTick(new TickEvent.WorldTickEvent(Side.SERVER, TickEvent.Phase.END, world));
         int[] changes = new int[EnumFacing.VALUES.length];
-        CacheTile source = world.put(new BlockPos(15, 64, 15), new CacheTile() {
+        CacheTile source = world.put(new BlockPos(x, 64, z), new CacheTile() {
 
             @Override
             public void onNeighborChanged(@NotNull EnumFacing facing) {
@@ -593,10 +648,10 @@ class PipeNetChunkCacheTest {
         });
         assertNull(source.getNeighbor(EnumFacing.EAST));
         assertNull(source.getNeighbor(EnumFacing.SOUTH));
-        TestChunk east = new TestChunk(world, 1, 0);
+        TestChunk east = new TestChunk(world, (x + 1) >> 4, z >> 4);
         CacheTile eastNeighbor = world.put(east, source.getPos().east(), new CacheTile());
         world.load(east);
-        TestChunk south = new TestChunk(world, 0, 1);
+        TestChunk south = new TestChunk(world, x >> 4, (z + 1) >> 4);
         CacheTile southNeighbor = world.put(south, source.getPos().south(), new CacheTile());
         world.load(south);
         Arrays.fill(changes, 0);

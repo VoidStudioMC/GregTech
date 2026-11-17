@@ -134,12 +134,21 @@ public class PipeNetEventHandler {
             }
 
             if (cache instanceof IPipeTile<?, ?>pipe) {
+                // Only connections facing the changed chunk can affect a neighboring network's routes.
+                if (faces != ALL_FACES && !hasConnectionTo(pipe, affectedFaces)) continue;
                 BlockPipe<?, ?, ?> block = pipe.getPipeBlock();
                 if (block == null) continue;
                 PipeNet<?> net = block.getWorldPipeNet(chunk.getWorld()).getNetFromPos(pos);
                 if (net != null) networks.add(net);
             }
         }
+    }
+
+    private static boolean hasConnectionTo(IPipeTile<?, ?> pipe, int faces) {
+        for (EnumFacing facing : EnumFacing.HORIZONTALS) {
+            if ((faces & (1 << facing.getIndex())) != 0 && pipe.isConnected(facing)) return true;
+        }
+        return false;
     }
 
     private static int getBorderFaces(BlockPos pos) {
