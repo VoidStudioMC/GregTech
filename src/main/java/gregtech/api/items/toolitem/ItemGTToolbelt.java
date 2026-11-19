@@ -34,12 +34,14 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -564,6 +566,7 @@ public class ItemGTToolbelt extends ItemGTTool implements IDyeableItem {
                 Material material = GregTechAPI.materialManager.getMaterial(toolTag.getString(MATERIAL_KEY));
                 if (material == null) return 4;
                 ToolProperty toolProperty = material.getProperty(PropertyKey.TOOL);
+                if (toolProperty == null) return 4;
                 return Math.min(8, 2 + toolProperty.getToolHarvestLevel());
             };
         }
@@ -605,25 +608,36 @@ public class ItemGTToolbelt extends ItemGTTool implements IDyeableItem {
         protected @NotNull ToolStackHandler getHandler() {
             int size = slotCountSupplier.getAsInt();
             if (handler == null) handler = new ToolStackHandler(size);
-            else if (handler.getSlots() != size) handler.setSize(size);
+            else if (handler.getSlots() != size) handler.resize(size);
             return handler;
         }
     }
 
     @Override
     public NBTTagCompound getNBTShareTag(ItemStack stack) {
-        NBTTagCompound tag = new NBTTagCompound();
-        if (stack.getTagCompound() != null) {
-            tag.setTag("NBT", stack.getTagCompound());
-        }
-        tag.setTag("Cap", getHandler(stack).serializeNBT());
+        NBTTagCompound tag = getItemTag(stack.getTagCompound());
+        if (tag == null) tag = new NBTTagCompound();
+        tag.setTag("Cap", getHandler(stack).serializeNBT().copy());
         return tag;
     }
 
     @Override
     public void readNBTShareTag(ItemStack stack, NBTTagCompound nbt) {
-        // cap syncing is handled separately, we only need it on the share tag so that changes are detected properly.
-        stack.setTagCompound(nbt == null ? null : (nbt.hasKey("NBT") ? nbt.getCompoundTag("NBT") : null));
+        stack.setTagCompound(getItemTag(nbt));
+        if (nbt != null && nbt.hasKey("Cap", Constants.NBT.TAG_COMPOUND)) {
+            getHandler(stack).deserializeNBT(nbt.getCompoundTag("Cap").copy());
+        }
+    }
+
+    private static @Nullable NBTTagCompound getItemTag(@Nullable NBTTagCompound nbt) {
+        if (nbt == null) return null;
+        while (!nbt.hasKey(ToolHelper.TOOL_TAG_KEY, Constants.NBT.TAG_COMPOUND) &&
+                nbt.hasKey("NBT", Constants.NBT.TAG_COMPOUND) && nbt.hasKey("Cap", Constants.NBT.TAG_COMPOUND)) {
+            nbt = nbt.getCompoundTag("NBT");
+        }
+        NBTTagCompound tag = nbt.copy();
+        tag.removeTag("Cap");
+        return tag.isEmpty() ? null : tag;
     }
 
     protected static final ToolStackHandler FALLBACK = new ToolStackHandler(0);
@@ -713,7 +727,25 @@ public class ItemGTToolbelt extends ItemGTTool implements IDyeableItem {
         @Override
         public void deserializeNBT(NBTTagCompound nbt) {
             super.deserializeNBT(nbt);
-            if (nbt.hasKey("SelectedSlot")) this.selectedSlot = nbt.getByte("SelectedSlot");
+            setSelectedSlot(nbt.hasKey("SelectedSlot") ? nbt.getByte("SelectedSlot") : -1);
+        }
+
+        private void resize(int size) {
+            for (int i = getSlots() - 1; i >= size; i--) {
+                if (!stacks.get(i).isEmpty()) {
+                    size = i + 1;
+                    break;
+                }
+            }
+            if (size == getSlots()) return;
+
+            NonNullList<ItemStack> previous = stacks;
+            setSize(size);
+            for (int i = 0; i < Math.min(previous.size(), size); i++) {
+                stacks.set(i, previous.get(i));
+            }
+            setSelectedSlot(selectedSlot);
+            onLoad();
         }
 
         @Override
