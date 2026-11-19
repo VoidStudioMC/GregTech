@@ -15,6 +15,7 @@ import gregtech.api.metatileentity.multiblock.IMultiblockAbilityPart;
 import gregtech.api.metatileentity.multiblock.MultiblockAbility;
 import gregtech.client.renderer.texture.Textures;
 import gregtech.common.gui.widget.appeng.AEFluidConfigWidget;
+import gregtech.common.items.behaviors.DataStickHandlers;
 import gregtech.common.metatileentities.multi.multiblockpart.appeng.slot.ExportOnlyAEFluidList;
 import gregtech.common.metatileentities.multi.multiblockpart.appeng.slot.ExportOnlyAEFluidSlot;
 import gregtech.common.metatileentities.multi.multiblockpart.appeng.stack.WrappedFluidStack;
@@ -277,10 +278,7 @@ public class MetaTileEntityMEInputHatch extends MetaTileEntityAEHostablePart<IAE
 
     @Override
     public final void onDataStickLeftClick(EntityPlayer player, ItemStack dataStick) {
-        NBTTagCompound tag = new NBTTagCompound();
-        tag.setTag("MEInputHatch", writeConfigToTag());
-        dataStick.setTagCompound(tag);
-        dataStick.setTranslatableName("gregtech.machine.me.fluid_import.data_stick.name");
+        DataStickHandlers.ME_INPUT_HATCH.write(dataStick, writeConfigToTag());
         player.sendStatusMessage(new TextComponentTranslation("gregtech.machine.me.import_copy_settings"), true);
     }
 
@@ -303,11 +301,11 @@ public class MetaTileEntityMEInputHatch extends MetaTileEntityAEHostablePart<IAE
 
     @Override
     public final boolean onDataStickRightClick(EntityPlayer player, ItemStack dataStick) {
-        NBTTagCompound tag = dataStick.getTagCompound();
-        if (tag == null || !tag.hasKey("MEInputHatch")) {
+        NBTTagCompound tag = DataStickHandlers.ME_INPUT_HATCH.read(dataStick);
+        if (tag == null) {
             return false;
         }
-        readConfigFromTag(tag.getCompoundTag("MEInputHatch"));
+        readConfigFromTag(tag);
         syncME();
         player.sendStatusMessage(new TextComponentTranslation("gregtech.machine.me.import_paste_settings"), true);
         return true;
