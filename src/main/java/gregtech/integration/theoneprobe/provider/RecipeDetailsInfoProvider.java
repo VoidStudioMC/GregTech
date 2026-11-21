@@ -3,7 +3,6 @@ package gregtech.integration.theoneprobe.provider;
 import gregtech.api.capability.GregtechTileCapabilities;
 import gregtech.api.capability.IMultipleRecipeMaps;
 import gregtech.api.capability.impl.ComputationRecipeLogic;
-import gregtech.api.capability.impl.MultiblockFuelRecipeLogic;
 import gregtech.api.capability.impl.PrimitiveRecipeLogic;
 import gregtech.api.metatileentity.MetaTileEntity;
 import gregtech.integration.theoneprobe.ProbeInfoProvider;
@@ -57,12 +56,6 @@ public final class RecipeDetailsInfoProvider extends ProbeInfoProvider {
             if (computation.isHasNotEnoughComputation()) {
                 info.text(TextFormatting.YELLOW + ProbeInfoUtil.lang("gregtech.top.not_enough_computation"));
             }
-        }
-        var recipe = logic.getPreviousRecipe();
-        if (logic instanceof MultiblockFuelRecipeLogic && recipe != null && !recipe.getFluidInputs().isEmpty()) {
-            info.text(TextFormatting.GRAY + ProbeInfoUtil.lang("gregtech.top.fuel"));
-            recipe.getFluidInputs().forEach(input -> ProbeInfoUtil.fluid(info, input.getInputFluidStack()));
-            ProbeInfoUtil.line(info, "gregtech.top.fuel_duration", ProbeInfoUtil.number(recipe.getDuration()) + " t");
         }
     }
 }
