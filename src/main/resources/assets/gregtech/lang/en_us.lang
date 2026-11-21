@@ -6649,8 +6649,6 @@ record.sus=Leonz - Among Us Drip
 # Additional The One Probe details
 gregtech.top.energy_input_average=Average input
 gregtech.top.energy_output_average=Average output
-gregtech.top.max_voltage=Maximum recipe voltage
-gregtech.top.recipe_map=Recipe type
 gregtech.top.parallels=Parallel recipes
 gregtech.top.not_enough_energy=Insufficient energy
 gregtech.top.outputs_full=Output storage full

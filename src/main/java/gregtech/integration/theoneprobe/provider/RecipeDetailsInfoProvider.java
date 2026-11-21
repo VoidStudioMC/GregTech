@@ -1,9 +1,6 @@
 package gregtech.integration.theoneprobe.provider;
 
-import gregtech.api.capability.GregtechTileCapabilities;
-import gregtech.api.capability.IMultipleRecipeMaps;
 import gregtech.api.capability.impl.ComputationRecipeLogic;
-import gregtech.api.capability.impl.PrimitiveRecipeLogic;
 import gregtech.api.metatileentity.MetaTileEntity;
 import gregtech.integration.theoneprobe.ProbeInfoProvider;
 import gregtech.integration.theoneprobe.ProbeInfoUtil;
@@ -25,20 +22,6 @@ public final class RecipeDetailsInfoProvider extends ProbeInfoProvider {
         if (!ProbeInfoUtil.isFormed(machine)) return;
         var logic = ProbeInfoUtil.recipeLogic(tile);
         if (logic == null) return;
-        IMultipleRecipeMaps multiple = tile.getCapability(GregtechTileCapabilities.CAPABILITY_MULTIPLE_RECIPEMAPS,
-                null);
-        if (multiple == null && machine instanceof IMultipleRecipeMaps maps) {
-            multiple = maps;
-        }
-        if ((multiple == null || multiple.getAvailableRecipeMaps().length == 1) && logic.getRecipeMap() != null) {
-            ProbeInfoUtil.line(
-                    info,
-                    "gregtech.top.recipe_map",
-                    ProbeInfoUtil.lang(logic.getRecipeMap().getTranslationKey()));
-        }
-        if (!(logic instanceof PrimitiveRecipeLogic)) {
-            ProbeInfoUtil.line(info, "gregtech.top.max_voltage", ProbeInfoUtil.voltage(logic.getMaxVoltage()));
-        }
         if (logic.isHasNotEnoughEnergy()) {
             info.text(TextFormatting.YELLOW + ProbeInfoUtil.lang("gregtech.top.not_enough_energy"));
         }
