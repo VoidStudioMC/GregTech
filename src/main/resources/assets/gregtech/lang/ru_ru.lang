@@ -6310,3 +6310,21 @@ gregtech.multiblock.recipe_progress.seconds=Прогресс: %,3.2fсек / %,3
 gregtech.multiblock.large_combustion_engine.fuel_none=§cНет топлива!
 gregtech.multiblock.large_combustion_engine.oxygen_none=§cНет присадки!
 gregtech.multiblock.large_combustion_engine.dynamo_hatch_full=Выходной разъем полон!
+
+# Additional The One Probe details
+gregtech.top.energy_input_average=Средний вход
+gregtech.top.energy_output_average=Средний выход
+gregtech.top.parallels=Параллельные рецепты
+gregtech.top.not_enough_energy=Недостаточно энергии
+gregtech.top.outputs_full=Выходное хранилище заполнено
+gregtech.top.computation=Вычисления
+gregtech.top.not_enough_computation=Недостаточно вычислительной мощности
+gregtech.top.item_outputs=Выходные предметы
+gregtech.top.fluid_outputs=Выходные жидкости
+gregtech.top.cable_load=Нагрузка кабеля
+gregtech.top.cable_voltage=Напряжение кабеля
+gregtech.top.cable_amperage=Сила тока кабеля
+gregtech.top.computation_supplied=Доступные вычисления
+gregtech.top.computation_current=Текущие вычисления
+gregtech.top.energy_stored=Запас энергии
+gregtech.top.energy_capacity=Ёмкость энергии
