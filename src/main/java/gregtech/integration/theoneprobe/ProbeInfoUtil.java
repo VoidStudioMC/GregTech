@@ -3,7 +3,6 @@ package gregtech.integration.theoneprobe;
 import gregtech.api.GTValues;
 import gregtech.api.capability.GregtechTileCapabilities;
 import gregtech.api.capability.IMultiblockController;
-import gregtech.api.capability.IWorkable;
 import gregtech.api.capability.impl.AbstractRecipeLogic;
 import gregtech.api.metatileentity.MetaTileEntity;
 import gregtech.api.metatileentity.interfaces.IGregTechTileEntity;
@@ -102,8 +101,4 @@ public final class ProbeInfoUtil {
         return tile.getCapability(GregtechTileCapabilities.CAPABILITY_RECIPE_LOGIC, null);
     }
 
-    public static @Nullable IWorkable workable(TileEntity tile, @Nullable MetaTileEntity machine) {
-        if (!isFormed(machine)) return null;
-        return tile.getCapability(GregtechTileCapabilities.CAPABILITY_WORKABLE, null);
-    }
 }

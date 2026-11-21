@@ -51,12 +51,10 @@ public class TheOneProbeModule extends IntegrationSubmodule {
 
         FluidStackElement.register(oneProbe);
         oneProbe.registerProvider(new CableInfoProvider());
-        oneProbe.registerProvider(new MachineDetailsInfoProvider());
         oneProbe.registerProvider(new RecipeDetailsInfoProvider());
         oneProbe.registerProvider(new RecipeParallelInfoProvider());
         oneProbe.registerProvider(new RecipeItemOutputInfoProvider());
         oneProbe.registerProvider(new RecipeFluidOutputInfoProvider());
-        oneProbe.registerProvider(new CleanroomInfoProvider());
         oneProbe.registerProvider(new ComputationInfoProvider());
         oneProbe.registerProvider(new PowerSubstationInfoProvider());
 
