@@ -196,6 +196,14 @@ public class MetaTileEntityPowerSubstation extends MultiblockWithDisplayBase
         }
     }
 
+    public BigInteger getStoredEnergy() {
+        return energyBank == null ? BigInteger.ZERO : energyBank.getStored();
+    }
+
+    public BigInteger getEnergyCapacity() {
+        return energyBank == null ? BigInteger.ZERO : energyBank.getCapacity();
+    }
+
     public long getPassiveDrain() {
         if (ConfigHolder.machines.enableMaintenance) {
             int multiplier = 1 + getNumMaintenanceProblems();

@@ -114,8 +114,7 @@ public class CoverInfoProvider extends CapabilityInfoProvider<CoverHolder> {
                 regulator.getTransferMode() == TransferMode.TRANSFER_ANY) {
                     // do not display the regular rate if the cover has a specialized rate
                     transferRateText(probeInfo, pump.getPumpMode(), " " + rateUnit,
-                            pump.getBucketMode() == CoverPump.BucketMode.BUCKET ? pump.getTransferRate() / 1000 :
-                                    pump.getTransferRate());
+                            pump.getTransferRate());
                 }
 
         FluidFilterContainer filter = pump.getFluidFilterContainer();
