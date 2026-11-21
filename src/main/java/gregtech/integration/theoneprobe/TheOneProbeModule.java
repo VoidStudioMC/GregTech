@@ -50,6 +50,7 @@ public class TheOneProbeModule extends IntegrationSubmodule {
         oneProbe.registerProvider(new AEMultiblockHatchProvider());
 
         FluidStackElement.register(oneProbe);
+        oneProbe.registerProvider(new DrumInfoProvider());
         oneProbe.registerProvider(new CableInfoProvider());
         oneProbe.registerProvider(new RecipeDetailsInfoProvider());
         oneProbe.registerProvider(new RecipeParallelInfoProvider());
