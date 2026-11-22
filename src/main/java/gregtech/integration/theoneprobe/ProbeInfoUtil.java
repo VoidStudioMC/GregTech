@@ -100,5 +100,4 @@ public final class ProbeInfoUtil {
     public static @Nullable AbstractRecipeLogic recipeLogic(TileEntity tile) {
         return tile.getCapability(GregtechTileCapabilities.CAPABILITY_RECIPE_LOGIC, null);
     }
-
 }

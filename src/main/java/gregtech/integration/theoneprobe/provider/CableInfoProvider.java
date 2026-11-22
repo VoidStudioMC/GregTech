@@ -42,5 +42,4 @@ public final class CableInfoProvider extends ProbeInfoProvider {
                 "gregtech.top.cable_amperage",
                 TextFormattingUtil.formatNumbers(amps) + " / " + ProbeInfoUtil.number(maxAmps) + " A");
     }
-
 }
