@@ -8,6 +8,7 @@ import gregtech.api.unification.material.Materials;
 import gregtech.api.unification.material.registry.MarkerMaterialRegistry;
 import gregtech.api.unification.ore.OrePrefix;
 import gregtech.api.util.GTLog;
+import gregtech.common.CommonProxy;
 import gregtech.common.items.MetaItems;
 import gregtech.core.unification.material.internal.MaterialRegistryManager;
 import gregtech.modules.ModuleManager;
@@ -89,6 +90,7 @@ public final class Bootstrap {
         MetaItems.init();
 
         GregTechAPI.mteManager = MTEManager.getInstance();
+        new CommonProxy().onPreLoad();
 
         bootstrapped = true;
     }
