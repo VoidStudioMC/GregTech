@@ -39,7 +39,10 @@
  */
 dependencies {
     // Published dependencies
-    api("codechicken:codechickenlib:3.2.3.358")
+    api("codechicken:codechickenlib:3.2.3.358") {
+        // Both recipe viewers use the same mod ID. The development runtime selects one.
+        exclude group: 'mezz.jei', module: 'jei_1.12.2'
+    }
     api("com.cleanroommc:modularui:3.1.5") { transitive = false }
     api("com.cleanroommc:groovyscript:1.4.3") { transitive = false }
     api("curse.maven:inventory-bogosorter-632327:7650535-deobf-7650536-sources-7650537") // Inventory BogoSorter − v1.6.1+

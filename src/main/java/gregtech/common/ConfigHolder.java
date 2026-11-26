@@ -504,6 +504,11 @@ public class ConfigHolder {
         @Config.Comment({ "Whether to prefer the Material Tree over other categories in JEI", "Default: false" })
         public boolean preferMaterialTreeInJEI = false;
 
+        @Config.Comment({ "Whether to register GregTech item groups in Had Enough Items.",
+                "Default: true" })
+        @Config.RequiresMcRestart
+        public boolean enableHEICollapsibleGroups = true;
+
         public static class GuiConfig {
 
             @Config.Comment({ "The scrolling speed of widgets", "Default: 13" })
